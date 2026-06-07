@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-mono: ui-monospace, monospace;
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+}
+
+:root {
+  /* Warm linen background */
+  --background: #faf7f2;
+  --foreground: #1c1917;
+
+  /* Cards */
+  --card: #ffffff;
+  --card-foreground: #1c1917;
+
+  /* Popovers */
+  --popover: #ffffff;
+  --popover-foreground: #1c1917;
+
+  /* Primary: deep forest green */
+  --primary: #1a4a2e;
+  --primary-foreground: #faf7f2;
+
+  /* Secondary: warm stone */
+  --secondary: #f5f0e8;
+  --secondary-foreground: #44403c;
+
+  /* Muted */
+  --muted: #f0ebe0;
+  --muted-foreground: #78716c;
+
+  /* Accent: warm amber */
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
+
+  /* Destructive */
+  --destructive: #dc2626;
+
+  /* Borders */
+  --border: rgba(28, 25, 23, 0.1);
+  --input: rgba(28, 25, 23, 0.08);
+  --ring: #1a4a2e;
+
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-playfair), Georgia, serif;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Frosted glass utility */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Warm card shadow */
+.card-shadow {
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.06),
+              0 4px 16px rgba(28, 25, 23, 0.08);
+}
+
+.card-shadow-lg {
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.06),
+              0 12px 32px rgba(28, 25, 23, 0.12);
+}
+
+/* Hover lift */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(28, 25, 23, 0.1),
+              0 16px 40px rgba(28, 25, 23, 0.14);
+}
+
+/* Fade in animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease both;
+}
+
+.fade-up-1 { animation-delay: 0.05s; }
+.fade-up-2 { animation-delay: 0.1s; }
+.fade-up-3 { animation-delay: 0.15s; }
+.fade-up-4 { animation-delay: 0.2s; }
+.fade-up-5 { animation-delay: 0.25s; }
+
+/* Input focus */
+input:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(26, 74, 46, 0.2);
+  border-color: #1a4a2e !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(28, 25, 23, 0.15); border-radius: 2px; }
