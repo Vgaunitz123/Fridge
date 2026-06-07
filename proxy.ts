@@ -43,7 +43,7 @@ export async function proxy(request: NextRequest) {
 
   if (user && isPublicPath) {
     const url = request.nextUrl.clone()
-    url.pathname = '/'
+    url.pathname = '/fridge'
     return NextResponse.redirect(url)
   }
 

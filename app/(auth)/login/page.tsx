@@ -18,120 +18,137 @@ export default function LoginPage() {
     setError(null)
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError('Fel e-post eller lösenord')
-      setLoading(false)
-    } else {
-      router.push('/')
-      router.refresh()
-    }
+    if (error) { setError('Fel e-post eller lösenord'); setLoading(false) }
+    else { router.push('/fridge'); router.refresh() }
+  }
+
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: '10px',
+    background: '#eeefec',
+    border: '1px solid transparent',
+    color: '#111211',
+    fontSize: '15px',
+    fontFamily: 'var(--font-dm-sans)',
+    outline: 'none',
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-5"
-      style={{
-        background: 'radial-gradient(ellipse 80% 60% at 50% -10%, #c8dfc8 0%, #faf7f2 60%)',
-      }}
-    >
-      {/* Decorative blobs */}
+    <div className="min-h-screen flex flex-col" style={{ background: '#ffffff' }}>
+      {/* Fridge hero illustration */}
       <div
-        className="pointer-events-none fixed top-0 right-0 w-72 h-72 rounded-full opacity-20"
-        style={{ background: 'radial-gradient(circle, #2d6a4f, transparent 70%)', filter: 'blur(40px)' }}
-      />
-      <div
-        className="pointer-events-none fixed bottom-0 left-0 w-64 h-64 rounded-full opacity-15"
-        style={{ background: 'radial-gradient(circle, #d4850a, transparent 70%)', filter: 'blur(50px)' }}
-      />
-
-      <div className="w-full max-w-sm relative">
-        {/* Brand */}
-        <div className="text-center mb-8 fade-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ background: '#1a4a2e' }}>
-            <span className="text-3xl">🥬</span>
+        className="relative overflow-hidden flex items-end justify-center"
+        style={{ height: '42vh', background: 'linear-gradient(180deg, #e8edf0 0%, #d4dde2 100%)' }}
+      >
+        {/* Fridge interior mockup */}
+        <div className="w-full h-full flex flex-col justify-between p-4 pb-0">
+          {/* Top shelf */}
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+            <div className="text-5xl">🥛</div>
+            <div className="text-4xl">🧀</div>
+            <div className="text-4xl">🥚</div>
+            <div className="text-4xl">🍳</div>
           </div>
-          <h1 className="text-4xl font-display font-bold" style={{ color: '#1a4a2e', fontFamily: 'var(--font-playfair)' }}>
-            Kylskåpet
-          </h1>
-          <p className="text-sm mt-1.5" style={{ color: '#78716c' }}>Slösa inte, laga smart</p>
+          {/* Mid shelf */}
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+            <div className="text-5xl">🥩</div>
+            <div className="text-4xl">🥦</div>
+            <div className="text-4xl">🍎</div>
+            <div className="text-5xl">🐟</div>
+          </div>
+          {/* Bottom */}
+          <div className="flex justify-around items-center py-2">
+            <div className="text-4xl">🧂</div>
+            <div className="text-3xl">🫙</div>
+            <div className="text-4xl">🫐</div>
+          </div>
         </div>
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-16"
+          style={{ background: 'linear-gradient(to top, #fff, transparent)' }} />
+      </div>
 
-        {/* Card */}
-        <div className="rounded-3xl p-7 card-shadow fade-up fade-up-1" style={{ background: '#fff' }}>
-          <h2 className="text-xl font-display font-semibold mb-6" style={{ fontFamily: 'var(--font-playfair)', color: '#1c1917' }}>
-            Välkommen tillbaka
-          </h2>
+      {/* App name */}
+      <div className="text-center py-5">
+        <h1
+          className="text-xl font-bold tracking-widest uppercase"
+          style={{ color: '#111211', fontFamily: 'var(--font-dm-sans)', letterSpacing: '0.12em' }}
+        >
+          RECEPT-APPEN
+        </h1>
+      </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#78716c' }}>
-                E-post
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="din@email.se"
-                required
-                className="w-full px-4 py-3 rounded-xl text-sm transition-all"
-                style={{
-                  background: '#faf7f2',
-                  border: '1.5px solid rgba(28,25,23,0.12)',
-                  color: '#1c1917',
-                  outline: 'none',
-                }}
-              />
-            </div>
+      {/* Form */}
+      <div className="flex-1 px-6 pb-8">
+        <div className="rounded-2xl p-6" style={{ background: '#f5f6f4' }}>
+          <h2 className="text-xl font-semibold mb-5" style={{ color: '#111211' }}>Logga In</h2>
 
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#78716c' }}>
-                Lösenord
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="w-full px-4 py-3 rounded-xl text-sm transition-all"
-                style={{
-                  background: '#faf7f2',
-                  border: '1.5px solid rgba(28,25,23,0.12)',
-                  color: '#1c1917',
-                  outline: 'none',
-                }}
-              />
-            </div>
+          <form onSubmit={handleLogin} className="space-y-3">
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="Användarnamn"
+              required
+              style={inputStyle}
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Lösenord"
+              required
+              style={inputStyle}
+            />
 
-            {error && (
-              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm"
-                style={{ background: '#fef2f2', color: '#dc2626' }}>
-                <span>⚠</span> {error}
-              </div>
-            )}
+            {error && <p className="text-sm" style={{ color: '#dc2626' }}>{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-sm font-semibold tracking-wide transition-all mt-2"
               style={{
-                background: loading ? '#4a7c59' : '#1a4a2e',
-                color: '#faf7f2',
+                width: '100%',
+                padding: '14px',
+                borderRadius: '10px',
+                background: loading ? '#444' : '#111211',
+                color: '#fff',
+                fontSize: '15px',
+                fontWeight: 600,
+                fontFamily: 'var(--font-dm-sans)',
+                marginTop: '4px',
                 cursor: loading ? 'not-allowed' : 'pointer',
               }}
             >
-              {loading ? 'Loggar in…' : 'Logga in'}
+              {loading ? 'Loggar in…' : 'Logga In'}
             </button>
           </form>
+
+          <div className="text-center mt-4">
+            <Link href="/register" className="text-sm" style={{ color: '#6b6f6b' }}>
+              Registrera dig
+            </Link>
+          </div>
         </div>
 
-        <p className="text-center text-sm mt-5 fade-up fade-up-2" style={{ color: '#78716c' }}>
-          Inget konto?{' '}
-          <Link href="/register" className="font-semibold" style={{ color: '#1a4a2e' }}>
-            Registrera dig
-          </Link>
-        </p>
+        {/* CTA */}
+        <div className="mt-4">
+          <button
+            onClick={() => router.push('/register')}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: '10px',
+              background: '#1e3a2a',
+              color: '#fff',
+              fontSize: '15px',
+              fontWeight: 600,
+              fontFamily: 'var(--font-dm-sans)',
+            }}
+          >
+            Gå med oss
+          </button>
+        </div>
       </div>
     </div>
   )
