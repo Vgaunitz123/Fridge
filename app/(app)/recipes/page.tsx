@@ -9,12 +9,29 @@ import Link from 'next/link'
 const FILTERS = ['Alla', 'Snabbt', 'Vegetarisk', 'Barnvänl', 'Veganskt', 'Glutenfritt']
 
 const DEMO_RECIPES = [
-  { id: 'd1', title: 'Kyckling med pesto och pasta', cook_time_minutes: 25, tags: ['Snabbt', 'Barnvänl'], description: 'Enkel vardagsrätt', emoji: '🍝', gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)' },
-  { id: 'd2', title: 'Kylskåpsfrittata', cook_time_minutes: 20, tags: ['Vegetarisk'], description: 'Ägg och grönsaker', emoji: '🍳', gradient: 'linear-gradient(135deg,#fde68a,#f59e0b)' },
-  { id: 'd3', title: 'Halloumisallad', cook_time_minutes: 15, tags: ['Vegetarisk'], description: 'Färsk och lätt', emoji: '🥗', gradient: 'linear-gradient(135deg,#34d399,#0d9488)' },
-  { id: 'd4', title: 'Laxpanna med dill', cook_time_minutes: 30, tags: ['Snabbt'], description: 'Klassisk svensk', emoji: '🐟', gradient: 'linear-gradient(135deg,#fb7185,#e11d48)' },
-  { id: 'd5', title: 'Bönsoppa', cook_time_minutes: 20, tags: ['Veganskt'], description: 'Billig och mättande', emoji: '🫘', gradient: 'linear-gradient(135deg,#a3e635,#16a34a)' },
-  { id: 'd6', title: 'Pannkakor', cook_time_minutes: 15, tags: ['Barnvänl', 'Snabbt'], description: 'Alltid uppskattat', emoji: '🥞', gradient: 'linear-gradient(135deg,#fbbf24,#f59e0b)' },
+  // Snabbt
+  { id: 'd1',  title: 'Kyckling med pesto och pasta',     cook_time_minutes: 25, tags: ['Snabbt', 'Barnvänl'],    description: 'Saftig kyckling, grön pesto och al dente pasta',      emoji: '🍝', gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)' },
+  { id: 'd2',  title: 'Kylskåpsfrittata',                 cook_time_minutes: 20, tags: ['Vegetarisk', 'Snabbt'],  description: 'Ägg och rester från veckan i en',                      emoji: '🍳', gradient: 'linear-gradient(135deg,#fde68a,#f59e0b)' },
+  { id: 'd3',  title: 'Pannkakor med jordgubbar',         cook_time_minutes: 15, tags: ['Barnvänl', 'Snabbt'],    description: 'Tunna pannkakor med grädde och färska bär',            emoji: '🥞', gradient: 'linear-gradient(135deg,#fbbf24,#f97316)' },
+  { id: 'd4',  title: 'Äggröra med smoked salmon',        cook_time_minutes: 10, tags: ['Snabbt', 'Glutenfritt'], description: 'Krämig äggröra på rostbröd med rökig lax',             emoji: '🍳', gradient: 'linear-gradient(135deg,#fda4af,#fb7185)' },
+  { id: 'd5',  title: 'Avokadotoast med fetaost',         cook_time_minutes: 10, tags: ['Vegetarisk', 'Snabbt'],  description: 'Krämig avokado, smulig fetaost och chiliflingor',      emoji: '🥑', gradient: 'linear-gradient(135deg,#86efac,#22c55e)' },
+  // Vegetarisk
+  { id: 'd6',  title: 'Halloumisallad med quinoa',        cook_time_minutes: 20, tags: ['Vegetarisk', 'Glutenfritt'], description: 'Grillad halloumi, quinoa och färska grönsaker',    emoji: '🥗', gradient: 'linear-gradient(135deg,#34d399,#0d9488)' },
+  { id: 'd7',  title: 'Tomatsoppa med basilika',          cook_time_minutes: 25, tags: ['Vegetarisk', 'Veganskt'], description: 'Len tomatsoppa smaksatt med färsk basilika',          emoji: '🍅', gradient: 'linear-gradient(135deg,#f87171,#dc2626)' },
+  { id: 'd8',  title: 'Svamprisotto',                     cook_time_minutes: 35, tags: ['Vegetarisk'],             description: 'Krämig risotto med blandade skogsvampar och parmesan', emoji: '🍄', gradient: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
+  { id: 'd9',  title: 'Veganska tacos med jackfruit',     cook_time_minutes: 30, tags: ['Veganskt'],               description: 'Smakrik jackfruit som pulled pork, med avokadomousse', emoji: '🌮', gradient: 'linear-gradient(135deg,#fb923c,#ea580c)' },
+  // Kött & Fisk
+  { id: 'd10', title: 'Laxpanna med dill och potatis',    cook_time_minutes: 30, tags: ['Snabbt', 'Glutenfritt'], description: 'Stekt lax med dillsmör och kokt färskpotatis',         emoji: '🐟', gradient: 'linear-gradient(135deg,#fb7185,#e11d48)' },
+  { id: 'd11', title: 'Köttbullar med gräddsås',          cook_time_minutes: 40, tags: ['Barnvänl', 'Klassisk'],  description: 'Svenska köttbullar med pressad potatis och lingon',   emoji: '🥩', gradient: 'linear-gradient(135deg,#fca5a5,#ef4444)' },
+  { id: 'd12', title: 'Kycklingwok med nudlar',           cook_time_minutes: 20, tags: ['Snabbt'],                description: 'Asiatisk wok med kyckling, grönsaker och oystersås', emoji: '🍜', gradient: 'linear-gradient(135deg,#fdba74,#f59e0b)' },
+  { id: 'd13', title: 'Biff med bearnaisesås',            cook_time_minutes: 25, tags: ['Glutenfritt'],           description: 'Perfekt stekt biff med hemgjord bearnaise och pommes', emoji: '🥩', gradient: 'linear-gradient(135deg,#b45309,#92400e)' },
+  // Budget & Veganskt
+  { id: 'd14', title: 'Bönsoppa med rostat bröd',         cook_time_minutes: 20, tags: ['Veganskt', 'Budget'],    description: 'Mustig bönsoppa med tomater, spiskummin och lime',    emoji: '🫘', gradient: 'linear-gradient(135deg,#a3e635,#16a34a)' },
+  { id: 'd15', title: 'Linssoppa med kokosmjölk',         cook_time_minutes: 30, tags: ['Veganskt', 'Budget'],    description: 'Röda linser, kokosmjölk och ingefära — mättande och god', emoji: '🥣', gradient: 'linear-gradient(135deg,#fb923c,#f59e0b)' },
+  { id: 'd16', title: 'Ugnsbakad blomkål med tahini',     cook_time_minutes: 35, tags: ['Veganskt', 'Vegetarisk'], description: 'Hel blomkål i ugn med tahinisås och granatäpple',    emoji: '🥦', gradient: 'linear-gradient(135deg,#d9f99d,#86efac)' },
+  // Barnvänligt
+  { id: 'd17', title: 'Makaronigratäng',                  cook_time_minutes: 35, tags: ['Barnvänl'],              description: 'Klassisk gratäng med makaroner, falukorv och ost',   emoji: '🧀', gradient: 'linear-gradient(135deg,#fcd34d,#f59e0b)' },
+  { id: 'd18', title: 'Pizzabullar',                      cook_time_minutes: 40, tags: ['Barnvänl'],              description: 'Mjuka bullor fyllda med tomatsås, skinka och mozzarella', emoji: '🍕', gradient: 'linear-gradient(135deg,#f87171,#ef4444)' },
 ]
 
 export default function RecipesPage() {
