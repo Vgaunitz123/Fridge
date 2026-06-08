@@ -179,9 +179,35 @@ export default function RecipesPage() {
 
         {showGenerate && (
           <div className="mt-2 rounded-xl p-4 fade-up" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
-            <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
-              Välj ingredienser
-            </p>
+            <div className="flex items-center justify-between mb-2.5">
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Välj ingredienser
+              </p>
+              {uniqueItems.length > 0 && (
+                <button
+                  onClick={() => {
+                    const allNames = uniqueItems.map(i => i.name)
+                    const allSelected = allNames.every(n => selected.has(n))
+                    if (allSelected) {
+                      setSelected(new Set())
+                    } else {
+                      setSelected(new Set(allNames))
+                    }
+                  }}
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#1e3a2a',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px 0',
+                  }}
+                >
+                  {uniqueItems.every(i => selected.has(i.name)) ? 'Avmarkera alla' : 'Alla varor'}
+                </button>
+              )}
+            </div>
             {fridgeItems.length === 0 ? (
               <p style={{ fontSize: '13px', color: '#aaa' }}>
                 Inga varor i kylen.{' '}
