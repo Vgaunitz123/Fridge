@@ -27,6 +27,20 @@ function RecipeIcon({ active }: { active: boolean }) {
   )
 }
 
+function PantryIcon({ active }: { active: boolean }) {
+  const c = active ? '#1e3a2a' : '#9aa5a0'
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="18" height="4" rx="1.5" stroke={c} strokeWidth="1.7"/>
+      <rect x="3" y="10" width="18" height="4" rx="1.5" stroke={c} strokeWidth="1.7"/>
+      <rect x="3" y="17" width="18" height="4" rx="1.5" stroke={c} strokeWidth="1.7"/>
+      <line x1="7" y1="5" x2="7" y2="5" stroke={c} strokeWidth="1.7" strokeLinecap="round"/>
+      <line x1="7" y1="12" x2="7" y2="12" stroke={c} strokeWidth="1.7" strokeLinecap="round"/>
+      <line x1="7" y1="19" x2="7" y2="19" stroke={c} strokeWidth="1.7" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 function CommunityIcon({ active }: { active: boolean }) {
   const c = active ? '#1e3a2a' : '#9aa5a0'
   return (
@@ -50,7 +64,8 @@ function ProfileIcon({ active }: { active: boolean }) {
 }
 
 const NAV_ITEMS = [
-  { href: '/fridge',    label: 'Fridge',    Icon: FridgeIcon },
+  { href: '/fridge',    label: 'Kylskåp',   Icon: FridgeIcon },
+  { href: '/pantry',    label: 'Skafferi',  Icon: PantryIcon },
   { href: '/recipes',   label: 'Recept',    Icon: RecipeIcon },
   { href: '/community', label: 'Community', Icon: CommunityIcon },
   { href: '/profile',   label: 'Profil',    Icon: ProfileIcon },
@@ -77,7 +92,7 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center py-3 gap-1 relative"
+              className="flex-1 flex flex-col items-center py-2.5 gap-0.5 relative"
             >
               {active && (
                 <span

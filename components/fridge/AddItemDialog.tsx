@@ -9,6 +9,7 @@ type Props = {
   open: boolean
   onClose: () => void
   onAdd: (item: Omit<FridgeItem, 'id' | 'user_id' | 'created_at'>) => Promise<void>
+  defaultCategory?: string
 }
 
 const CATEGORIES = [
@@ -35,11 +36,11 @@ const inputStyle = {
   fontFamily: 'var(--font-dm-sans)',
 }
 
-export default function AddItemDialog({ open, onClose, onAdd }: Props) {
+export default function AddItemDialog({ open, onClose, onAdd, defaultCategory = 'other' }: Props) {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState('1')
   const [unit, setUnit] = useState('st')
-  const [category, setCategory] = useState('other')
+  const [category, setCategory] = useState(defaultCategory)
   const [expiryDate, setExpiryDate] = useState('')
   const [saving, setSaving] = useState(false)
 

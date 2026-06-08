@@ -12,11 +12,13 @@ const CATEGORY_EMOJI: Record<string, string> = {
   bread: '🍞', pantry: '🧂', other: '🥡',
 }
 
+const FRIDGE_CATEGORIES = ['dairy', 'meat', 'vegetable', 'fruit', 'other']
+
 const SHELVES = [
-  { id: 'dairy',  label: 'Mejeri & Ägg',     categories: ['dairy'] },
-  { id: 'meat',   label: 'Kött & Fisk',       categories: ['meat'] },
-  { id: 'veg',    label: 'Grönsaker & Frukt', categories: ['vegetable', 'fruit'] },
-  { id: 'other',  label: 'Övrigt',            categories: ['bread', 'pantry', 'other'] },
+  { id: 'dairy', label: 'Mejeri & Ägg',     categories: ['dairy'] },
+  { id: 'meat',  label: 'Kött & Fisk',       categories: ['meat'] },
+  { id: 'veg',   label: 'Grönsaker & Frukt', categories: ['vegetable', 'fruit'] },
+  { id: 'other', label: 'Övrigt',            categories: ['other'] },
 ]
 
 function expiryDot(expiry: string | null) {
@@ -67,7 +69,7 @@ export default function FridgePage() {
 
   const fetchItems = useCallback(async () => {
     const supabase = createClient()
-    const { data } = await supabase.from('fridge_items').select('*').order('name')
+    const { data } = await supabase.from('fridge_items').select('*').in('category', FRIDGE_CATEGORIES).order('name')
     setItems(data ?? [])
     setLoading(false)
   }, [])
