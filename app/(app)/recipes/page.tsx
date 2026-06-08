@@ -19,6 +19,7 @@ const DEMO_RECIPES = [
 
 export default function RecipesPage() {
   const [activeFilter, setActiveFilter] = useState('Alla')
+  const [searchQuery, setSearchQuery] = useState('')
   const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([])
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [generating, setGenerating] = useState(false)
@@ -53,9 +54,14 @@ export default function RecipesPage() {
     setGenerating(false)
   }
 
-  const displayRecipes = generatedRecipes.length > 0 ? null : DEMO_RECIPES.filter(r =>
-    activeFilter === 'Alla' || r.tags.includes(activeFilter)
-  )
+  const displayRecipes = generatedRecipes.length > 0 ? null : DEMO_RECIPES.filter(r => {
+    const matchesFilter = activeFilter === 'Alla' || r.tags.includes(activeFilter)
+    const matchesSearch = searchQuery.trim() === '' ||
+      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+    return matchesFilter && matchesSearch
+  })
 
   return (
     <div style={{ background: '#f5f6f4', minHeight: '100vh' }}>
@@ -84,7 +90,24 @@ export default function RecipesPage() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <span style={{ fontSize: '14px', color: '#aaa' }}>Sök på kategori / ingrediens</span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Sök på kategori / ingrediens"
+            style={{
+              flex: 1,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
+              fontSize: '14px',
+              color: '#111211',
+              fontFamily: 'var(--font-dm-sans)',
+            }}
+          />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} style={{ color: '#aaa', fontSize: '16px', lineHeight: 1 }}>✕</button>
+          )}
         </div>
       </div>
 
@@ -188,7 +211,23 @@ export default function RecipesPage() {
       )}
 
       {/* Browse recipes */}
-      {displayRecipes && (
+      {displayRecipes && displayRecipes.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#111211', marginBottom: '4px' }}>Inga recept hittades</p>
+          <p style={{ fontSize: '13px', color: '#6b6f6b', textAlign: 'center' }}>
+            Prova ett annat sökord eller ändra filtret
+          </p>
+          <button
+            onClick={() => { setSearchQuery(''); setActiveFilter('Alla') }}
+            style={{ marginTop: '14px', padding: '10px 20px', borderRadius: '10px', background: '#1e3a2a', color: '#fff', fontSize: '13px', fontWeight: 600 }}
+          >
+            Rensa sökning
+          </button>
+        </div>
+      )}
+
+      {displayRecipes && displayRecipes.length > 0 && (
         <div className="px-4 pb-28">
           {/* Featured - first item large */}
           {displayRecipes[0] && (
