@@ -12,15 +12,6 @@ import Image from 'next/image'
 type State = 'idle' | 'scanning' | 'results' | 'saving' | 'done'
 type ScanMode = 'receipt' | 'product' | null
 
-const CATEGORY_LABELS: Record<string, string> = {
-  dairy: '🥛 Mejeri & Ägg',
-  meat: '🥩 Kött & Fisk',
-  vegetable: '🥦 Grönsaker',
-  fruit: '🍎 Frukt',
-  bread: '🍞 Bröd & Spannmål',
-  pantry: '🧂 Skafferi',
-  other: '🥡 Övrigt',
-}
 
 export default function ScanPage() {
   const [state, setState] = useState<State>('idle')
@@ -82,7 +73,7 @@ export default function ScanPage() {
       name: i.name,
       quantity: i.estimated_quantity,
       unit: i.unit,
-      category: i.category ?? 'other',
+      category: i.dbCategory ?? 'other',
       expiry_date: i.expiry_date ?? null,
     })))
     setState('done')
@@ -250,41 +241,65 @@ export default function ScanPage() {
             )}
 
             {(state === 'results' || state === 'saving') && ingredients.length > 0 && (
-              <div className="fade-up">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#78716c' }}>Hittade {ingredients.length} varor</p>
+              <div className="fade-up space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#78716c' }}>
+                    Hittade {ingredients.length} varor
+                  </p>
                   <span className="text-lg">🎉</span>
                 </div>
-                <div className="rounded-2xl overflow-hidden mb-3" style={{ border: '1px solid rgba(28,25,23,0.08)' }}>
-                  {ingredients.map((ing, idx) => (
-                    <button key={idx} onClick={() => toggleIngredient(idx)}
-                      className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
-                      style={{
-                        background: ing.selected ? '#f0fdf4' : '#fff',
-                        borderBottom: idx < ingredients.length - 1 ? '1px solid rgba(28,25,23,0.06)' : 'none',
-                      }}
-                    >
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 transition-all"
-                        style={{ background: ing.selected ? '#1a4a2e' : 'rgba(28,25,23,0.08)', color: '#fff' }}>
-                        {ing.selected ? '✓' : ''}
+
+                {(['fridge', 'pantry'] as const).map(loc => {
+                  const group = ingredients.filter(i => i.location === loc)
+                  if (!group.length) return null
+                  return (
+                    <div key={loc}>
+                      <div className="flex items-center gap-2 mb-1.5 px-1">
+                        <span className="text-base">{loc === 'fridge' ? '🧊' : '🏠'}</span>
+                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: loc === 'fridge' ? '#0369a1' : '#92400e' }}>
+                          {loc === 'fridge' ? 'Kylskåp' : 'Skafferi'}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-sm font-semibold truncate" style={{ color: '#1c1917' }}>{ing.name}</span>
-                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                          <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(28,25,23,0.06)', color: '#78716c' }}>
-                            {CATEGORY_LABELS[ing.category] ?? ing.category}
-                          </span>
-                          {ing.expiry_date && (
-                            <span className="text-xs" style={{ color: '#d97706' }}>
-                              Bäst före: {ing.expiry_date}
-                            </span>
-                          )}
-                        </div>
+                      <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${loc === 'fridge' ? 'rgba(3,105,161,0.15)' : 'rgba(146,64,14,0.15)'}` }}>
+                        {group.map((ing) => {
+                          const globalIdx = ingredients.indexOf(ing)
+                          return (
+                            <button key={globalIdx} onClick={() => toggleIngredient(globalIdx)}
+                              className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                              style={{
+                                background: ing.selected
+                                  ? (loc === 'fridge' ? '#f0f9ff' : '#fffbeb')
+                                  : '#fff',
+                                borderBottom: group.indexOf(ing) < group.length - 1 ? '1px solid rgba(28,25,23,0.05)' : 'none',
+                              }}
+                            >
+                              <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 transition-all"
+                                style={{ background: ing.selected ? '#1a4a2e' : 'rgba(28,25,23,0.08)', color: '#fff' }}>
+                                {ing.selected ? '✓' : ''}
+                              </div>
+                              <span className="text-xl flex-shrink-0">{ing.emoji}</span>
+                              <div className="flex-1 min-w-0">
+                                <span className="block text-sm font-semibold truncate" style={{ color: '#1c1917' }}>{ing.name}</span>
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                                  <span className="text-xs" style={{ color: '#78716c' }}>{ing.category}</span>
+                                  {ing.expiry_date && (
+                                    <span className="text-xs font-medium" style={{ color: '#d97706' }}>
+                                      · Bäst före {ing.expiry_date}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-xs flex-shrink-0" style={{ color: '#a8a29e' }}>
+                                {ing.estimated_quantity} {ing.unit}
+                              </span>
+                            </button>
+                          )
+                        })}
                       </div>
-                      <span className="text-xs flex-shrink-0" style={{ color: '#a8a29e' }}>{ing.estimated_quantity} {ing.unit}</span>
-                    </button>
-                  ))}
-                </div>
+                    </div>
+                  )
+                })}
+
                 <button onClick={handleSave} disabled={state === 'saving' || !ingredients.some(i => i.selected)}
                   className="w-full py-3.5 rounded-xl text-sm font-semibold"
                   style={{ background: state === 'saving' ? '#a3b8a8' : '#1a4a2e', color: '#faf7f2' }}>

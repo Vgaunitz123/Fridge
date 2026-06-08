@@ -48,9 +48,12 @@ export type SocialPost = {
 
 export type ScannedIngredient = {
   name: string
+  emoji: string
+  category: string      // Swedish display label e.g. "Mejeri & Ägg"
+  dbCategory: string    // DB value e.g. "dairy"
+  location: 'fridge' | 'pantry'
   estimated_quantity: number
   unit: string
   expiry_date: string | null
-  category: string
   selected: boolean
 }

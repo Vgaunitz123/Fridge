@@ -1,113 +1,160 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// ─── Category keyword matcher ────────────────────────────────────────────────
+// ─── Map Swedish category labels → DB category values ────────────────────────
 
-const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  dairy: [
-    'mjölk', 'milk', 'smör', 'butter', 'ost', 'cheese', 'yoghurt', 'yogurt',
-    'grädde', 'cream', 'kvarg', 'quark', 'ägg', 'egg', 'filmjölk', 'kefir',
-    'kesella', 'ricotta', 'mozzarella', 'brie', 'camembert', 'fetaost', 'feta',
-    'parmesan', 'gouda', 'havarti', 'crème fraîche', 'creme fraiche', 'matyoghurt',
-  ],
-  meat: [
-    'kyckling', 'chicken', 'nötkött', 'beef', 'fläsk', 'pork', 'lamm', 'lamb',
-    'korv', 'sausage', 'bacon', 'skinka', 'ham', 'köttfärs', 'mince', 'biff', 'steak',
-    'lax', 'salmon', 'tonfisk', 'tuna', 'torsk', 'cod', 'fisk', 'fish',
-    'räkor', 'shrimp', 'musslor', 'mussels', 'falukorv', 'kassler', 'salami', 'chorizo',
-    'kebab', 'entrecôte', 'kycklingfilé', 'laxfilé', 'fläskfilé',
-  ],
-  vegetable: [
-    'morot', 'carrot', 'lök', 'onion', 'tomat', 'tomato', 'gurka', 'cucumber',
-    'sallad', 'lettuce', 'broccoli', 'blomkål', 'cauliflower', 'paprika', 'pepper',
-    'spenat', 'spinach', 'vitlök', 'garlic', 'purjolök', 'leek', 'zucchini', 'squash',
-    'aubergine', 'svamp', 'mushroom', 'rödbeta', 'beet', 'potatis', 'potato',
-    'sötpotatis', 'kålrot', 'majs', 'corn', 'ärtor', 'pea', 'bönor', 'bean',
-    'linser', 'lentil', 'kikärtor', 'chickpea', 'selleri', 'celery', 'fänkål',
-    'ruccola', 'sparris', 'asparagus', 'avokado', 'avocado', 'halloumi',
-  ],
-  fruit: [
-    'äpple', 'apple', 'päron', 'pear', 'banan', 'banana', 'apelsin', 'orange',
-    'citron', 'lemon', 'lime', 'jordgubb', 'strawberry', 'hallon', 'raspberry',
-    'blåbär', 'blueberry', 'körsbär', 'cherry', 'vindruv', 'grape', 'mango',
-    'ananas', 'pineapple', 'vattenmelon', 'watermelon', 'melon', 'persika', 'peach',
-    'nektarin', 'plommon', 'plum', 'kiwi', 'papaya', 'passionsfrukt',
-  ],
-  bread: [
-    'bröd', 'bread', 'knäckebröd', 'crispbread', 'pasta', 'spaghetti', 'makaroni',
-    'penne', 'rigatoni', 'nudlar', 'noodle', 'ris', 'rice', 'mjöl', 'flour',
-    'havregryn', 'oats', 'müsli', 'muesli', 'flingor', 'cereal', 'tortilla',
-    'pita', 'bagel', 'bulle', 'kex', 'cracker', 'couscous', 'quinoa', 'bulgur',
-  ],
-  pantry: [
-    'olja', 'oil', 'olivolja', 'rapsolja', 'ketchup', 'senap', 'mustard',
-    'majonnäs', 'mayonnaise', 'soja', 'soy', 'vinäger', 'vinegar', 'salt', 'socker',
-    'sugar', 'honung', 'honey', 'sylt', 'jam', 'marmelad', 'buljong', 'broth',
-    'konserv', 'tomatsås', 'passerade tomater', 'kokosmjölk', 'curry', 'krydda',
-    'spice', 'kanel', 'kardemumma', 'bakpulver', 'jäst', 'yeast', 'vanilj', 'vanilla',
-  ],
+const CATEGORY_TO_DB: Record<string, string> = {
+  'Mejeri & Ägg':    'dairy',
+  'Kött & Fisk':     'meat',
+  'Grönsaker & Frukt': 'vegetable',
+  'Dryck':           'other',
+  'Torrvaror':       'bread',
+  'Konserver':       'pantry',
+  'Kryddor & Såser': 'pantry',
+  'Snacks':          'pantry',
+  'Övrigt':          'other',
 }
 
-const VALID_CATEGORIES = ['dairy', 'meat', 'vegetable', 'fruit', 'bread', 'pantry', 'other']
+// ─── Keyword fallback for category + location ─────────────────────────────────
 
-function guessCategory(name: string): string {
+const FRIDGE_KEYWORDS: [string, string][] = [
+  // [keyword, Swedish category]
+  ['mjölk', 'Mejeri & Ägg'], ['milk', 'Mejeri & Ägg'], ['smör', 'Mejeri & Ägg'],
+  ['ost', 'Mejeri & Ägg'], ['yoghurt', 'Mejeri & Ägg'], ['grädde', 'Mejeri & Ägg'],
+  ['ägg', 'Mejeri & Ägg'], ['egg', 'Mejeri & Ägg'], ['kvarg', 'Mejeri & Ägg'],
+  ['filmjölk', 'Mejeri & Ägg'], ['kefir', 'Mejeri & Ägg'], ['crème fraîche', 'Mejeri & Ägg'],
+  ['kyckling', 'Kött & Fisk'], ['chicken', 'Kött & Fisk'], ['nöt', 'Kött & Fisk'],
+  ['fläsk', 'Kött & Fisk'], ['lax', 'Kött & Fisk'], ['fisk', 'Kött & Fisk'],
+  ['korv', 'Kött & Fisk'], ['skinka', 'Kött & Fisk'], ['köttfärs', 'Kött & Fisk'],
+  ['räkor', 'Kött & Fisk'], ['bacon', 'Kött & Fisk'], ['biff', 'Kött & Fisk'],
+  ['tofu', 'Kött & Fisk'], ['halloumi', 'Kött & Fisk'],
+  ['morot', 'Grönsaker & Frukt'], ['lök', 'Grönsaker & Frukt'], ['tomat', 'Grönsaker & Frukt'],
+  ['gurka', 'Grönsaker & Frukt'], ['sallad', 'Grönsaker & Frukt'], ['broccoli', 'Grönsaker & Frukt'],
+  ['paprika', 'Grönsaker & Frukt'], ['spenat', 'Grönsaker & Frukt'], ['potatis', 'Grönsaker & Frukt'],
+  ['äpple', 'Grönsaker & Frukt'], ['banan', 'Grönsaker & Frukt'], ['apelsin', 'Grönsaker & Frukt'],
+  ['citron', 'Grönsaker & Frukt'], ['avokado', 'Grönsaker & Frukt'], ['svamp', 'Grönsaker & Frukt'],
+  ['juice', 'Dryck'], ['smoothie', 'Dryck'],
+]
+
+const PANTRY_KEYWORDS: [string, string][] = [
+  ['pasta', 'Torrvaror'], ['ris', 'Torrvaror'], ['mjöl', 'Torrvaror'],
+  ['havregryn', 'Torrvaror'], ['bröd', 'Torrvaror'], ['müsli', 'Torrvaror'],
+  ['flingor', 'Torrvaror'], ['knäckebröd', 'Torrvaror'], ['couscous', 'Torrvaror'],
+  ['quinoa', 'Torrvaror'], ['nudlar', 'Torrvaror'], ['linser', 'Torrvaror'],
+  ['bönor', 'Torrvaror'], ['kikärtor', 'Torrvaror'],
+  ['konserv', 'Konserver'], ['burk', 'Konserver'], ['tomatsås', 'Konserver'],
+  ['kokosmjölk', 'Konserver'], ['tonfisk burk', 'Konserver'],
+  ['olja', 'Kryddor & Såser'], ['olivolja', 'Kryddor & Såser'], ['ketchup', 'Kryddor & Såser'],
+  ['senap', 'Kryddor & Såser'], ['soja', 'Kryddor & Såser'], ['vinäger', 'Kryddor & Såser'],
+  ['salt', 'Kryddor & Såser'], ['socker', 'Kryddor & Såser'], ['krydda', 'Kryddor & Såser'],
+  ['peppar', 'Kryddor & Såser'], ['curry', 'Kryddor & Såser'], ['kanel', 'Kryddor & Såser'],
+  ['honung', 'Kryddor & Såser'], ['sylt', 'Kryddor & Såser'],
+  ['chips', 'Snacks'], ['nötter', 'Snacks'], ['mandel', 'Snacks'],
+  ['cashew', 'Snacks'], ['popcorn', 'Snacks'], ['kex', 'Snacks'],
+  ['kaffe', 'Torrvaror'], ['te', 'Torrvaror'], ['kakao', 'Torrvaror'],
+]
+
+function guessFromKeywords(name: string): { category: string; location: 'fridge' | 'pantry' } {
   const lower = name.toLowerCase()
-  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    if (keywords.some(kw => lower.includes(kw))) return category
+  for (const [kw, cat] of FRIDGE_KEYWORDS) {
+    if (lower.includes(kw)) return { category: cat, location: 'fridge' }
   }
-  return 'other'
+  for (const [kw, cat] of PANTRY_KEYWORDS) {
+    if (lower.includes(kw)) return { category: cat, location: 'pantry' }
+  }
+  return { category: 'Övrigt', location: 'fridge' }
 }
 
-// ─── Prompts ─────────────────────────────────────────────────────────────────
+// ─── Default emoji per category ───────────────────────────────────────────────
 
-const RECEIPT_PROMPT = `Det här är ett foto av ett kassakvitto eller matkvitto.
-Läs av alla matvaror och returnera ett JSON-array med exakt detta format:
-[{"name":"produktnamn på svenska","estimated_quantity":1,"unit":"st","expiry_date":null,"category":"dairy"}]
+const CATEGORY_EMOJI: Record<string, string> = {
+  'Mejeri & Ägg':      '🥛',
+  'Kött & Fisk':       '🥩',
+  'Grönsaker & Frukt': '🥦',
+  'Dryck':             '🥤',
+  'Torrvaror':         '🍞',
+  'Konserver':         '🥫',
+  'Kryddor & Såser':   '🧂',
+  'Snacks':            '🍿',
+  'Övrigt':            '🥡',
+}
 
-Regler:
-- name: produktens namn på svenska, rent och läsbart (t.ex. "Mjölk 3%", "Smör", "Ägg 6-pack")
-- estimated_quantity: antal från kvittot, annars 1
-- unit: "st", "kg", "g", "l", "dl" eller "förp"
-- expiry_date: bäst-före-datum som YYYY-MM-DD om det syns på kvittot, annars null
-- category: en av: "dairy", "meat", "vegetable", "fruit", "bread", "pantry", "other"
-  - dairy = mejeri & ägg (mjölk, ost, smör, yoghurt, ägg...)
-  - meat = kött & fisk (kyckling, lax, fläsk, korv...)
-  - vegetable = grönsaker (morot, lök, tomat, potatis...)
-  - fruit = frukt (äpple, banan, apelsin...)
-  - bread = bröd & spannmål (bröd, pasta, ris, havregryn...)
-  - pantry = skafferivaror (olja, ketchup, kryddor, konserver...)
-  - other = övrigt
-- Ta med ALLA matvaror, hoppa över icke-livsmedel (påsar, serviceavgifter, pant)
-- Svara BARA med JSON-arrayen, ingen markdown, ingen förklaring`
+// ─── System prompt ────────────────────────────────────────────────────────────
 
-const PRODUCT_PROMPT = `Identifiera alla matvaror i bilden och returnera ett JSON-array med exakt detta format:
-[{"name":"produktnamn på svenska","estimated_quantity":1,"unit":"st","expiry_date":null,"category":"dairy"}]
+const SYSTEM_PROMPT = `Du är en smart matassistent. När du får ett kvitto eller en bild på varor ska du:
 
-Regler:
-- name: produktens namn på svenska
-- estimated_quantity: uppskattad mängd
-- unit: lämplig enhet (st, kg, g, l, dl, förp)
-- expiry_date: bäst-före-datum (YYYY-MM-DD) om det syns tydligt på förpackningen, annars null
-- category: en av: "dairy", "meat", "vegetable", "fruit", "bread", "pantry", "other"
-- Inkludera bara faktiska matvaror. Tom array [] om ingen mat syns.
-- Svara BARA med JSON-arrayen, ingen markdown, ingen förklaring`
+1. Identifiera alla matvaror
+2. Kategorisera varje vara i RÄTT PLATS:
+   - "fridge" (kylskåp): mejeri, kött, fisk, färska grönsaker, öppnade produkter, allt som behöver kylas
+   - "pantry" (skafferi): torrvaror, konserver, pasta, ris, kryddor, kaffe, te, chips, nötter, olja
 
-// ─── Mock fallback (no API key) ───────────────────────────────────────────────
-
-function mockReceiptItems() {
-  return [
-    { name: 'Mjölk 1,5%',    estimated_quantity: 1,   unit: 'l',    expiry_date: null, category: 'dairy' },
-    { name: 'Smör',          estimated_quantity: 1,   unit: 'förp', expiry_date: null, category: 'dairy' },
-    { name: 'Ägg 10-pack',   estimated_quantity: 1,   unit: 'st',   expiry_date: null, category: 'dairy' },
-    { name: 'Kycklingfilé',  estimated_quantity: 500, unit: 'g',    expiry_date: null, category: 'meat'  },
-    { name: 'Pasta',         estimated_quantity: 500, unit: 'g',    expiry_date: null, category: 'bread' },
-    { name: 'Morötter',      estimated_quantity: 500, unit: 'g',    expiry_date: null, category: 'vegetable' },
+3. Returnera ENDAST giltig JSON, inget annat:
+{
+  "items": [
+    {
+      "name": "Mjölk 1,5%",
+      "category": "Mejeri & Ägg",
+      "location": "fridge",
+      "emoji": "🥛",
+      "quantity": 1,
+      "unit": "liter",
+      "bestBefore": null
+    }
   ]
 }
 
-function mockProductItems() {
-  return [
-    { name: 'Produkt (demo)', estimated_quantity: 1, unit: 'st', expiry_date: null, category: 'other' },
-  ]
+Kategorier att använda:
+- Fridge: "Mejeri & Ägg", "Kött & Fisk", "Grönsaker & Frukt", "Dryck", "Övrigt"
+- Pantry: "Torrvaror", "Konserver", "Kryddor & Såser", "Snacks", "Övrigt"
+
+Regler:
+- Hoppa över icke-livsmedel (kassar, serviceavgifter, pant)
+- bestBefore: datum som "YYYY-MM-DD" om det syns, annars null
+- unit: "st", "kg", "g", "liter", "dl", "förp" eller liknande
+- Välj en passande emoji för varje vara
+- Svara ENDAST med JSON-objektet, ingen förklaring, ingen markdown`
+
+// ─── Mock fallback ────────────────────────────────────────────────────────────
+
+function mockItems(mode: string) {
+  if (mode === 'receipt') {
+    return [
+      { name: 'Mjölk 1,5%',   category: 'Mejeri & Ägg',      location: 'fridge',  emoji: '🥛', quantity: 1,   unit: 'liter', bestBefore: null },
+      { name: 'Smör',          category: 'Mejeri & Ägg',      location: 'fridge',  emoji: '🧈', quantity: 1,   unit: 'förp',  bestBefore: null },
+      { name: 'Ägg 10-pack',   category: 'Mejeri & Ägg',      location: 'fridge',  emoji: '🥚', quantity: 10,  unit: 'st',    bestBefore: null },
+      { name: 'Kycklingfilé',  category: 'Kött & Fisk',       location: 'fridge',  emoji: '🍗', quantity: 500, unit: 'g',     bestBefore: null },
+      { name: 'Pasta',         category: 'Torrvaror',         location: 'pantry',  emoji: '🍝', quantity: 500, unit: 'g',     bestBefore: null },
+      { name: 'Olivolja',      category: 'Kryddor & Såser',   location: 'pantry',  emoji: '🫒', quantity: 1,   unit: 'förp',  bestBefore: null },
+    ]
+  }
+  return [{ name: 'Produkt (demo)', category: 'Övrigt', location: 'fridge' as const, emoji: '🥡', quantity: 1, unit: 'st', bestBefore: null }]
+}
+
+// ─── Normalise AI response → internal format ──────────────────────────────────
+
+function normalise(raw: Record<string, unknown>[]) {
+  return raw.map(i => {
+    const name = String(i.name ?? '')
+    const aiCategory = String(i.category ?? '')
+    const aiLocation = String(i.location ?? '')
+    const guess = guessFromKeywords(name)
+
+    const category = aiCategory in CATEGORY_TO_DB ? aiCategory : guess.category
+    const location: 'fridge' | 'pantry' =
+      aiLocation === 'fridge' || aiLocation === 'pantry' ? aiLocation : guess.location
+    const dbCategory = CATEGORY_TO_DB[category] ?? 'other'
+    const emoji = String(i.emoji ?? CATEGORY_EMOJI[category] ?? '🥡')
+
+    return {
+      name,
+      emoji,
+      category,
+      location,
+      estimated_quantity: Number(i.quantity ?? 1),
+      unit: String(i.unit ?? 'st'),
+      expiry_date: (i.bestBefore as string | null) ?? null,
+      dbCategory,
+    }
+  })
 }
 
 // ─── Route handler ────────────────────────────────────────────────────────────
@@ -127,7 +174,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
-    const ingredients = mode === 'receipt' ? mockReceiptItems() : mockProductItems()
+    const ingredients = normalise(mockItems(mode))
     return NextResponse.json({ ingredients, mock: true })
   }
 
@@ -140,12 +187,13 @@ export async function POST(request: NextRequest) {
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 2048,
+      system: SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: mode === 'receipt' ? RECEIPT_PROMPT : PRODUCT_PROMPT },
+            { type: 'text', text: mode === 'receipt' ? 'Analysera detta kvitto.' : 'Analysera bilden och identifiera alla matvaror.' },
           ],
         },
       ],
@@ -157,20 +205,9 @@ export async function POST(request: NextRequest) {
     }
 
     const text = content.text.trim().replace(/^```json\n?/, '').replace(/\n?```$/, '').trim()
-    const raw = JSON.parse(text)
-
-    const ingredients = raw.map((i: Record<string, unknown>) => {
-      const name = String(i.name ?? '')
-      const aiCategory = String(i.category ?? '')
-      const category = VALID_CATEGORIES.includes(aiCategory) ? aiCategory : guessCategory(name)
-      return {
-        name,
-        estimated_quantity: Number(i.estimated_quantity ?? 1),
-        unit: String(i.unit ?? 'st'),
-        expiry_date: (i.expiry_date as string | null) ?? null,
-        category,
-      }
-    })
+    const parsed = JSON.parse(text)
+    const raw: Record<string, unknown>[] = Array.isArray(parsed) ? parsed : parsed.items ?? []
+    const ingredients = normalise(raw)
 
     return NextResponse.json({ ingredients })
   } catch (err) {
