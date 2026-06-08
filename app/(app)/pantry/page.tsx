@@ -165,7 +165,7 @@ export default function PantryPage() {
         <button
           onClick={() => setDialogOpen(true)}
           className="py-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-          style={{ background: '#1e3a2a', color: '#fff' }}
+          style={{ background: '#1C3A2A', color: '#fff' }}
         >
           + Lägg till skafferivar
         </button>

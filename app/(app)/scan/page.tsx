@@ -116,7 +116,7 @@ export default function ScanPage() {
               className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
               style={{
                 background: scanMode === 'receipt' ? '#f0fdf4' : '#fff',
-                border: `2px solid ${scanMode === 'receipt' ? '#1a4a2e' : 'rgba(28,25,23,0.08)'}`,
+                border: `2px solid ${scanMode === 'receipt' ? '#1C3A2A' : 'rgba(28,25,23,0.08)'}`,
                 boxShadow: '0 1px 3px rgba(28,25,23,0.05)',
               }}
             >
@@ -141,7 +141,7 @@ export default function ScanPage() {
               className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
               style={{
                 background: scanMode === 'product' ? '#f0fdf4' : '#fff',
-                border: `2px solid ${scanMode === 'product' ? '#1a4a2e' : 'rgba(28,25,23,0.08)'}`,
+                border: `2px solid ${scanMode === 'product' ? '#1C3A2A' : 'rgba(28,25,23,0.08)'}`,
                 boxShadow: '0 1px 3px rgba(28,25,23,0.05)',
               }}
             >
@@ -167,7 +167,7 @@ export default function ScanPage() {
                 className="cursor-pointer transition-all"
                 style={{
                   borderRadius: '20px',
-                  border: `2px dashed ${isDragActive ? '#1a4a2e' : 'rgba(28,25,23,0.15)'}`,
+                  border: `2px dashed ${isDragActive ? '#1C3A2A' : 'rgba(28,25,23,0.15)'}`,
                   background: isDragActive ? '#f0fdf4' : '#faf7f2',
                   padding: '32px 24px',
                   textAlign: 'center',
@@ -190,7 +190,7 @@ export default function ScanPage() {
                         if (f) { setFile(f); setPreview(URL.createObjectURL(f)) }
                       }}
                     />
-                    <span className="text-xs font-semibold px-4 py-2 rounded-full" style={{ background: '#1a4a2e', color: '#faf7f2' }}>
+                    <span className="text-xs font-semibold px-4 py-2 rounded-full" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
                       📸 Öppna kameran
                     </span>
                   </label>
@@ -235,7 +235,7 @@ export default function ScanPage() {
             )}
 
             {state === 'idle' && (
-              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold" style={{ background: '#1a4a2e', color: '#faf7f2' }}>
+              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
                 ✨ Hitta varor automatiskt
               </button>
             )}
@@ -274,7 +274,7 @@ export default function ScanPage() {
                               }}
                             >
                               <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 transition-all"
-                                style={{ background: ing.selected ? '#1a4a2e' : 'rgba(28,25,23,0.08)', color: '#fff' }}>
+                                style={{ background: ing.selected ? '#1C3A2A' : 'rgba(28,25,23,0.08)', color: '#fff' }}>
                                 {ing.selected ? '✓' : ''}
                               </div>
                               <span className="text-xl flex-shrink-0">{ing.emoji}</span>
@@ -302,7 +302,7 @@ export default function ScanPage() {
 
                 <button onClick={handleSave} disabled={state === 'saving' || !ingredients.some(i => i.selected)}
                   className="w-full py-3.5 rounded-xl text-sm font-semibold"
-                  style={{ background: state === 'saving' ? '#a3b8a8' : '#1a4a2e', color: '#faf7f2' }}>
+                  style={{ background: state === 'saving' ? '#a3b8a8' : '#1C3A2A', color: '#faf7f2' }}>
                   {state === 'saving' ? 'Sparar…' : `Lägg till ${ingredients.filter(i => i.selected).length} varor i kylskåpet`}
                 </button>
               </div>

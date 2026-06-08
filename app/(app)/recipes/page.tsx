@@ -8,30 +8,26 @@ import Link from 'next/link'
 
 const FILTERS = ['Alla', 'Snabbt', 'Vegetarisk', 'Barnvänl', 'Veganskt', 'Glutenfritt']
 
+const UNS = 'https://images.unsplash.com/photo-'
 const DEMO_RECIPES = [
-  // Snabbt
-  { id: 'd1',  title: 'Kyckling med pesto och pasta',     cook_time_minutes: 25, tags: ['Snabbt', 'Barnvänl'],    description: 'Saftig kyckling, grön pesto och al dente pasta',      emoji: '🍝', gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)' },
-  { id: 'd2',  title: 'Kylskåpsfrittata',                 cook_time_minutes: 20, tags: ['Vegetarisk', 'Snabbt'],  description: 'Ägg och rester från veckan i en',                      emoji: '🍳', gradient: 'linear-gradient(135deg,#fde68a,#f59e0b)' },
-  { id: 'd3',  title: 'Pannkakor med jordgubbar',         cook_time_minutes: 15, tags: ['Barnvänl', 'Snabbt'],    description: 'Tunna pannkakor med grädde och färska bär',            emoji: '🥞', gradient: 'linear-gradient(135deg,#fbbf24,#f97316)' },
-  { id: 'd4',  title: 'Äggröra med smoked salmon',        cook_time_minutes: 10, tags: ['Snabbt', 'Glutenfritt'], description: 'Krämig äggröra på rostbröd med rökig lax',             emoji: '🍳', gradient: 'linear-gradient(135deg,#fda4af,#fb7185)' },
-  { id: 'd5',  title: 'Avokadotoast med fetaost',         cook_time_minutes: 10, tags: ['Vegetarisk', 'Snabbt'],  description: 'Krämig avokado, smulig fetaost och chiliflingor',      emoji: '🥑', gradient: 'linear-gradient(135deg,#86efac,#22c55e)' },
-  // Vegetarisk
-  { id: 'd6',  title: 'Halloumisallad med quinoa',        cook_time_minutes: 20, tags: ['Vegetarisk', 'Glutenfritt'], description: 'Grillad halloumi, quinoa och färska grönsaker',    emoji: '🥗', gradient: 'linear-gradient(135deg,#34d399,#0d9488)' },
-  { id: 'd7',  title: 'Tomatsoppa med basilika',          cook_time_minutes: 25, tags: ['Vegetarisk', 'Veganskt'], description: 'Len tomatsoppa smaksatt med färsk basilika',          emoji: '🍅', gradient: 'linear-gradient(135deg,#f87171,#dc2626)' },
-  { id: 'd8',  title: 'Svamprisotto',                     cook_time_minutes: 35, tags: ['Vegetarisk'],             description: 'Krämig risotto med blandade skogsvampar och parmesan', emoji: '🍄', gradient: 'linear-gradient(135deg,#a78bfa,#7c3aed)' },
-  { id: 'd9',  title: 'Veganska tacos med jackfruit',     cook_time_minutes: 30, tags: ['Veganskt'],               description: 'Smakrik jackfruit som pulled pork, med avokadomousse', emoji: '🌮', gradient: 'linear-gradient(135deg,#fb923c,#ea580c)' },
-  // Kött & Fisk
-  { id: 'd10', title: 'Laxpanna med dill och potatis',    cook_time_minutes: 30, tags: ['Snabbt', 'Glutenfritt'], description: 'Stekt lax med dillsmör och kokt färskpotatis',         emoji: '🐟', gradient: 'linear-gradient(135deg,#fb7185,#e11d48)' },
-  { id: 'd11', title: 'Köttbullar med gräddsås',          cook_time_minutes: 40, tags: ['Barnvänl', 'Klassisk'],  description: 'Svenska köttbullar med pressad potatis och lingon',   emoji: '🥩', gradient: 'linear-gradient(135deg,#fca5a5,#ef4444)' },
-  { id: 'd12', title: 'Kycklingwok med nudlar',           cook_time_minutes: 20, tags: ['Snabbt'],                description: 'Asiatisk wok med kyckling, grönsaker och oystersås', emoji: '🍜', gradient: 'linear-gradient(135deg,#fdba74,#f59e0b)' },
-  { id: 'd13', title: 'Biff med bearnaisesås',            cook_time_minutes: 25, tags: ['Glutenfritt'],           description: 'Perfekt stekt biff med hemgjord bearnaise och pommes', emoji: '🥩', gradient: 'linear-gradient(135deg,#b45309,#92400e)' },
-  // Budget & Veganskt
-  { id: 'd14', title: 'Bönsoppa med rostat bröd',         cook_time_minutes: 20, tags: ['Veganskt', 'Budget'],    description: 'Mustig bönsoppa med tomater, spiskummin och lime',    emoji: '🫘', gradient: 'linear-gradient(135deg,#a3e635,#16a34a)' },
-  { id: 'd15', title: 'Linssoppa med kokosmjölk',         cook_time_minutes: 30, tags: ['Veganskt', 'Budget'],    description: 'Röda linser, kokosmjölk och ingefära — mättande och god', emoji: '🥣', gradient: 'linear-gradient(135deg,#fb923c,#f59e0b)' },
-  { id: 'd16', title: 'Ugnsbakad blomkål med tahini',     cook_time_minutes: 35, tags: ['Veganskt', 'Vegetarisk'], description: 'Hel blomkål i ugn med tahinisås och granatäpple',    emoji: '🥦', gradient: 'linear-gradient(135deg,#d9f99d,#86efac)' },
-  // Barnvänligt
-  { id: 'd17', title: 'Makaronigratäng',                  cook_time_minutes: 35, tags: ['Barnvänl'],              description: 'Klassisk gratäng med makaroner, falukorv och ost',   emoji: '🧀', gradient: 'linear-gradient(135deg,#fcd34d,#f59e0b)' },
-  { id: 'd18', title: 'Pizzabullar',                      cook_time_minutes: 40, tags: ['Barnvänl'],              description: 'Mjuka bullor fyllda med tomatsås, skinka och mozzarella', emoji: '🍕', gradient: 'linear-gradient(135deg,#f87171,#ef4444)' },
+  { id: 'd1',  title: 'Kyckling med pesto och pasta',     cook_time_minutes: 25, tags: ['Snabbt', 'Barnvänl'],        description: 'Saftig kyckling, grön pesto och al dente pasta',           imageUrl: UNS+'1555949258-eb67b1ef0ceb?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd2',  title: 'Kylskåpsfrittata',                 cook_time_minutes: 20, tags: ['Vegetarisk', 'Snabbt'],      description: 'Ägg och grönsaker från veckan i en',                       imageUrl: UNS+'1490645935967-10de6ba17061?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd3',  title: 'Pannkakor med jordgubbar',         cook_time_minutes: 15, tags: ['Barnvänl', 'Snabbt'],        description: 'Tunna pannkakor med grädde och färska bär',                 imageUrl: UNS+'1567620905732-2d1ec7ab7445?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd4',  title: 'Äggröra med smoked salmon',        cook_time_minutes: 10, tags: ['Snabbt', 'Glutenfritt'],     description: 'Krämig äggröra på rostbröd med rökig lax',                  imageUrl: UNS+'1519708227418-c8fd9a32b7a2?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd5',  title: 'Avokadotoast med fetaost',         cook_time_minutes: 10, tags: ['Vegetarisk', 'Snabbt'],      description: 'Krämig avokado, smulig fetaost och chiliflingor',            imageUrl: UNS+'1603046891724-52e79e69cd8b?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd6',  title: 'Halloumisallad med quinoa',        cook_time_minutes: 20, tags: ['Vegetarisk', 'Glutenfritt'], description: 'Grillad halloumi, quinoa och färska grönsaker',              imageUrl: UNS+'1512621776951-a57141f2eefd?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd7',  title: 'Tomatsoppa med basilika',          cook_time_minutes: 25, tags: ['Vegetarisk', 'Veganskt'],    description: 'Len tomatsoppa smaksatt med färsk basilika',                 imageUrl: UNS+'1547592166-23ac45744acd?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd8',  title: 'Svamprisotto',                     cook_time_minutes: 35, tags: ['Vegetarisk'],                description: 'Krämig risotto med blandade skogsvampar och parmesan',      imageUrl: UNS+'1476124369491-e7addf5db371?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd9',  title: 'Veganska tacos med jackfruit',     cook_time_minutes: 30, tags: ['Veganskt'],                  description: 'Smakrik jackfruit som pulled pork, med avokadomousse',       imageUrl: UNS+'1551504734-5da7e163f67d?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd10', title: 'Laxpanna med dill och potatis',    cook_time_minutes: 30, tags: ['Snabbt', 'Glutenfritt'],     description: 'Stekt lax med dillsmör och kokt färskpotatis',              imageUrl: UNS+'1467003909585-2f8a72700288?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd11', title: 'Köttbullar med gräddsås',          cook_time_minutes: 40, tags: ['Barnvänl'],                  description: 'Svenska köttbullar med pressad potatis och lingon',          imageUrl: UNS+'1529042410759-befb1204b468?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd12', title: 'Kycklingwok med nudlar',           cook_time_minutes: 20, tags: ['Snabbt'],                    description: 'Asiatisk wok med kyckling, grönsaker och oystersås',        imageUrl: UNS+'1603073163308-9654c3fb70b5?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd13', title: 'Biff med bearnaisesås',            cook_time_minutes: 25, tags: ['Glutenfritt'],               description: 'Perfekt stekt biff med hemgjord bearnaise och pommes',       imageUrl: UNS+'1558030006-450675393462?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd14', title: 'Bönsoppa med rostat bröd',         cook_time_minutes: 20, tags: ['Veganskt'],                  description: 'Mustig bönsoppa med tomater, spiskummin och lime',           imageUrl: UNS+'1547592180-85f173990554?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd15', title: 'Linssoppa med kokosmjölk',         cook_time_minutes: 30, tags: ['Veganskt'],                  description: 'Röda linser, kokosmjölk och ingefära — mättande och god',   imageUrl: UNS+'1476122102823-c3e4a1ef0de4?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd16', title: 'Ugnsbakad blomkål med tahini',     cook_time_minutes: 35, tags: ['Veganskt', 'Vegetarisk'],    description: 'Hel blomkål i ugn med tahinisås och granatäpple',            imageUrl: UNS+'1568605117036-5fe5e7bab0b7?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd17', title: 'Makaronigratäng',                  cook_time_minutes: 35, tags: ['Barnvänl'],                  description: 'Klassisk gratäng med makaroner, falukorv och ost',           imageUrl: UNS+'1543362906-acfc16c67564?w=600&h=400&fit=crop&auto=format' },
+  { id: 'd18', title: 'Pizzabullar',                      cook_time_minutes: 40, tags: ['Barnvänl'],                  description: 'Mjuka bullor fyllda med tomatsås, skinka och mozzarella',   imageUrl: UNS+'1513104890138-7c749659a591?w=600&h=400&fit=crop&auto=format' },
 ]
 
 export default function RecipesPage() {
@@ -150,15 +146,15 @@ export default function RecipesPage() {
             key={f}
             onClick={() => setActiveFilter(f)}
             style={{
-              padding: '7px 16px',
+              padding: '6px 15px',
               borderRadius: '100px',
               fontSize: '13px',
-              fontWeight: 600,
+              fontWeight: 500,
               whiteSpace: 'nowrap',
               flexShrink: 0,
-              background: activeFilter === f ? '#1e3a2a' : '#fff',
-              color: activeFilter === f ? '#fff' : '#333',
-              border: activeFilter === f ? 'none' : '1px solid rgba(0,0,0,0.08)',
+              background: activeFilter === f ? '#1C3A2A' : 'transparent',
+              color: activeFilter === f ? '#fff' : '#1A1A1A',
+              border: `1.5px solid ${activeFilter === f ? '#1C3A2A' : 'rgba(0,0,0,0.18)'}`,
             }}
           >
             {f}
@@ -171,7 +167,7 @@ export default function RecipesPage() {
         <button
           onClick={() => setShowGenerate(!showGenerate)}
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl"
-          style={{ background: '#1e3a2a', color: '#fff' }}
+          style={{ background: '#1C3A2A', color: '#fff' }}
         >
           <span style={{ fontSize: '14px', fontWeight: 600 }}>👨‍🍳 Generera recept med dina varor</span>
           <span style={{ fontSize: '18px' }}>{showGenerate ? '−' : '+'}</span>
@@ -197,7 +193,7 @@ export default function RecipesPage() {
                   style={{
                     fontSize: '12px',
                     fontWeight: 600,
-                    color: '#1e3a2a',
+                    color: '#1C3A2A',
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
@@ -211,7 +207,7 @@ export default function RecipesPage() {
             {fridgeItems.length === 0 ? (
               <p style={{ fontSize: '13px', color: '#aaa' }}>
                 Inga varor i kylen.{' '}
-                <Link href="/fridge" style={{ color: '#1e3a2a', fontWeight: 600 }}>Lägg till →</Link>
+                <Link href="/fridge" style={{ color: '#1C3A2A', fontWeight: 600 }}>Lägg till →</Link>
               </p>
             ) : (
               <>
@@ -227,7 +223,7 @@ export default function RecipesPage() {
                           borderRadius: '100px',
                           fontSize: '13px',
                           fontWeight: 500,
-                          background: isSelected ? '#1e3a2a' : '#eeefec',
+                          background: isSelected ? '#1C3A2A' : '#eeefec',
                           color: isSelected ? '#fff' : '#333',
                           border: 'none',
                           display: 'flex',
@@ -251,7 +247,7 @@ export default function RecipesPage() {
                     width: '100%',
                     padding: '12px',
                     borderRadius: '10px',
-                    background: generating || !selected.size ? '#999' : '#1e3a2a',
+                    background: generating || !selected.size ? '#999' : '#1C3A2A',
                     color: '#fff',
                     fontSize: '14px',
                     fontWeight: 600,
@@ -287,7 +283,7 @@ export default function RecipesPage() {
           </p>
           <button
             onClick={() => { setSearchQuery(''); setActiveFilter('Alla') }}
-            style={{ marginTop: '14px', padding: '10px 20px', borderRadius: '10px', background: '#1e3a2a', color: '#fff', fontSize: '13px', fontWeight: 600 }}
+            style={{ marginTop: '14px', padding: '10px 20px', borderRadius: '10px', background: '#1C3A2A', color: '#fff', fontSize: '13px', fontWeight: 600 }}
           >
             Rensa sökning
           </button>
@@ -339,7 +335,7 @@ export default function RecipesPage() {
                   <p style={{ fontSize: '11px', color: '#6b6f6b', marginTop: '2px' }}>{r.description}</p>
                   <div className="flex gap-1 mt-2 flex-wrap">
                     {r.tags.slice(0, 2).map(t => (
-                      <span key={t} style={{ padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600, background: '#e8f0e9', color: '#1e3a2a' }}>{t}</span>
+                      <span key={t} style={{ padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600, background: '#e8f0e9', color: '#1C3A2A' }}>{t}</span>
                     ))}
                   </div>
                 </div>

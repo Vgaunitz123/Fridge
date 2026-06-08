@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 function FridgeIcon({ active }: { active: boolean }) {
-  const c = active ? '#1e3a2a' : '#9aa5a0'
+  const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="4" y="2" width="16" height="20" rx="3" stroke={c} strokeWidth="1.7"/>
@@ -16,7 +16,7 @@ function FridgeIcon({ active }: { active: boolean }) {
 }
 
 function RecipeIcon({ active }: { active: boolean }) {
-  const c = active ? '#1e3a2a' : '#9aa5a0'
+  const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M4 4C4 3 5 2 6 2H18C19 2 20 3 20 4V20C20 21 19 22 18 22H6C5 22 4 21 4 20V4Z" stroke={c} strokeWidth="1.7"/>
@@ -28,7 +28,7 @@ function RecipeIcon({ active }: { active: boolean }) {
 }
 
 function PantryIcon({ active }: { active: boolean }) {
-  const c = active ? '#1e3a2a' : '#9aa5a0'
+  const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="3" y="3" width="18" height="4" rx="1.5" stroke={c} strokeWidth="1.7"/>
@@ -42,7 +42,7 @@ function PantryIcon({ active }: { active: boolean }) {
 }
 
 function CommunityIcon({ active }: { active: boolean }) {
-  const c = active ? '#1e3a2a' : '#9aa5a0'
+  const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="9" cy="7" r="3.2" stroke={c} strokeWidth="1.7"/>
@@ -54,7 +54,7 @@ function CommunityIcon({ active }: { active: boolean }) {
 }
 
 function ProfileIcon({ active }: { active: boolean }) {
-  const c = active ? '#1e3a2a' : '#9aa5a0'
+  const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="7.5" r="3.5" stroke={c} strokeWidth="1.7"/>
@@ -97,14 +97,14 @@ export default function BottomNav() {
               {active && (
                 <span
                   className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
-                  style={{ background: '#1e3a2a' }}
+                  style={{ background: '#1C3A2A' }}
                 />
               )}
               <Icon active={active} />
               <span
                 className="text-xs transition-all"
                 style={{
-                  color: active ? '#1e3a2a' : '#9aa5a0',
+                  color: active ? '#1C3A2A' : '#9aa5a0',
                   fontWeight: active ? 600 : 400,
                   fontFamily: 'var(--font-dm-sans)',
                 }}
