@@ -252,16 +252,14 @@ export default function FridgePage() {
 
       {/* Bottom buttons */}
       <div className="px-3 pb-28 flex flex-col gap-2">
-        {isFridge && (
-          <Link
-            href="/scan"
-            className="flex items-center justify-center gap-2 py-4 text-sm font-semibold"
-            style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: '8px' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
-            Skanna kvitto / AI-foto
-          </Link>
-        )}
+        <Link
+          href="/scan"
+          className="flex items-center justify-center gap-2 py-4 text-sm font-semibold"
+          style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: '8px' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
+          Skanna kvitto / AI-foto
+        </Link>
         <button
           onClick={() => setDialogOpen(true)}
           className="py-3.5 text-sm font-semibold"
