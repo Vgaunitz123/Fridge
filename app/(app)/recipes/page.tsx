@@ -92,14 +92,26 @@ export default function RecipesPage() {
   })
 
   return (
-    <div style={{ background: '#f5f6f4', minHeight: '100vh' }}>
+    <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between">
-        <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#111211', fontFamily: 'var(--font-playfair)' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
           Recept &amp; Mat
         </h1>
-        <div className="flex items-center gap-3">
-          <button style={{ color: '#111211' }}>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/recipes/new"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              padding: '7px 13px', borderRadius: '8px',
+              background: '#1C3A2A', color: '#fff',
+              fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Lägg till
+          </Link>
+          <button style={{ color: '#1A1A1A' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
