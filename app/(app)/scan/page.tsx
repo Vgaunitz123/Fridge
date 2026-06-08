@@ -42,6 +42,7 @@ export default function ScanPage() {
     setError(null)
     const formData = new FormData()
     formData.append('image', file)
+    formData.append('mode', scanMode ?? 'product')
     const res = await fetch('/api/scan', { method: 'POST', body: formData })
     const data = await res.json()
     if (!res.ok || data.error) {
@@ -49,7 +50,9 @@ export default function ScanPage() {
       setState('idle')
       return
     }
-    setIngredients((data.ingredients as Omit<ScannedIngredient, 'selected'>[]).map(i => ({ ...i, selected: true })))
+    const items = (data.ingredients as Omit<ScannedIngredient, 'selected'>[]).map(i => ({ ...i, selected: true }))
+    setIngredients(items)
+    if (data.mock) setError('Demo-läge: Inga riktiga AI-resultat (API-nyckel saknas)')
     setState('results')
   }
 
@@ -65,7 +68,12 @@ export default function ScanPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setState('results'); return }
     await supabase.from('fridge_items').insert(selected.map(i => ({
-      user_id: user.id, name: i.name, quantity: i.estimated_quantity, unit: i.unit, category: 'other', expiry_date: null,
+      user_id: user.id,
+      name: i.name,
+      quantity: i.estimated_quantity,
+      unit: i.unit,
+      category: 'other',
+      expiry_date: i.expiry_date ?? null,
     })))
     setState('done')
     setTimeout(() => router.push('/fridge'), 1200)
@@ -217,7 +225,10 @@ export default function ScanPage() {
             </button>
 
             {error && (
-              <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: '#fff7ed', color: '#92400e', border: '1px solid rgba(217,119,6,0.2)' }}>
+              <div className="px-4 py-3 rounded-2xl text-sm"
+                style={error.startsWith('Demo')
+                  ? { background: '#f0f9ff', color: '#0369a1', border: '1px solid rgba(3,105,161,0.2)' }
+                  : { background: '#fff7ed', color: '#92400e', border: '1px solid rgba(217,119,6,0.2)' }}>
                 {error}
               </div>
             )}
@@ -247,8 +258,15 @@ export default function ScanPage() {
                         style={{ background: ing.selected ? '#1a4a2e' : 'rgba(28,25,23,0.08)', color: '#fff' }}>
                         {ing.selected ? '✓' : ''}
                       </div>
-                      <span className="flex-1 text-sm font-semibold" style={{ color: '#1c1917' }}>{ing.name}</span>
-                      <span className="text-xs" style={{ color: '#a8a29e' }}>{ing.estimated_quantity} {ing.unit}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="block text-sm font-semibold truncate" style={{ color: '#1c1917' }}>{ing.name}</span>
+                        {ing.expiry_date && (
+                          <span className="block text-xs mt-0.5" style={{ color: '#d97706' }}>
+                            Bäst före: {ing.expiry_date}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs flex-shrink-0" style={{ color: '#a8a29e' }}>{ing.estimated_quantity} {ing.unit}</span>
                     </button>
                   ))}
                 </div>

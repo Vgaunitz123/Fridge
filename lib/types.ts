@@ -50,5 +50,6 @@ export type ScannedIngredient = {
   name: string
   estimated_quantity: number
   unit: string
+  expiry_date: string | null
   selected: boolean
 }
