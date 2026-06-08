@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase'
 import { FridgeItem, Recipe } from '@/lib/types'
 import RecipeCard from '@/components/recipes/RecipeCard'
@@ -51,6 +51,21 @@ export default function RecipesPage() {
   }, [])
 
   useEffect(() => { fetchFridge() }, [fetchFridge])
+
+  // Merge duplicates by name (case-insensitive), sum quantities
+  const uniqueItems = useMemo(() => {
+    const map = new Map<string, { name: string; quantity: number; unit: string }>()
+    for (const item of fridgeItems) {
+      const key = item.name.toLowerCase().trim()
+      const existing = map.get(key)
+      if (existing) {
+        map.set(key, { ...existing, quantity: existing.quantity + item.quantity })
+      } else {
+        map.set(key, { name: item.name, quantity: item.quantity, unit: item.unit })
+      }
+    }
+    return Array.from(map.values())
+  }, [fridgeItems])
 
   function toggleIngredient(name: string) {
     setSelected(prev => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n })
@@ -175,23 +190,32 @@ export default function RecipesPage() {
             ) : (
               <>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
-                  {fridgeItems.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => toggleIngredient(item.name)}
-                      style={{
-                        padding: '5px 12px',
-                        borderRadius: '100px',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        background: selected.has(item.name) ? '#1e3a2a' : '#eeefec',
-                        color: selected.has(item.name) ? '#fff' : '#333',
-                        border: 'none',
-                      }}
-                    >
-                      {item.name}
-                    </button>
-                  ))}
+                  {uniqueItems.map(item => {
+                    const isSelected = selected.has(item.name)
+                    return (
+                      <button
+                        key={item.name}
+                        onClick={() => toggleIngredient(item.name)}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: '100px',
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          background: isSelected ? '#1e3a2a' : '#eeefec',
+                          color: isSelected ? '#fff' : '#333',
+                          border: 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                        }}
+                      >
+                        {item.name}
+                        <span style={{ opacity: 0.65, fontSize: '11px' }}>
+                          {item.quantity} {item.unit}
+                        </span>
+                      </button>
+                    )
+                  })}
                 </div>
                 {error && <p style={{ fontSize: '13px', color: '#dc2626', marginBottom: '8px' }}>{error}</p>}
                 <button
