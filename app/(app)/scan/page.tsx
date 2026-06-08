@@ -12,6 +12,16 @@ import Image from 'next/image'
 type State = 'idle' | 'scanning' | 'results' | 'saving' | 'done'
 type ScanMode = 'receipt' | 'product' | null
 
+const CATEGORY_LABELS: Record<string, string> = {
+  dairy: '🥛 Mejeri & Ägg',
+  meat: '🥩 Kött & Fisk',
+  vegetable: '🥦 Grönsaker',
+  fruit: '🍎 Frukt',
+  bread: '🍞 Bröd & Spannmål',
+  pantry: '🧂 Skafferi',
+  other: '🥡 Övrigt',
+}
+
 export default function ScanPage() {
   const [state, setState] = useState<State>('idle')
   const [scanMode, setScanMode] = useState<ScanMode>(null)
@@ -72,7 +82,7 @@ export default function ScanPage() {
       name: i.name,
       quantity: i.estimated_quantity,
       unit: i.unit,
-      category: 'other',
+      category: i.category ?? 'other',
       expiry_date: i.expiry_date ?? null,
     })))
     setState('done')
@@ -260,11 +270,16 @@ export default function ScanPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="block text-sm font-semibold truncate" style={{ color: '#1c1917' }}>{ing.name}</span>
-                        {ing.expiry_date && (
-                          <span className="block text-xs mt-0.5" style={{ color: '#d97706' }}>
-                            Bäst före: {ing.expiry_date}
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(28,25,23,0.06)', color: '#78716c' }}>
+                            {CATEGORY_LABELS[ing.category] ?? ing.category}
                           </span>
-                        )}
+                          {ing.expiry_date && (
+                            <span className="text-xs" style={{ color: '#d97706' }}>
+                              Bäst före: {ing.expiry_date}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <span className="text-xs flex-shrink-0" style={{ color: '#a8a29e' }}>{ing.estimated_quantity} {ing.unit}</span>
                     </button>
