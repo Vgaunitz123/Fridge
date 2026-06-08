@@ -9,7 +9,7 @@ import { FridgeItem } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
-type State = 'idle' | 'scanning' | 'results' | 'saving' | 'done'
+type State = 'idle' | 'scanning' | 'results' | 'saving' | 'done' | 'no_api_key'
 type ScanMode = 'receipt' | 'product' | null
 
 
@@ -46,6 +46,10 @@ export default function ScanPage() {
     formData.append('mode', scanMode ?? 'product')
     const res = await fetch('/api/scan', { method: 'POST', body: formData })
     const data = await res.json()
+    if (data.error === 'no_api_key') {
+      setState('no_api_key')
+      return
+    }
     if (!res.ok || data.error) {
       setError(data.error ?? 'Något gick fel')
       setState('idle')
@@ -53,7 +57,7 @@ export default function ScanPage() {
     }
     const items = (data.ingredients as Omit<ScannedIngredient, 'selected'>[]).map(i => ({ ...i, selected: true }))
     setIngredients(items)
-    if (data.mock) setError('Demo-läge: Inga riktiga AI-resultat (API-nyckel saknas)')
+    if (data.mock) setError('Demo-läge: Produktidentifiering är aktiv men använder exempeldata')
     setState('results')
   }
 
@@ -234,8 +238,49 @@ export default function ScanPage() {
               </div>
             )}
 
+            {state === 'no_api_key' && (
+              <div className="fade-up rounded-2xl overflow-hidden" style={{ border: '1.5px solid rgba(220,38,38,0.2)', background: '#fff' }}>
+                <div className="px-5 py-4" style={{ background: '#fef2f2', borderBottom: '1px solid rgba(220,38,38,0.12)' }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span style={{ fontSize: '18px' }}>🔑</span>
+                    <p className="font-bold text-sm" style={{ color: '#991b1b' }}>AI-skanningen är inte konfigurerad</p>
+                  </div>
+                  <p className="text-xs" style={{ color: '#b91c1c' }}>
+                    Kvittoskanning kräver en Anthropic API-nyckel. Utan den kan appen inte läsa ditt kvitto.
+                  </p>
+                </div>
+                <div className="px-5 py-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#6b6b6b' }}>Så här aktiverar du AI-skanningen</p>
+                  {[
+                    { n: '1', text: 'Gå till console.anthropic.com och skapa ett konto' },
+                    { n: '2', text: 'Hämta din API-nyckel under "API Keys"' },
+                    { n: '3', text: 'Öppna filen .env.local i projektmappen' },
+                    { n: '4', text: 'Ange: ANTHROPIC_API_KEY=din-nyckel-här' },
+                    { n: '5', text: 'Starta om servern (npm run dev) — klart!' },
+                  ].map(s => (
+                    <div key={s.n} className="flex items-start gap-3">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
+                        style={{ background: '#1C3A2A', color: '#fff', fontSize: '10px' }}>
+                        {s.n}
+                      </div>
+                      <p className="text-sm" style={{ color: '#1a1a1a', lineHeight: 1.45 }}>{s.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-5 pb-4">
+                  <button
+                    onClick={() => { setManualOpen(true) }}
+                    className="pressable w-full py-3 rounded-xl text-sm font-semibold"
+                    style={{ background: '#1C3A2A', color: '#fff' }}
+                  >
+                    Lägg till manuellt istället
+                  </button>
+                </div>
+              </div>
+            )}
+
             {state === 'idle' && (
-              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
+              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold pressable" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
                 ✨ Hitta varor automatiskt
               </button>
             )}

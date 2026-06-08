@@ -174,6 +174,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
+    // Receipt mode: mock items are misleading — return a clear error instead
+    if (mode === 'receipt') {
+      return NextResponse.json(
+        { error: 'no_api_key', message: 'AI-skanningen kräver en Anthropic API-nyckel. Lägg till ANTHROPIC_API_KEY i .env.local.' },
+        { status: 503 }
+      )
+    }
     const ingredients = normalise(mockItems(mode))
     return NextResponse.json({ ingredients, mock: true })
   }
