@@ -233,9 +233,11 @@ export default function FridgePage() {
                   {shelfItems.length === 0 ? (
                     <div style={{ height: '28px', borderTop: `1px dashed ${dividerColor}`, marginTop: '4px' }} />
                   ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <div className="stagger" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {shelfItems.map(item => (
-                        <ItemTag key={item.id} item={item} onDelete={deleteItem} />
+                        <div key={item.id} className="fade-up">
+                          <ItemTag item={item} onDelete={deleteItem} />
+                        </div>
                       ))}
                     </div>
                   )}
@@ -254,7 +256,7 @@ export default function FridgePage() {
       <div className="px-3 pb-28 flex flex-col gap-2">
         <Link
           href="/scan"
-          className="flex items-center justify-center gap-2 py-4 text-sm font-semibold"
+          className="pressable flex items-center justify-center gap-2 py-4 text-sm font-semibold"
           style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: '8px' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
@@ -262,7 +264,7 @@ export default function FridgePage() {
         </Link>
         <button
           onClick={() => setDialogOpen(true)}
-          className="py-3.5 text-sm font-semibold"
+          className="pressable py-3.5 text-sm font-semibold"
           style={{ background: '#fff', color: '#1A1A1A', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: '8px' }}
         >
           + Lägg till {isFridge ? 'kyilvara' : 'skafferivar'} manuellt

@@ -27,11 +27,11 @@ function CardInner({ recipe }: { recipe: Props['recipe'] }) {
 
   return (
     <div
-      className="overflow-hidden transition-all duration-200 active:scale-[0.98]"
+      className="card-hover fade-up overflow-hidden"
       style={{
         background: '#fff',
         borderRadius: '8px',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.06)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
       {/* Hero — 3:2 ratio, real photo or neutral placeholder */}

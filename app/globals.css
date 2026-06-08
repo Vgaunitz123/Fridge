@@ -69,49 +69,86 @@
   }
 }
 
-/* Subtle card shadow matching PDF */
-.card-shadow {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.07);
+/* ── Custom easing curves (Emil Kowalski) ─────────────────────────────────── */
+:root {
+  --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Frosted glass nav */
+/* ── Keyframes ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Entry animations ─────────────────────────────────────────────────────── */
+.fade-up  { animation: fadeUp 280ms var(--ease-out) both; }
+.scale-in { animation: scaleIn 200ms var(--ease-out) both; }
+
+/* Stagger helpers — add to parent, children pick up delay via nth-child */
+.stagger > *:nth-child(1)  { animation-delay:   0ms; }
+.stagger > *:nth-child(2)  { animation-delay:  40ms; }
+.stagger > *:nth-child(3)  { animation-delay:  80ms; }
+.stagger > *:nth-child(4)  { animation-delay: 120ms; }
+.stagger > *:nth-child(5)  { animation-delay: 160ms; }
+.stagger > *:nth-child(6)  { animation-delay: 200ms; }
+.stagger > *:nth-child(7)  { animation-delay: 240ms; }
+.stagger > *:nth-child(8)  { animation-delay: 280ms; }
+.stagger > *:nth-child(n+9){ animation-delay: 300ms; }
+
+/* ── Pressable elements (all buttons & links that act as buttons) ─────────── */
+.pressable {
+  transition: transform 140ms var(--ease-out), box-shadow 140ms var(--ease-out);
+  cursor: pointer;
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* ── Card hover (only real pointer devices) ───────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  .card-hover {
+    transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+  }
+  .card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.11);
+  }
+  .card-hover:active {
+    transform: scale(0.98);
+    transition-duration: 100ms;
+  }
+}
+
+/* ── Frosted glass nav ────────────────────────────────────────────────────── */
 .glass {
-  background: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
-/* Hover lift */
-.hover-lift {
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-}
-
-/* Fade up animation */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.fade-up { animation: fadeUp 0.35s ease both; }
-.fade-up-1 { animation-delay: 0.05s; }
-.fade-up-2 { animation-delay: 0.1s; }
-.fade-up-3 { animation-delay: 0.15s; }
-
-/* Inputs */
+/* ── Inputs ───────────────────────────────────────────────────────────────── */
 input:focus, textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(30,58,42,0.18);
-  border-color: #1e3a2a !important;
+  box-shadow: 0 0 0 2px rgba(28,58,42,0.18);
+  border-color: #1C3A2A !important;
+  transition: box-shadow 150ms var(--ease-out), border-color 150ms var(--ease-out);
 }
 
-/* Hide scrollbar */
+/* ── Scrollbars ───────────────────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* Custom scrollbar */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }

@@ -91,11 +91,11 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center py-3 gap-1 relative"
+              className="flex-1 flex flex-col items-center py-3 gap-1 relative pressable"
             >
               {active && (
                 <span
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full scale-in"
                   style={{ background: '#1C3A2A' }}
                 />
               )}

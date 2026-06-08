@@ -8,6 +8,41 @@ import Link from 'next/link'
 
 const FILTERS = ['Alla', 'Snabbt', 'Vegetarisk', 'Barnvänl', 'Veganskt', 'Glutenfritt']
 
+const PLACEHOLDER_COLORS = ['#D6CFC4', '#C8C2B6', '#D4CCBF', '#C6BFB3', '#D0C9BC']
+function pickColor(title: string) {
+  let h = 0; for (const c of title) h = c.charCodeAt(0) + ((h << 5) - h)
+  return PLACEHOLDER_COLORS[Math.abs(h) % PLACEHOLDER_COLORS.length]
+}
+
+function FeaturedCard({ recipe }: { recipe: (typeof DEMO_RECIPES)[0] }) {
+  const [err, setErr] = useState(false)
+  const photo = !err && recipe.imageUrl
+  return (
+    <Link href={`/recipes/${recipe.id}`} style={{ display: 'block', textDecoration: 'none', marginBottom: '12px' }}>
+      <div className="card-hover fade-up overflow-hidden" style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08)' }}>
+        <div className="relative overflow-hidden" style={{ height: '200px' }}>
+          {photo
+            ? <img src={recipe.imageUrl} alt={recipe.title} onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ width: '100%', height: '100%', background: pickColor(recipe.title) }} />
+          }
+          <div className="absolute top-3 right-3 px-2 py-1 text-xs font-semibold" style={{ background: '#1C3A2A', color: '#fff', borderRadius: '4px', fontSize: '11px' }}>
+            {recipe.cook_time_minutes} min
+          </div>
+          <div className="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
+            {recipe.tags.slice(0, 2).map(t => (
+              <span key={t} style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(6px)', color: '#fff', borderRadius: '3px' }}>{t}</span>
+            ))}
+          </div>
+        </div>
+        <div style={{ padding: '14px 16px' }}>
+          <h3 style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '4px' }}>{recipe.title}</h3>
+          <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>{recipe.description}</p>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 const UNS = 'https://images.unsplash.com/photo-'
 const DEMO_RECIPES = [
   { id: 'd1',  title: 'Kyckling med pesto och pasta',     cook_time_minutes: 25, tags: ['Snabbt', 'Barnvänl'],        description: 'Saftig kyckling, grön pesto och al dente pasta',           imageUrl: UNS+'1555949258-eb67b1ef0ceb?w=600&h=400&fit=crop&auto=format' },
@@ -157,6 +192,7 @@ export default function RecipesPage() {
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
+            className="pressable"
             style={{
               padding: '6px 15px',
               borderRadius: '100px',
@@ -255,10 +291,11 @@ export default function RecipesPage() {
                 <button
                   onClick={generate}
                   disabled={generating || !selected.size}
+                  className="pressable"
                   style={{
                     width: '100%',
                     padding: '12px',
-                    borderRadius: '10px',
+                    borderRadius: '8px',
                     background: generating || !selected.size ? '#999' : '#1C3A2A',
                     color: '#fff',
                     fontSize: '14px',
@@ -304,54 +341,15 @@ export default function RecipesPage() {
 
       {displayRecipes && displayRecipes.length > 0 && (
         <div className="px-4 pb-28">
-          {/* Featured - first item large */}
+          {/* Featured — first card full-width with taller photo */}
           {displayRecipes[0] && (
-            <div
-              className="mb-3 rounded-2xl overflow-hidden hover-lift"
-              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
-            >
-              <div className="flex items-center justify-center relative" style={{ height: '160px', background: displayRecipes[0].gradient }}>
-                <span style={{ fontSize: '72px' }}>{displayRecipes[0].emoji}</span>
-                <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full"
-                  style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(8px)' }}>
-                  <span style={{ fontSize: '11px', color: '#fff', fontWeight: 600 }}>⏱ {displayRecipes[0].cook_time_minutes} min</span>
-                </div>
-                <div className="absolute bottom-3 left-3 flex gap-1.5">
-                  {displayRecipes[0].tags.map(t => (
-                    <span key={t} style={{ padding: '3px 10px', borderRadius: '100px', fontSize: '11px', fontWeight: 600, background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: '#fff' }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-              <div style={{ padding: '14px 16px', background: '#fff' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#111211', fontFamily: 'var(--font-playfair)' }}>
-                  {displayRecipes[0].title}
-                </h3>
-                <p style={{ fontSize: '13px', color: '#6b6f6b', marginTop: '2px' }}>{displayRecipes[0].description}</p>
-              </div>
-            </div>
+            <FeaturedCard recipe={displayRecipes[0]} />
           )}
 
-          {/* Rest in grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          {/* Grid — staggered entry */}
+          <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             {displayRecipes.slice(1).map(r => (
-              <div key={r.id} className="rounded-2xl overflow-hidden hover-lift" style={{ background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-                <div className="flex items-center justify-center relative" style={{ height: '100px', background: r.gradient }}>
-                  <span style={{ fontSize: '44px' }}>{r.emoji}</span>
-                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(8px)' }}>
-                    <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600 }}>⏱ {r.cook_time_minutes}m</span>
-                  </div>
-                </div>
-                <div style={{ padding: '10px 12px' }}>
-                  <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#111211', lineHeight: 1.3 }}>{r.title}</h3>
-                  <p style={{ fontSize: '11px', color: '#6b6f6b', marginTop: '2px' }}>{r.description}</p>
-                  <div className="flex gap-1 mt-2 flex-wrap">
-                    {r.tags.slice(0, 2).map(t => (
-                      <span key={t} style={{ padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 600, background: '#e8f0e9', color: '#1C3A2A' }}>{t}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <RecipeCard key={r.id} recipe={r as never} />
             ))}
           </div>
         </div>
