@@ -13,12 +13,18 @@ const CATEGORY_EMOJI: Record<string, string> = {
 }
 
 const FRIDGE_CATEGORIES = ['dairy', 'meat', 'vegetable', 'fruit', 'other']
+const PANTRY_CATEGORIES = ['bread', 'pantry']
 
-const SHELVES = [
+const FRIDGE_SHELVES = [
   { id: 'dairy', label: 'Mejeri & Ägg',     categories: ['dairy'] },
   { id: 'meat',  label: 'Kött & Fisk',       categories: ['meat'] },
   { id: 'veg',   label: 'Grönsaker & Frukt', categories: ['vegetable', 'fruit'] },
   { id: 'other', label: 'Övrigt',            categories: ['other'] },
+]
+
+const PANTRY_SHELVES = [
+  { id: 'bread',  label: 'Torrvaror & Bröd',   categories: ['bread'] },
+  { id: 'pantry', label: 'Konserver & Kryddor', categories: ['pantry'] },
 ]
 
 function expiryDot(expiry: string | null) {
@@ -33,7 +39,6 @@ function expiryDot(expiry: string | null) {
 function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) => void }) {
   const dot = expiryDot(item.expiry_date)
   const emoji = CATEGORY_EMOJI[item.category] ?? '🥡'
-
   return (
     <div
       className="group relative inline-flex items-center gap-1.5 select-none"
@@ -41,13 +46,13 @@ function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) 
         padding: '5px 11px 5px 7px',
         background: '#ffffff',
         borderRadius: '100px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         border: '1px solid rgba(0,0,0,0.06)',
         cursor: 'default',
       }}
     >
       <span style={{ fontSize: '15px', lineHeight: 1 }}>{emoji}</span>
-      <span style={{ fontSize: '12px', fontWeight: 600, color: '#111211', whiteSpace: 'nowrap' }}>
+      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A1A', whiteSpace: 'nowrap' }}>
         {item.name}
       </span>
       {dot && (
@@ -62,15 +67,23 @@ function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) 
   )
 }
 
+type Tab = 'fridge' | 'pantry'
+
 export default function FridgePage() {
-  const [items, setItems] = useState<FridgeItem[]>([])
+  const [tab, setTab] = useState<Tab>('fridge')
+  const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([])
+  const [pantryItems, setPantryItems] = useState<FridgeItem[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchItems = useCallback(async () => {
     const supabase = createClient()
-    const { data } = await supabase.from('fridge_items').select('*').in('category', FRIDGE_CATEGORIES).order('name')
-    setItems(data ?? [])
+    const [{ data: fridge }, { data: pantry }] = await Promise.all([
+      supabase.from('fridge_items').select('*').in('category', FRIDGE_CATEGORIES).order('name'),
+      supabase.from('fridge_items').select('*').in('category', PANTRY_CATEGORIES).order('name'),
+    ])
+    setFridgeItems(fridge ?? [])
+    setPantryItems(pantry ?? [])
     setLoading(false)
   }, [])
 
@@ -79,7 +92,8 @@ export default function FridgePage() {
   async function deleteItem(id: string) {
     const supabase = createClient()
     await supabase.from('fridge_items').delete().eq('id', id)
-    setItems(prev => prev.filter(i => i.id !== id))
+    setFridgeItems(prev => prev.filter(i => i.id !== id))
+    setPantryItems(prev => prev.filter(i => i.id !== id))
   }
 
   async function addItem(item: Omit<FridgeItem, 'id' | 'user_id' | 'created_at'>) {
@@ -87,42 +101,69 @@ export default function FridgePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     const { data } = await supabase.from('fridge_items').insert({ ...item, user_id: user.id }).select().single()
-    if (data) setItems(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
+    if (data) {
+      if (PANTRY_CATEGORIES.includes(data.category)) {
+        setPantryItems(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
+      } else {
+        setFridgeItems(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)))
+      }
+    }
     setDialogOpen(false)
   }
 
-  const expiringSoon = items.filter(i => {
+  const items = tab === 'fridge' ? fridgeItems : pantryItems
+  const shelves = tab === 'fridge' ? FRIDGE_SHELVES : PANTRY_SHELVES
+
+  const expiringSoon = fridgeItems.filter(i => {
     if (!i.expiry_date) return false
     return differenceInDays(new Date(i.expiry_date), new Date()) <= 2
   })
 
+  const isFridge = tab === 'fridge'
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#F5F3EE' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-12 pb-3">
-        <div>
-          <p style={{ fontSize: '13px', color: '#6b6f6b', fontWeight: 500 }}>
+      <div className="px-4 pt-12 pb-3">
+        <div className="flex items-center justify-between mb-4">
+          <p style={{ fontSize: '13px', color: '#6B6B6B', fontWeight: 500 }}>
             {loading ? '…' : `${items.length} varor`}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button style={{ color: '#111211' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-          </button>
-          <button style={{ color: '#111211' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
+
+        {/* Tab toggle */}
+        <div
+          className="flex p-1"
+          style={{ background: '#E8E5DE', borderRadius: '10px' }}
+        >
+          {(['fridge', 'pantry'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="flex-1 flex items-center justify-center gap-2 py-2"
+              style={{
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 600,
+                transition: 'all 0.15s',
+                background: tab === t ? '#fff' : 'transparent',
+                color: tab === t ? '#1A1A1A' : '#6B6B6B',
+                boxShadow: tab === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <span>{t === 'fridge' ? '🧊' : '🏠'}</span>
+              {t === 'fridge' ? 'Kylskåp' : 'Skafferi'}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Expiry warning */}
-      {expiringSoon.length > 0 && (
-        <div className="mx-4 mb-2 px-4 py-2.5 rounded-xl flex items-center gap-2"
-          style={{ background: '#fff3cd', border: '1px solid rgba(212,133,10,0.2)' }}>
+      {/* Expiry warning — only on fridge tab */}
+      {isFridge && expiringSoon.length > 0 && (
+        <div className="mx-4 mb-2 px-4 py-2.5 flex items-center gap-2"
+          style={{ background: '#fff8e6', borderRadius: '8px', border: '1px solid rgba(212,133,10,0.2)' }}>
           <span style={{ fontSize: '14px' }}>⚠️</span>
           <p style={{ fontSize: '12px', color: '#7a4f00', fontWeight: 500 }}>
             {expiringSoon.map(i => i.name).join(', ')} håller på att gå ut
@@ -130,50 +171,67 @@ export default function FridgePage() {
         </div>
       )}
 
-      {/* Fridge container */}
-      <div className="flex-1 mx-3 mb-3 rounded-2xl overflow-hidden relative" style={{
-        background: 'linear-gradient(180deg, #e8ecef 0%, #dde3e8 40%, #d5dde3 100%)',
-        boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.1)',
-        border: '1.5px solid #c4cfd6',
-        minHeight: '460px',
-      }}>
-        {/* Light strip at top */}
-        <div style={{ height: '8px', background: 'linear-gradient(90deg, #b8cdd8, #e8f4f8, #ddeef5, #e8f4f8, #b8cdd8)', opacity: 0.9 }} />
+      {/* Container */}
+      <div
+        className="flex-1 mx-3 mb-3 overflow-hidden relative"
+        style={isFridge ? {
+          background: 'linear-gradient(180deg, #e8ecef 0%, #dde3e8 40%, #d5dde3 100%)',
+          boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.1)',
+          border: '1.5px solid #c4cfd6',
+          borderRadius: '16px',
+          minHeight: '400px',
+        } : {
+          background: 'linear-gradient(180deg, #f0e6d3 0%, #e8d8c0 40%, #dfd0b4 100%)',
+          boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.6), 0 2px 12px rgba(0,0,0,0.08)',
+          border: '1.5px solid #c8b89a',
+          borderRadius: '16px',
+          minHeight: '400px',
+        }}
+      >
+        {/* Top light strip */}
+        <div style={{ height: '8px', background: isFridge
+          ? 'linear-gradient(90deg, #b8cdd8, #e8f4f8, #ddeef5, #e8f4f8, #b8cdd8)'
+          : 'linear-gradient(90deg, #c8a882, #e8d4b8, #d4bc96, #e8d4b8, #c8a882)',
+          opacity: 0.85 }} />
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <div className="text-5xl animate-pulse">🧊</div>
-            <p style={{ fontSize: '13px', color: '#7a9aaa' }}>Laddar…</p>
+            <div className="text-5xl animate-pulse">{isFridge ? '🧊' : '📦'}</div>
+            <p style={{ fontSize: '13px', color: '#9a9a9a' }}>Laddar…</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-2">
-            <div className="text-5xl opacity-30">🧊</div>
-            <p style={{ fontSize: '13px', color: '#8aa5b2' }}>Kylskåpet är tomt</p>
-            <p style={{ fontSize: '12px', color: '#a0b8c2' }}>Lägg till varor nedan</p>
+            <div className="text-5xl opacity-25">{isFridge ? '🧊' : '📦'}</div>
+            <p style={{ fontSize: '13px', color: '#9a9a9a' }}>
+              {isFridge ? 'Kylskåpet är tomt' : 'Skafferiet är tomt'}
+            </p>
+            <p style={{ fontSize: '12px', color: '#b0b0b0' }}>Lägg till varor nedan</p>
           </div>
         ) : (
           <div>
-            {SHELVES.map((shelf, si) => {
+            {shelves.map((shelf, si) => {
               const shelfItems = items.filter(i => shelf.categories.includes(i.category))
-              const isLast = si === SHELVES.length - 1
+              const isLast = si === shelves.length - 1
+              const dividerColor = isFridge ? 'rgba(150,195,215,0.5)' : 'rgba(160,120,70,0.3)'
+              const shelfLineColor = isFridge
+                ? 'linear-gradient(90deg, transparent, rgba(150,195,215,0.5), rgba(180,215,230,0.7), rgba(150,195,215,0.5), transparent)'
+                : 'linear-gradient(90deg, transparent, rgba(160,120,70,0.4), rgba(180,140,90,0.6), rgba(160,120,70,0.4), transparent)'
+              const labelColor = isFridge ? 'rgba(80,120,140,0.75)' : 'rgba(100,70,30,0.65)'
+
               return (
                 <div
                   key={shelf.id}
                   style={{
                     padding: '10px 12px 14px',
-                    borderBottom: isLast ? 'none' : '2px solid rgba(168,200,215,0.5)',
-                    background: si % 2 === 0
-                      ? 'rgba(255,255,255,0.12)'
-                      : 'rgba(255,255,255,0.06)',
+                    borderBottom: isLast ? 'none' : `2px solid ${dividerColor}`,
+                    background: si % 2 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
                   }}
                 >
-                  {/* Shelf label */}
-                  <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(80,120,140,0.75)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>
+                  <p style={{ fontSize: '10px', fontWeight: 700, color: labelColor, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '8px' }}>
                     {shelf.label}
                   </p>
-
                   {shelfItems.length === 0 ? (
-                    <div style={{ height: '28px', borderTop: '1px dashed rgba(150,195,215,0.4)', marginTop: '4px' }} />
+                    <div style={{ height: '28px', borderTop: `1px dashed ${dividerColor}`, marginTop: '4px' }} />
                   ) : (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {shelfItems.map(item => (
@@ -181,51 +239,55 @@ export default function FridgePage() {
                       ))}
                     </div>
                   )}
-
-                  {/* Shelf bottom line */}
                   {!isLast && (
-                    <div style={{ marginTop: '12px', height: '3px', borderRadius: '2px', background: 'linear-gradient(90deg, transparent, rgba(150,195,215,0.5), rgba(180,215,230,0.7), rgba(150,195,215,0.5), transparent)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} />
+                    <div style={{ marginTop: '12px', height: '3px', borderRadius: '2px', background: shelfLineColor, boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }} />
                   )}
                 </div>
               )
             })}
           </div>
         )}
-
-        {/* Fridge bottom shadow */}
-        <div style={{ height: '6px', background: 'linear-gradient(90deg, rgba(0,50,80,0.06), rgba(0,50,80,0.04), rgba(0,50,80,0.06))' }} />
+        <div style={{ height: '6px', opacity: 0.4, background: isFridge ? 'rgba(0,50,80,0.1)' : 'rgba(100,60,20,0.1)' }} />
       </div>
 
       {/* Bottom buttons */}
       <div className="px-3 pb-28 flex flex-col gap-2">
-        <Link
-          href="/scan"
-          className="flex items-center justify-center gap-2 py-4 rounded-xl text-sm font-semibold"
-          style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none' }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
-          Skanna konto / Foto kylskåp AI
-        </Link>
+        {isFridge && (
+          <Link
+            href="/scan"
+            className="flex items-center justify-center gap-2 py-4 text-sm font-semibold"
+            style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: '8px' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
+            Skanna kvitto / AI-foto
+          </Link>
+        )}
         <button
           onClick={() => setDialogOpen(true)}
-          className="py-3.5 rounded-xl text-sm font-semibold"
-          style={{ background: '#fff', color: '#111211', border: '1px solid rgba(0,0,0,0.1)' }}
+          className="py-3.5 text-sm font-semibold"
+          style={{ background: '#fff', color: '#1A1A1A', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: '8px' }}
         >
-          + Lägg till vara manuellt
+          + Lägg till {isFridge ? 'kyilvara' : 'skafferivar'} manuellt
         </button>
 
-        {/* Expiry legend */}
-        <div className="flex items-center justify-center gap-4 pt-1">
-          {[['#22c55e','OK'],['#d97706','≤5 d'],['#ea580c','≤2 d'],['#dc2626','Gått ut']].map(([c,l]) => (
-            <div key={l} className="flex items-center gap-1">
-              <span style={{ width:7, height:7, borderRadius:'50%', background:c, display:'inline-block' }} />
-              <span style={{ fontSize:'10px', color:'#9aa5a0' }}>{l}</span>
-            </div>
-          ))}
-        </div>
+        {isFridge && (
+          <div className="flex items-center justify-center gap-4 pt-1">
+            {[['#22c55e','OK'],['#d97706','≤5 d'],['#ea580c','≤2 d'],['#dc2626','Gått ut']].map(([c,l]) => (
+              <div key={l} className="flex items-center gap-1">
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: c, display: 'inline-block' }} />
+                <span style={{ fontSize: '10px', color: '#9aa5a0' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <AddItemDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onAdd={addItem} />
+      <AddItemDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onAdd={addItem}
+        defaultCategory={tab === 'pantry' ? 'pantry' : 'other'}
+      />
     </div>
   )
 }

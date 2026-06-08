@@ -65,7 +65,6 @@ function ProfileIcon({ active }: { active: boolean }) {
 
 const NAV_ITEMS = [
   { href: '/fridge',    label: 'Kylskåp',   Icon: FridgeIcon },
-  { href: '/pantry',    label: 'Skafferi',  Icon: PantryIcon },
   { href: '/recipes',   label: 'Recept',    Icon: RecipeIcon },
   { href: '/community', label: 'Community', Icon: CommunityIcon },
   { href: '/profile',   label: 'Profil',    Icon: ProfileIcon },
@@ -92,7 +91,7 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex-1 flex flex-col items-center py-2.5 gap-0.5 relative"
+              className="flex-1 flex flex-col items-center py-3 gap-1 relative"
             >
               {active && (
                 <span
