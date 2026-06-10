@@ -54,20 +54,17 @@ export default function ProfilePage() {
     setUploadError(null)
     const fd = new FormData()
     fd.append('avatar', file)
-    try {
-      const res = await fetch('/api/profile/avatar', { method: 'POST', body: fd })
-      const json = await res.json()
-      if (res.ok) {
-        setAvatarErr(false)
-        setAvatarKey(Date.now())
-      } else {
-        setUploadError(json.error ?? 'Kunde inte ladda upp bild')
-      }
-    } catch {
-      setUploadError('Nätverksfel – försök igen')
-    } finally {
-      setUploading(false)
-      e.target.value = ''
+    const res = await fetch('/api/profile/avatar', { method: 'POST', body: fd }).catch(() => null)
+    setUploading(false)
+    e.target.value = ''
+    if (!res) { setUploadError('Kunde inte nå servern'); return }
+    let json: { error?: string; url?: string } = {}
+    try { json = await res.json() } catch { /* non-JSON response */ }
+    if (res.ok) {
+      setAvatarErr(false)
+      setAvatarKey(Date.now())
+    } else {
+      setUploadError(json.error ?? `Fel ${res.status}`)
     }
   }
 

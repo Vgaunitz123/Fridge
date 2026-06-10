@@ -4,40 +4,47 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export async function POST(req: NextRequest) {
-  const cookieStore = await cookies()
-  const userClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
-  )
-  const { data: { user } } = await userClient.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Ej inloggad' }, { status: 401 })
+  try {
+    const cookieStore = await cookies()
+    const userClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+    )
+    const { data: { user } } = await userClient.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Ej inloggad' }, { status: 401 })
 
-  const formData = await req.formData()
-  const file = formData.get('avatar') as File | null
-  if (!file) return NextResponse.json({ error: 'Ingen fil' }, { status: 400 })
-  if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'Max 5 MB' }, { status: 400 })
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json({ error: 'Serverkonfiguration saknas (SERVICE_ROLE_KEY)' }, { status: 500 })
+    }
 
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
+    const formData = await req.formData()
+    const file = formData.get('avatar') as File | null
+    if (!file) return NextResponse.json({ error: 'Ingen fil bifogad' }, { status: 400 })
+    if (file.size > 5 * 1024 * 1024) return NextResponse.json({ error: 'Filen är för stor (max 5 MB)' }, { status: 400 })
 
-  // Ensure bucket exists
-  await admin.storage.createBucket('avatars', { public: true, fileSizeLimit: 5 * 1024 * 1024 }).catch(() => {})
+    const admin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { persistSession: false } }
+    )
 
-  const ext = file.type === 'image/png' ? 'png' : 'jpg'
-  const path = `${user.id}/avatar.${ext}`
-  const arrayBuf = await file.arrayBuffer()
-  const buffer = Buffer.from(arrayBuf)
+    await admin.storage.createBucket('avatars', { public: true, fileSizeLimit: 5 * 1024 * 1024 }).catch(() => {})
 
-  const { error } = await admin.storage
-    .from('avatars')
-    .upload(path, buffer, { contentType: file.type, upsert: true })
+    const ext = file.type === 'image/png' ? 'png' : 'jpg'
+    const path = `${user.id}/avatar.${ext}`
+    const buffer = Buffer.from(await file.arrayBuffer())
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const { error } = await admin.storage
+      .from('avatars')
+      .upload(path, buffer, { contentType: file.type, upsert: true })
 
-  const { data: { publicUrl } } = admin.storage.from('avatars').getPublicUrl(path)
-  return NextResponse.json({ url: publicUrl })
+    if (error) return NextResponse.json({ error: `Storage: ${error.message}` }, { status: 500 })
+
+    const { data: { publicUrl } } = admin.storage.from('avatars').getPublicUrl(path)
+    return NextResponse.json({ url: publicUrl })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Okänt fel'
+    return NextResponse.json({ error: `Serverfel: ${msg}` }, { status: 500 })
+  }
 }
