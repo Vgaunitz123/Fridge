@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -18,6 +18,32 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
   const [publishing, setPublishing] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [customImage, setCustomImage] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadErr, setUploadErr] = useState<string | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const activeImage = customImage ?? imageUrl
+
+  async function handleImagePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setUploadErr(null)
+    const fd = new FormData()
+    fd.append('image', file)
+    const res = await fetch('/api/community/upload-image', { method: 'POST', body: fd }).catch(() => null)
+    setUploading(false)
+    e.target.value = ''
+    if (!res) { setUploadErr('Kunde inte nå servern'); return }
+    let json: { url?: string; error?: string } = {}
+    try { json = await res.json() } catch {}
+    if (res.ok && json.url) {
+      setCustomImage(json.url)
+    } else {
+      setUploadErr(json.error ?? `Fel ${res.status}`)
+    }
+  }
 
   async function publish() {
     setPublishing(true)
@@ -29,7 +55,7 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
     const { error: err } = await supabase.from('social_posts').insert({
       user_id: user.id,
       user_email: user.email,
-      image_url: imageUrl ?? '',
+      image_url: activeImage ?? '',
       thumbnail_url: null,
       caption: caption.trim(),
       tags,
@@ -61,19 +87,16 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
 
       {open && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-          {/* Backdrop */}
           <div
             style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }}
             onClick={() => { if (!publishing) setOpen(false) }}
           />
 
-          {/* Sheet */}
           <div style={{
             position: 'relative', background: '#FAFAF8',
             borderRadius: '24px 24px 0 0', padding: '0 0 40px',
-            maxHeight: '80vh', overflowY: 'auto',
+            maxHeight: '88vh', overflowY: 'auto',
           }}>
-            {/* Handle */}
             <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
               <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.1)' }} />
             </div>
@@ -108,12 +131,54 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
                 </div>
               ) : (
                 <>
-                  {/* Preview image */}
-                  {imageUrl && (
-                    <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '16px', aspectRatio: '16/9' }}>
-                      <img src={imageUrl} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
+                  {/* Image preview + upload */}
+                  <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', marginBottom: '12px', aspectRatio: '16/9', background: '#111' }}>
+                    {activeImage ? (
+                      <img src={activeImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#E8E5DE' }}>
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      </div>
+                    )}
+
+                    {/* Upload overlay button */}
+                    <button
+                      onClick={() => fileRef.current?.click()}
+                      disabled={uploading}
+                      style={{
+                        position: 'absolute', bottom: '8px', right: '8px',
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 12px', borderRadius: '20px',
+                        background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)',
+                        color: '#fff', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600,
+                      }}
+                    >
+                      {uploading ? (
+                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite' }} />
+                      ) : (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                          <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                      )}
+                      {uploading ? 'Laddar upp…' : customImage ? 'Byt bild' : 'Lägg till egen bild'}
+                    </button>
+                  </div>
+
+                  {uploadErr && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginBottom: '10px' }}>{uploadErr}</p>
                   )}
+
+                  {customImage && (
+                    <button
+                      onClick={() => setCustomImage(null)}
+                      style={{ fontSize: '12px', color: '#9B9B9B', background: 'none', border: 'none', cursor: 'pointer', marginBottom: '10px', marginTop: '-4px' }}
+                    >
+                      ✕ Ta bort egen bild
+                    </button>
+                  )}
+
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImagePick} />
 
                   {/* Caption */}
                   <label style={{ fontSize: '12px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: '6px' }}>
@@ -131,7 +196,6 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
                     }}
                   />
 
-                  {/* Tags */}
                   {tags.length > 0 && (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px', marginBottom: '16px' }}>
                       {tags.map(t => (
