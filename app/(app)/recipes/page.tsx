@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { FridgeItem, Recipe } from '@/lib/types'
 import RecipeCard from '@/components/recipes/RecipeCard'
@@ -74,6 +74,9 @@ export default function RecipesPage() {
   const [generatedRecipes, setGeneratedRecipes] = useState<Recipe[]>([])
   const [error, setError] = useState<string | null>(null)
   const [showGenerate, setShowGenerate] = useState(false)
+  const [externalRecipes, setExternalRecipes] = useState<Recipe[] | null>(null)
+  const [externalLoading, setExternalLoading] = useState(true)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchFridge = useCallback(async () => {
     const supabase = createClient()
@@ -81,7 +84,20 @@ export default function RecipesPage() {
     setFridgeItems(data ?? [])
   }, [])
 
-  useEffect(() => { fetchFridge() }, [fetchFridge])
+  const fetchExternal = useCallback(async (q = '') => {
+    setExternalLoading(true)
+    try {
+      const res = await fetch(`/api/recipes/external${q ? `?q=${encodeURIComponent(q)}` : ''}`)
+      const data = await res.json()
+      if (data.recipes) setExternalRecipes(data.recipes)
+    } catch {
+      // keep DEMO_RECIPES as fallback — handled below
+    } finally {
+      setExternalLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchFridge(); fetchExternal() }, [fetchFridge, fetchExternal])
 
   // Merge duplicates by name (case-insensitive), sum quantities
   const uniqueItems = useMemo(() => {
@@ -117,11 +133,21 @@ export default function RecipesPage() {
     setGenerating(false)
   }
 
-  const displayRecipes = generatedRecipes.length > 0 ? null : DEMO_RECIPES.filter(r => {
+  // Use external recipes if loaded, else fall back to DEMO_RECIPES
+  const baseRecipes = (externalRecipes ?? DEMO_RECIPES).map(r => ({
+    ...r,
+    // Ensure DEMO_RECIPES has required Recipe fields
+    ingredients: (r as Recipe).ingredients ?? [],
+    steps: (r as Recipe).steps ?? [],
+    created_by: (r as Recipe).created_by ?? null,
+    created_at: (r as Recipe).created_at ?? '',
+  })) as Recipe[]
+
+  const displayRecipes = generatedRecipes.length > 0 ? null : baseRecipes.filter(r => {
     const matchesFilter = activeFilter === 'Alla' || r.tags.includes(activeFilter)
     const matchesSearch = searchQuery.trim() === '' ||
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (r.description ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesFilter && matchesSearch
   })
@@ -168,8 +194,15 @@ export default function RecipesPage() {
           <input
             type="text"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Sök på kategori / ingrediens"
+            onChange={e => {
+              const q = e.target.value
+              setSearchQuery(q)
+              if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current)
+              searchTimeoutRef.current = setTimeout(() => {
+                fetchExternal(q)
+              }, 500)
+            }}
+            placeholder="Sök recept från hela världen…"
             style={{
               flex: 1,
               background: 'transparent',
@@ -319,6 +352,23 @@ export default function RecipesPage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             {generatedRecipes.map(r => <RecipeCard key={r.id ?? r.title} recipe={r} />)}
           </div>
+        </div>
+      )}
+
+      {/* Source info / loading indicator */}
+      {externalLoading && !externalRecipes && (
+        <div className="px-4 mb-3 flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#1C3A2A' }} />
+          <p style={{ fontSize: '12px', color: '#6B6B6B' }}>Hämtar recept från TheMealDB…</p>
+        </div>
+      )}
+      {!externalLoading && externalRecipes && (
+        <div className="px-4 mb-2 flex items-center gap-1.5">
+          <span style={{ fontSize: '10px', color: '#9B9B9B' }}>
+            {externalRecipes.length} recept från TheMealDB
+            {process.env.NEXT_PUBLIC_HAS_SPOONACULAR ? ', Spoonacular' : ''}
+            {process.env.NEXT_PUBLIC_HAS_EDAMAM ? ', Edamam' : ''}
+          </span>
         </div>
       )}
 

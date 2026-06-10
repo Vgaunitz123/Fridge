@@ -3,6 +3,7 @@ import { Recipe, FridgeItem } from '@/lib/types'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ShoppingList from '@/components/recipes/ShoppingList'
+import { mealdbLookup } from '@/lib/mealdb'
 
 const GRADIENTS = [
   'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
@@ -35,17 +36,22 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
   const { id } = await params
   const supabase = await createServerSupabaseClient()
 
-  const [{ data: recipeData }, { data: { user } }] = await Promise.all([
-    supabase.from('recipes').select('*').eq('id', id).single(),
-    supabase.auth.getUser(),
-  ])
+  let recipe: Recipe | null = null
 
-  if (!recipeData) notFound()
-  const recipe = recipeData as Recipe
+  if (id.startsWith('mealdb_')) {
+    recipe = await mealdbLookup(id.replace('mealdb_', ''))
+  } else {
+    const { data } = await supabase.from('recipes').select('*').eq('id', id).single()
+    recipe = data as Recipe | null
+  }
+
+  if (!recipe) notFound()
+
+  const { data: { user } } = await supabase.auth.getUser()
 
   const { data: fridgeData } = user
     ? await supabase.from('fridge_items').select('*').eq('user_id', user.id)
-    : { data: [] }
+    : { data: [] as FridgeItem[] }
 
   const fridgeItems: FridgeItem[] = fridgeData ?? []
 
@@ -66,8 +72,12 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="pb-10">
       {/* Hero */}
-      <div className="flex items-center justify-center relative" style={{ height: '240px', background: gradient }}>
-        <span className="text-8xl drop-shadow-lg select-none">{emoji}</span>
+      <div className="flex items-center justify-center relative overflow-hidden" style={{ height: '260px', background: gradient }}>
+        {recipe.image_url
+          ? <img src={recipe.image_url} alt={recipe.title} className="absolute inset-0 w-full h-full object-cover" />
+          : <span className="text-8xl drop-shadow-lg select-none">{emoji}</span>
+        }
+        {recipe.image_url && <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.28)' }} />}
 
         <Link
           href="/recipes"
@@ -176,6 +186,15 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
         <Link href="/recipes" className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#1a4a2e' }}>
           ← Tillbaka till recept
         </Link>
+
+        {recipe.source && recipe.source_url && (
+          <p style={{ fontSize: '11px', color: '#aaa', marginTop: '4px' }}>
+            Källa:{' '}
+            <a href={recipe.source_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1a4a2e' }}>
+              {recipe.source}
+            </a>
+          </p>
+        )}
       </div>
     </div>
   )

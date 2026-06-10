@@ -23,7 +23,7 @@ export type RecipeStep = {
 export type Recipe = {
   id: string
   title: string
-  description: string
+  description: string | null
   ingredients: Ingredient[]
   steps: RecipeStep[]
   image_url: string | null
@@ -31,6 +31,9 @@ export type Recipe = {
   tags: string[]
   created_by: string | null
   created_at: string
+  // External recipe metadata (TheMealDB, Spoonacular, Edamam)
+  source?: string
+  source_url?: string
 }
 
 export type SocialPost = {
