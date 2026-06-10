@@ -533,6 +533,7 @@ export default function CommunityPage() {
   const [isDemo, setIsDemo] = useState(false)
   const [filter, setFilter] = useState('Allt')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const fetchPosts = useCallback(async () => {
@@ -648,24 +649,16 @@ export default function CommunityPage() {
         <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
           Community
         </h1>
-        <div className="flex items-center gap-2">
-          <Link href="/community/create"
-            className="pressable flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: '#fff', color: '#1C3A2A', border: '1.5px solid #1C3A2A', textDecoration: 'none' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
-            Redigera
-          </Link>
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="pressable flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
-            style={{ background: '#1C3A2A', color: '#fff' }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Dela
-          </button>
-        </div>
+        <button
+          onClick={() => setActionSheetOpen(true)}
+          className="pressable flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
+          style={{ background: '#1C3A2A', color: '#fff' }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Dela
+        </button>
       </div>
 
       {/* Filter pills */}
@@ -747,6 +740,54 @@ export default function CommunityPage() {
         onClose={() => setDrawerOpen(false)}
         onSubmit={handleNewPost}
       />
+
+      {/* Action sheet — Dela vs Videoeditor */}
+      {actionSheetOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }} onClick={() => setActionSheetOpen(false)} />
+          <div className="relative" style={{ background: '#FAFAF8', borderRadius: '20px 20px 0 0', padding: '8px 16px 40px' }}>
+            <div className="flex justify-center py-3">
+              <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
+            </div>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px', paddingLeft: '4px' }}>
+              Vad vill du göra?
+            </p>
+
+            {/* Option 1 — quick post */}
+            <button
+              onClick={() => { setActionSheetOpen(false); setDrawerOpen(true) }}
+              className="pressable w-full flex items-center gap-14px text-left mb-3"
+              style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '14px 16px', cursor: 'pointer' }}
+            >
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EBF2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: '14px' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <div>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', marginBottom: '2px' }}>Dela bild eller video</p>
+                <p style={{ fontSize: '12px', color: '#6B6B6B' }}>Lägg upp ett inlägg direkt</p>
+              </div>
+              <svg style={{ marginLeft: 'auto' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+
+            {/* Option 2 — editor */}
+            <Link
+              href="/community/create"
+              onClick={() => setActionSheetOpen(false)}
+              className="pressable w-full flex items-center text-left"
+              style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '14px 16px', cursor: 'pointer', textDecoration: 'none', display: 'flex' }}
+            >
+              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EBF2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: '14px' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="1.8" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+              </div>
+              <div>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', marginBottom: '2px' }}>Skapa med videoeditor</p>
+                <p style={{ fontSize: '12px', color: '#6B6B6B' }}>Klipp, lägg ihop & lägg till musik</p>
+              </div>
+              <svg style={{ marginLeft: 'auto' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
