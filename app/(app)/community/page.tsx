@@ -220,6 +220,8 @@ function NewPostDrawer({
   const [tab, setTab] = useState<DrawerTab>('image')
   const [imageUrl, setImageUrl] = useState('')
   const [tiktokUrl, setTiktokUrl] = useState('')
+  const [tiktokThumbUrl, setTiktokThumbUrl] = useState<string | null>(null)
+  const [fetchingTiktokThumb, setFetchingTiktokThumb] = useState(false)
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [thumbBlob, setThumbBlob] = useState<Blob | null>(null)
   const [thumbPreview, setThumbPreview] = useState<string | null>(null)
@@ -231,6 +233,7 @@ function NewPostDrawer({
   const [saving, setSaving] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const thumbPreviewRef = useRef<string | null>(null)
+  const tiktokThumbTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Auto-extract frame when video file changes
   useEffect(() => {
@@ -247,14 +250,29 @@ function NewPostDrawer({
     })
   }, [videoFile])
 
+  // Fetch TikTok oEmbed thumbnail when URL is pasted
+  useEffect(() => {
+    if (tiktokThumbTimerRef.current) clearTimeout(tiktokThumbTimerRef.current)
+    if (!tiktokUrl.includes('tiktok.com')) { setTiktokThumbUrl(null); return }
+    setFetchingTiktokThumb(true)
+    tiktokThumbTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/community/tiktok-thumb?url=${encodeURIComponent(tiktokUrl)}`)
+        const { thumbnailUrl } = await res.json()
+        setTiktokThumbUrl(thumbnailUrl ?? null)
+      } catch { setTiktokThumbUrl(null) }
+      setFetchingTiktokThumb(false)
+    }, 600)
+  }, [tiktokUrl])
+
   // Cleanup preview URL
   useEffect(() => () => { if (thumbPreviewRef.current) URL.revokeObjectURL(thumbPreviewRef.current) }, [])
 
   useEffect(() => {
     if (open) setTimeout(() => textareaRef.current?.focus(), 300)
     else {
-      setImageUrl(''); setTiktokUrl(''); setVideoFile(null)
-      setThumbBlob(null); setUploadProgress('')
+      setImageUrl(''); setTiktokUrl(''); setTiktokThumbUrl(null)
+      setVideoFile(null); setThumbBlob(null); setUploadProgress('')
       setCaption(''); setSelectedTags([])
       if (thumbPreviewRef.current) { URL.revokeObjectURL(thumbPreviewRef.current); thumbPreviewRef.current = null }
       setThumbPreview(null)
@@ -306,6 +324,7 @@ function NewPostDrawer({
         thumbUrl = thumbnailUrl
       } else if (tiktokUrl.trim()) {
         mediaUrl = tiktokUrl.trim()
+        thumbUrl = tiktokThumbUrl
       }
     }
 
@@ -382,6 +401,20 @@ function NewPostDrawer({
                 <p style={{ fontSize: '11px', color: '#9B9B9B', marginTop: '4px' }}>
                   Öppna TikTok → din video → Dela → Kopiera länk
                 </p>
+                {/* TikTok thumbnail preview */}
+                {(fetchingTiktokThumb || tiktokThumbUrl) && (
+                  <div className="mt-2">
+                    {fetchingTiktokThumb ? (
+                      <div style={{ height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0ee', borderRadius: '8px' }}>
+                        <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid #ccc', borderTopColor: '#1C3A2A', animation: 'spin 0.8s linear infinite' }} />
+                      </div>
+                    ) : tiktokThumbUrl ? (
+                      <div style={{ borderRadius: '8px', overflow: 'hidden', aspectRatio: '9/16', maxWidth: '120px' }}>
+                        <img src={tiktokThumbUrl} alt="TikTok thumbnail" className="w-full h-full object-cover" />
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
