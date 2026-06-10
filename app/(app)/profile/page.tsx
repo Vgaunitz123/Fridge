@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [avatarKey, setAvatarKey] = useState(Date.now())
   const [avatarErr, setAvatarErr] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -50,13 +51,23 @@ export default function ProfilePage() {
     const file = e.target.files?.[0]
     if (!file || !userId) return
     setUploading(true)
+    setUploadError(null)
     const fd = new FormData()
     fd.append('avatar', file)
-    const res = await fetch('/api/profile/avatar', { method: 'POST', body: fd })
-    setUploading(false)
-    if (res.ok) {
-      setAvatarErr(false)
-      setAvatarKey(Date.now()) // bust cache
+    try {
+      const res = await fetch('/api/profile/avatar', { method: 'POST', body: fd })
+      const json = await res.json()
+      if (res.ok) {
+        setAvatarErr(false)
+        setAvatarKey(Date.now())
+      } else {
+        setUploadError(json.error ?? 'Kunde inte ladda upp bild')
+      }
+    } catch {
+      setUploadError('Nätverksfel – försök igen')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
     }
   }
 
@@ -129,8 +140,12 @@ export default function ProfilePage() {
               </svg>
             )}
           </button>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic" className="hidden" onChange={handleAvatarUpload} />
         </div>
+
+        {uploadError && (
+          <p style={{ fontSize: '12px', color: '#dc2626', marginBottom: '8px', marginTop: '-4px' }}>{uploadError}</p>
+        )}
 
         {!loading && (
           <>

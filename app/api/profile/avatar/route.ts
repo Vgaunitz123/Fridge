@@ -29,11 +29,12 @@ export async function POST(req: NextRequest) {
 
   const ext = file.type === 'image/png' ? 'png' : 'jpg'
   const path = `${user.id}/avatar.${ext}`
-  const bytes = await file.arrayBuffer()
+  const arrayBuf = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuf)
 
   const { error } = await admin.storage
     .from('avatars')
-    .upload(path, bytes, { contentType: file.type, upsert: true })
+    .upload(path, buffer, { contentType: file.type, upsert: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
