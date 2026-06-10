@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import ShoppingList from '@/components/recipes/ShoppingList'
 import { mealdbLookup } from '@/lib/mealdb'
+import PublishRecipeButton from '@/components/recipes/PublishRecipeButton'
 
 const GRADIENTS = [
   'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
@@ -182,6 +183,14 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
             ))}
           </div>
         </div>
+
+        <PublishRecipeButton
+          recipeId={id}
+          title={recipe.title}
+          description={recipe.description ?? null}
+          imageUrl={recipe.image_url ?? null}
+          tags={recipe.tags ?? []}
+        />
 
         <Link href="/recipes" className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#1a4a2e' }}>
           ← Tillbaka till recept
