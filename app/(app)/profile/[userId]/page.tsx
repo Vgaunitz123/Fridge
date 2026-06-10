@@ -45,12 +45,10 @@ function PostSheet({ post, username, onClose }: {
           overflowY: 'auto',
         }}
       >
-        {/* Handle */}
         <div className="flex justify-center pt-3 pb-0">
           <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.1)' }} />
         </div>
 
-        {/* Media */}
         <div style={{ margin: '12px 16px 0', borderRadius: '16px', overflow: 'hidden', position: 'relative', aspectRatio: '4/3', background: '#0a0a0a' }}>
           {displayImg ? (
             <img src={displayImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -82,7 +80,6 @@ function PostSheet({ post, username, onClose }: {
         </div>
 
         <div style={{ padding: '16px 20px 48px' }}>
-          {/* Author + time */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
             <div style={{
               width: '32px', height: '32px', borderRadius: '50%',
@@ -98,12 +95,10 @@ function PostSheet({ post, username, onClose }: {
             </span>
           </div>
 
-          {/* Caption */}
           <p style={{ fontSize: '15px', color: '#1A1A1A', lineHeight: 1.6, marginBottom: '14px' }}>
             {post.caption}
           </p>
 
-          {/* Tags */}
           {post.tags.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
               {post.tags.map(t => (
@@ -117,7 +112,6 @@ function PostSheet({ post, username, onClose }: {
             </div>
           )}
 
-          {/* Likes */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', paddingTop: '12px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#e11d48">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -140,6 +134,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
   const [loading, setLoading] = useState(true)
   const [isOwn, setIsOwn] = useState(false)
   const [selectedPost, setSelectedPost] = useState<ProfilePost | null>(null)
+  const [avatarErr, setAvatarErr] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -181,82 +176,63 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
   const videoCount = posts.filter(p => isVideoUrl(p.image_url)).length
   const displayName = username || userId.slice(0, 8)
   const initials = displayName.slice(0, 2).toUpperCase()
+  const avatarUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${userId}/avatar.jpg`
 
   return (
     <div style={{ background: '#F5F3EE', minHeight: '100vh', paddingBottom: '100px' }}>
 
-      {/* Floating back button */}
-      <div style={{ position: 'absolute', top: '52px', left: '16px', zIndex: 10 }}>
+      {/* Header */}
+      <div style={{ padding: '52px 16px 0', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <Link
           href="/community"
           style={{
             width: '38px', height: '38px', borderRadius: '50%',
-            background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            textDecoration: 'none', color: '#1A1A1A', fontSize: '16px', fontWeight: 700,
+            textDecoration: 'none', color: '#1A1A1A', fontSize: '16px', fontWeight: 700, flexShrink: 0,
           }}
         >
           ←
         </Link>
-      </div>
-
-      {/* Hero banner */}
-      <div style={{
-        height: '160px',
-        background: 'linear-gradient(160deg, #1C3A2A 0%, #2D5A3F 60%, #3D7A55 100%)',
-        position: 'relative',
-      }}>
-        {/* Subtle texture dots */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.06,
-          backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-          backgroundSize: '20px 20px',
-        }} />
-      </div>
-
-      {/* Avatar — overlaps hero */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-48px', paddingBottom: '20px' }}>
-        <div style={{
-          width: '96px', height: '96px', borderRadius: '50%',
-          background: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 0 4px #F5F3EE, 0 4px 20px rgba(0,0,0,0.15)',
-          flexShrink: 0,
-        }}>
-          <div style={{
-            width: '88px', height: '88px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '32px', fontWeight: 700, color: '#fff',
-            fontFamily: 'Georgia, serif',
-          }}>
-            {initials}
-          </div>
-        </div>
-
-        <h1 style={{
-          marginTop: '12px', marginBottom: '2px',
-          fontSize: '22px', fontWeight: 700, color: '#1A1A1A',
-          fontFamily: 'Georgia, serif',
-        }}>
-          @{displayName}
+        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
+          Profil
         </h1>
-
         {isOwn && (
           <Link
             href="/profile"
-            style={{
-              fontSize: '12px', color: '#1C3A2A', fontWeight: 600,
-              textDecoration: 'none', marginTop: '6px',
-              padding: '5px 14px', borderRadius: '100px',
-              border: '1.5px solid rgba(28,58,42,0.3)',
-              background: 'transparent',
-            }}
+            style={{ fontSize: '12px', color: '#1C3A2A', fontWeight: 600, textDecoration: 'none' }}
           >
-            Redigera profil
+            Redigera →
           </Link>
         )}
+      </div>
+
+      {/* Profile card */}
+      <div style={{ margin: '0 16px 16px', background: '#fff', borderRadius: '20px', padding: '24px 20px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        {/* Avatar */}
+        <div style={{ width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 12px', background: '#E8E5DE' }}>
+          {!avatarErr ? (
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              onError={() => setAvatarErr(true)}
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%',
+              background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '26px', fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif',
+            }}>
+              {initials}
+            </div>
+          )}
+        </div>
+
+        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '0' }}>
+          @{displayName}
+        </h2>
       </div>
 
       {loading ? (
@@ -266,7 +242,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
       ) : (
         <>
           {/* Stats bar */}
-          <div style={{ margin: '0 16px 24px', background: '#fff', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <div style={{ margin: '0 16px 20px', background: '#fff', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', display: 'flex' }}>
             {[
               { value: posts.length, label: 'Inlägg' },
               { value: totalLikes, label: 'Gillar' },
@@ -275,11 +251,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
               <div
                 key={stat.label}
                 style={{
-                  display: 'inline-flex', flexDirection: 'column', alignItems: 'center',
-                  width: `${100 / arr.length}%`,
+                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
                   padding: '16px 8px',
                   borderRight: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
-                  verticalAlign: 'top',
                 }}
               >
                 <span style={{ fontSize: '24px', fontWeight: 700, color: '#1C3A2A', fontFamily: 'Georgia, serif', lineHeight: 1 }}>
@@ -319,36 +293,27 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
                 {posts.map((post, i) => {
                   const isVideo = isVideoUrl(post.image_url)
                   const thumb = isVideo ? post.thumbnail_url : post.image_url
-                  const isFirst = i === 0
                   return (
                     <button
                       key={post.id}
                       onClick={() => setSelectedPost(post)}
                       className="pressable"
                       style={{
-                        aspectRatio: '1',
-                        borderRadius: '0',
-                        overflow: 'hidden',
-                        position: 'relative',
-                        background: '#111',
-                        border: 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        outline: 'none',
+                        aspectRatio: '1', borderRadius: '0', overflow: 'hidden',
+                        position: 'relative', background: '#111',
+                        border: 'none', cursor: 'pointer', padding: 0, outline: 'none',
                       }}
                     >
                       {thumb ? (
-                        <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.2s' }} />
+                        <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                       ) : (
                         <div style={{ width: '100%', height: '100%', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                         </div>
                       )}
 
-                      {/* Dark overlay on hover (desktop) */}
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
-                      {/* Video badge */}
                       {isVideo && (
                         <div style={{
                           position: 'absolute', top: '6px', right: '6px',
@@ -360,14 +325,12 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
                         </div>
                       )}
 
-                      {/* Likes */}
                       <div style={{ position: 'absolute', bottom: '5px', left: '6px', display: 'flex', alignItems: 'center', gap: '3px' }}>
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', fontWeight: 700, textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}>{post.likes_count}</span>
                       </div>
 
-                      {/* "Senaste" badge on first post */}
-                      {isFirst && (
+                      {i === 0 && (
                         <div style={{
                           position: 'absolute', top: '6px', left: '6px',
                           fontSize: '9px', fontWeight: 700, color: '#fff',
