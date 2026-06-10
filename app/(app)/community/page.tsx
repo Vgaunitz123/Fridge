@@ -648,16 +648,24 @@ export default function CommunityPage() {
         <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
           Community
         </h1>
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="pressable flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
-          style={{ background: '#1C3A2A', color: '#fff' }}
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Dela
-        </button>
+        <div className="flex items-center gap-2">
+          <Link href="/community/create"
+            className="pressable flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold"
+            style={{ background: '#fff', color: '#1C3A2A', border: '1.5px solid #1C3A2A', textDecoration: 'none' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+            Redigera
+          </Link>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="pressable flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold"
+            style={{ background: '#1C3A2A', color: '#fff' }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Dela
+          </button>
+        </div>
       </div>
 
       {/* Filter pills */}
