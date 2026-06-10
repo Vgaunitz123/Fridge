@@ -16,6 +16,7 @@ type VideoPost = {
   likes_count: number
   user_liked: boolean
   author_email: string | null
+  author_id: string | null
 }
 
 function extractTikTokId(url: string): string | null {
@@ -106,22 +107,28 @@ function VideoSlide({
       {/* Bottom meta */}
       <div style={{ position: 'absolute', bottom: '100px', left: '16px', right: '72px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            background: '#1C3A2A', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '12px', fontWeight: 700, flexShrink: 0,
-          }}>
-            {(post.author_email?.[0] ?? '?').toUpperCase()}
-          </div>
-          <div>
-            <p style={{ color: '#fff', fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>
-              {post.author_email?.split('@')[0] ?? 'Anonym'}
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '11px' }}>
-              {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: sv })}
-            </p>
-          </div>
+          <Link
+            href={post.author_id ? `/profile/${post.author_id}` : '/community'}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+          >
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              background: '#1C3A2A', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '12px', fontWeight: 700, flexShrink: 0,
+              border: '1.5px solid rgba(255,255,255,0.3)',
+            }}>
+              {(post.author_email?.[0] ?? '?').toUpperCase()}
+            </div>
+            <div>
+              <p style={{ color: '#fff', fontSize: '13px', fontWeight: 700, lineHeight: 1.2 }}>
+                {post.author_email?.split('@')[0] ?? 'Anonym'}
+              </p>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '11px' }}>
+                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: sv })}
+              </p>
+            </div>
+          </Link>
         </div>
 
         <p style={{ color: '#fff', fontSize: '14px', lineHeight: 1.5 }}>{post.caption}</p>
@@ -199,7 +206,7 @@ export default function VideosPage() {
     )
 
     setPosts(videos.map((p: {
-      id: string; image_url: string; thumbnail_url: string | null; caption: string;
+      id: string; user_id: string; image_url: string; thumbnail_url: string | null; caption: string;
       tags: string[] | null; created_at: string; user_email: string | null;
       post_likes: { user_id: string }[]
     }) => ({
@@ -212,6 +219,7 @@ export default function VideosPage() {
       likes_count: p.post_likes?.length ?? 0,
       user_liked: user ? p.post_likes?.some(l => l.user_id === user.id) : false,
       author_email: p.user_email,
+      author_id: p.user_id ?? null,
     })))
     setLoading(false)
   }, [])

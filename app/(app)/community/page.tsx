@@ -134,13 +134,27 @@ function PostCard({
       <div style={{ padding: '12px 14px 10px' }}>
         {/* Author row */}
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-            style={{ background: '#1C3A2A', color: '#fff', fontSize: '10px' }}>
-            {avatar(post.author_email)}
-          </div>
-          <span style={{ fontSize: '12px', color: '#6B6B6B', fontWeight: 500 }}>
-            {post.author_email?.split('@')[0] ?? 'Anonym'}
-          </span>
+          {post.user_id ? (
+            <Link href={`/profile/${post.user_id}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none', minWidth: 0 }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: '#1C3A2A', color: '#fff', fontSize: '10px' }}>
+                {avatar(post.author_email)}
+              </div>
+              <span style={{ fontSize: '12px', color: '#1A1A1A', fontWeight: 600 }}>
+                {post.author_email?.split('@')[0] ?? 'Anonym'}
+              </span>
+            </Link>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{ background: '#1C3A2A', color: '#fff', fontSize: '10px' }}>
+                {avatar(post.author_email)}
+              </div>
+              <span style={{ fontSize: '12px', color: '#6B6B6B', fontWeight: 500 }}>
+                {post.author_email?.split('@')[0] ?? 'Anonym'}
+              </span>
+            </div>
+          )}
           <span style={{ fontSize: '11px', color: '#B0B0B0', marginLeft: 'auto' }}>{timeAgo(post.created_at)}</span>
         </div>
 
