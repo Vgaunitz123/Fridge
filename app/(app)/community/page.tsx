@@ -4,6 +4,12 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { sv } from 'date-fns/locale'
+import Link from 'next/link'
+
+function isVideoUrl(url: string | null): boolean {
+  if (!url) return false
+  return url.includes('tiktok.com') || url.includes('/videos/') || /\.(mp4|mov|webm)(\?|$)/i.test(url)
+}
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -59,45 +65,68 @@ function PostCard({
   post: Post; onLike: (id: string, liked: boolean) => void; featured?: boolean
 }) {
   const [imgErr, setImgErr] = useState(false)
+  const isVideo = isVideoUrl(post.image_url)
+
+  const mediaEl = (
+    <div className="relative overflow-hidden" style={{ aspectRatio: featured ? '16/9' : '3/2' }}>
+      {post.image_url && !imgErr ? (
+        <img
+          src={post.image_url}
+          alt={post.caption}
+          onError={() => setImgErr(true)}
+          className="w-full h-full object-cover"
+          style={isVideo ? { filter: 'brightness(0.6)' } : undefined}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center"
+          style={{ background: isVideo ? '#111' : 'linear-gradient(135deg, #E8E5DE 0%, #D4CCBF 100%)' }}>
+          {isVideo
+            ? <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.5"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M16 2l-4 5-4-5"/></svg>
+            : <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          }
+        </div>
+      )}
+
+      {/* Play button overlay for videos */}
+      {isVideo && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div style={{
+            width: '44px', height: '44px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)',
+            border: '1.5px solid rgba(255,255,255,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
+          </div>
+        </div>
+      )}
+
+      {/* Tags bottom-left */}
+      {post.tags.length > 0 && (
+        <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap">
+          {post.tags.slice(0, 2).map(t => (
+            <span key={t} style={{
+              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)',
+              color: '#fff', fontSize: '10px', fontWeight: 600,
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+              padding: '2px 7px', borderRadius: '3px',
+            }}>{t}</span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <div
       className="card-hover fade-up overflow-hidden"
       style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.06)' }}
     >
-      {/* Photo — 3:2 ratio */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: featured ? '16/9' : '3/2' }}>
-        {post.image_url && !imgErr ? (
-          <img
-            src={post.image_url}
-            alt={post.caption}
-            onError={() => setImgErr(true)}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #E8E5DE 0%, #D4CCBF 100%)' }}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
-              <polyline points="21 15 16 10 5 21"/>
-            </svg>
-          </div>
-        )}
-
-        {/* Tags bottom-left */}
-        {post.tags.length > 0 && (
-          <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap">
-            {post.tags.slice(0, 2).map(t => (
-              <span key={t} style={{
-                background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)',
-                color: '#fff', fontSize: '10px', fontWeight: 600,
-                letterSpacing: '0.06em', textTransform: 'uppercase',
-                padding: '2px 7px', borderRadius: '3px',
-              }}>{t}</span>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Video posts → link to video feed; image posts → just the card */}
+      {isVideo
+        ? <Link href="/community/videos" style={{ display: 'block', textDecoration: 'none' }}>{mediaEl}</Link>
+        : mediaEl
+      }
 
       {/* Body */}
       <div style={{ padding: '12px 14px 10px' }}>
@@ -148,12 +177,20 @@ function PostCard({
 
 // ─── New post drawer ──────────────────────────────────────────────────────────
 
+type DrawerTab = 'image' | 'video'
+
 function NewPostDrawer({
   open, onClose, onSubmit,
 }: {
-  open: boolean; onClose: () => void; onSubmit: (imageUrl: string, caption: string, tags: string[]) => Promise<void>
+  open: boolean; onClose: () => void
+  onSubmit: (mediaUrl: string, caption: string, tags: string[]) => Promise<void>
 }) {
+  const [tab, setTab] = useState<DrawerTab>('image')
   const [imageUrl, setImageUrl] = useState('')
+  const [tiktokUrl, setTiktokUrl] = useState('')
+  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
   const [caption, setCaption] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
@@ -161,13 +198,44 @@ function NewPostDrawer({
 
   useEffect(() => {
     if (open) setTimeout(() => textareaRef.current?.focus(), 300)
-    else { setImageUrl(''); setCaption(''); setSelectedTags([]) }
+    else { setImageUrl(''); setTiktokUrl(''); setVideoFile(null); setCaption(''); setSelectedTags([]); setUploadProgress('') }
   }, [open])
+
+  async function uploadVideo(file: File): Promise<string | null> {
+    setUploading(true)
+    setUploadProgress('Laddar upp video…')
+    const fd = new FormData()
+    fd.append('video', file)
+    const res = await fetch('/api/community/upload', { method: 'POST', body: fd })
+    setUploading(false)
+    if (!res.ok) {
+      const d = await res.json()
+      setUploadProgress(`Fel: ${d.error}`)
+      return null
+    }
+    const { url } = await res.json()
+    setUploadProgress('Video uppladdad!')
+    return url
+  }
 
   async function submit() {
     if (!caption.trim()) return
     setSaving(true)
-    await onSubmit(imageUrl.trim(), caption.trim(), selectedTags)
+
+    let mediaUrl = ''
+    if (tab === 'image') {
+      mediaUrl = imageUrl.trim()
+    } else if (tab === 'video') {
+      if (videoFile) {
+        const url = await uploadVideo(videoFile)
+        if (!url) { setSaving(false); return }
+        mediaUrl = url
+      } else if (tiktokUrl.trim()) {
+        mediaUrl = tiktokUrl.trim()
+      }
+    }
+
+    await onSubmit(mediaUrl, caption.trim(), selectedTags)
     setSaving(false)
   }
 
@@ -179,111 +247,145 @@ function NewPostDrawer({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
-      {/* Backdrop */}
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
 
-      {/* Sheet */}
-      <div
-        className="relative scale-in"
-        style={{
-          background: '#FAFAF8',
-          borderRadius: '20px 20px 0 0',
-          padding: '0 0 40px',
-          maxHeight: '92vh',
-          overflowY: 'auto',
-        }}
-      >
-        {/* Handle */}
+      <div className="relative scale-in" style={{ background: '#FAFAF8', borderRadius: '20px 20px 0 0', maxHeight: '94vh', overflowY: 'auto' }}>
         <div className="flex justify-center pt-3 pb-2">
           <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
         </div>
 
-        <div className="px-5 pb-2">
-          <div className="flex items-center justify-between mb-5">
+        <div className="px-5 pb-10">
+          <div className="flex items-center justify-between mb-4">
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A' }}>
               Dela med communityn
             </h2>
             <button onClick={onClose} style={{ color: '#6B6B6B', fontSize: '20px', lineHeight: 1 }}>✕</button>
           </div>
 
-          {/* Image URL */}
-          <div className="mb-4">
-            <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
-              Bildlänk (URL)
-            </label>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={e => setImageUrl(e.target.value)}
-              placeholder="https://…"
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: '10px',
-                border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff',
-                fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box',
-              }}
-            />
-            {imageUrl && (
-              <div className="mt-2 overflow-hidden" style={{ borderRadius: '8px', aspectRatio: '3/2' }}>
-                <img src={imageUrl} alt="Förhandsvisning" className="w-full h-full object-cover"
-                  onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
-              </div>
-            )}
+          {/* Image / Video tab toggle */}
+          <div className="flex p-1 mb-5" style={{ background: '#E8E5DE', borderRadius: '10px' }}>
+            {(['image', 'video'] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} className="flex-1 py-2 text-sm font-semibold"
+                style={{
+                  borderRadius: '8px', border: 'none', cursor: 'pointer',
+                  background: tab === t ? '#fff' : 'transparent',
+                  color: tab === t ? '#1A1A1A' : '#6B6B6B',
+                  boxShadow: tab === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                  transition: 'all 0.15s',
+                }}>
+                {t === 'image' ? '🖼 Bild' : '🎬 Video'}
+              </button>
+            ))}
           </div>
+
+          {/* IMAGE tab */}
+          {tab === 'image' && (
+            <div className="mb-4">
+              <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
+                Bildlänk (URL)
+              </label>
+              <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://…"
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box' }} />
+              {imageUrl && (
+                <div className="mt-2 overflow-hidden" style={{ borderRadius: '8px', aspectRatio: '3/2' }}>
+                  <img src={imageUrl} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIDEO tab */}
+          {tab === 'video' && (
+            <div className="mb-4 space-y-4">
+              {/* TikTok URL */}
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
+                  Klistra in TikTok-länk
+                </label>
+                <input type="url" value={tiktokUrl} onChange={e => setTiktokUrl(e.target.value)}
+                  placeholder="https://www.tiktok.com/@ditt_konto/video/…"
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '13px', color: '#1A1A1A', boxSizing: 'border-box' }} />
+                <p style={{ fontSize: '11px', color: '#9B9B9B', marginTop: '4px' }}>
+                  Öppna TikTok → din video → Dela → Kopiera länk
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.1)' }} />
+                <span style={{ fontSize: '11px', color: '#9B9B9B', fontWeight: 600 }}>ELLER</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.1)' }} />
+              </div>
+
+              {/* File upload */}
+              <div>
+                <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
+                  Ladda upp videofil (max 100 MB)
+                </label>
+                <label
+                  className="pressable"
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                    padding: '20px', borderRadius: '12px', cursor: 'pointer',
+                    border: '2px dashed rgba(0,0,0,0.15)', background: videoFile ? '#f0fdf4' : '#fafaf8',
+                  }}
+                >
+                  <input type="file" accept="video/mp4,video/quicktime,video/webm,video/*" className="hidden"
+                    onChange={e => setVideoFile(e.target.files?.[0] ?? null)} />
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={videoFile ? '#1C3A2A' : '#aaa'} strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span style={{ fontSize: '13px', fontWeight: 500, color: videoFile ? '#1C3A2A' : '#6B6B6B' }}>
+                    {videoFile ? videoFile.name : 'Välj MP4 / MOV / WebM'}
+                  </span>
+                  {videoFile && (
+                    <span style={{ fontSize: '11px', color: '#9B9B9B' }}>
+                      {(videoFile.size / 1024 / 1024).toFixed(1)} MB
+                    </span>
+                  )}
+                </label>
+                {uploadProgress && (
+                  <p style={{ fontSize: '12px', marginTop: '6px', color: uploadProgress.startsWith('Fel') ? '#dc2626' : '#1C3A2A' }}>
+                    {uploadProgress}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Caption */}
           <div className="mb-4">
             <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
-              Bildtext *
+              Text *
             </label>
-            <textarea
-              ref={textareaRef}
-              value={caption}
-              onChange={e => setCaption(e.target.value)}
+            <textarea ref={textareaRef} value={caption} onChange={e => setCaption(e.target.value)}
               placeholder="Vad lagade du? Dela receptet, tipset eller känslan…"
               rows={3}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: '10px',
-                border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff',
-                fontSize: '14px', color: '#1A1A1A', resize: 'none',
-                lineHeight: 1.55, boxSizing: 'border-box',
-              }}
-            />
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', resize: 'none', lineHeight: 1.55, boxSizing: 'border-box' }} />
           </div>
 
           {/* Tags */}
-          <div className="mb-6">
+          <div className="mb-5">
             <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '8px' }}>
               Taggar
             </label>
             <div className="flex flex-wrap gap-2">
               {TAG_OPTIONS.map(t => (
-                <button
-                  key={t}
-                  onClick={() => toggleTag(t)}
-                  className="pressable"
+                <button key={t} onClick={() => toggleTag(t)} className="pressable"
                   style={{
                     padding: '5px 13px', borderRadius: '100px', fontSize: '13px', fontWeight: 500,
                     background: selectedTags.includes(t) ? '#1C3A2A' : 'transparent',
                     color: selectedTags.includes(t) ? '#fff' : '#1A1A1A',
                     border: `1.5px solid ${selectedTags.includes(t) ? '#1C3A2A' : 'rgba(0,0,0,0.18)'}`,
-                  }}
-                >
+                  }}>
                   {t}
                 </button>
               ))}
             </div>
           </div>
 
-          <button
-            onClick={submit}
-            disabled={saving || !caption.trim()}
-            className="pressable w-full py-3.5 rounded-xl text-sm font-semibold"
-            style={{
-              background: saving || !caption.trim() ? '#a3b8a8' : '#1C3A2A',
-              color: '#fff',
-            }}
-          >
-            {saving ? 'Publicerar…' : 'Publicera inlägg'}
+          <button onClick={submit} disabled={saving || uploading || !caption.trim()} className="pressable w-full py-3.5 rounded-xl text-sm font-semibold"
+            style={{ background: saving || uploading || !caption.trim() ? '#a3b8a8' : '#1C3A2A', color: '#fff' }}>
+            {saving || uploading ? 'Publicerar…' : 'Publicera inlägg'}
           </button>
         </div>
       </div>
