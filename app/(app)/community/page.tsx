@@ -17,6 +17,7 @@ type Post = {
   id: string
   user_id: string
   image_url: string | null
+  thumbnail_url: string | null
   caption: string
   tags: string[]
   created_at: string
@@ -28,19 +29,19 @@ type Post = {
 // ─── Demo posts shown when DB is empty ───────────────────────────────────────
 
 const DEMO: Post[] = [
-  { id: 'd1', user_id: '', image_url: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=400&fit=crop',
+  { id: 'd1', user_id: '', image_url: 'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&h=400&fit=crop', thumbnail_url: null,
     caption: 'Hemgjord svamprisotto på fredagskvällen 🍄 Tog nästan en timme men var helt värt det.', tags: ['Vegetarisk'],
     created_at: new Date(Date.now() - 3600000 * 2).toISOString(), likes_count: 38, user_liked: false, author_email: 'anna@example.com' },
-  { id: 'd2', user_id: '', image_url: 'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=600&h=400&fit=crop',
+  { id: 'd2', user_id: '', image_url: 'https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?w=600&h=400&fit=crop', thumbnail_url: null,
     caption: 'Pasta alla norma med aubergine och ricotta. Enkelt och gott!', tags: ['Snabbt'],
     created_at: new Date(Date.now() - 3600000 * 5).toISOString(), likes_count: 21, user_liked: false, author_email: 'erik@example.com' },
-  { id: 'd3', user_id: '', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop',
+  { id: 'd3', user_id: '', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop', thumbnail_url: null,
     caption: 'Sommarens bästa sallad — halloumi, vattenmelon och mynta. Topp!', tags: ['Vegetarisk', 'Sommar'],
     created_at: new Date(Date.now() - 3600000 * 24).toISOString(), likes_count: 64, user_liked: false, author_email: 'sara@example.com' },
-  { id: 'd4', user_id: '', image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop',
+  { id: 'd4', user_id: '', image_url: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&h=400&fit=crop', thumbnail_url: null,
     caption: 'Lax med dillkräm och färskpotatis. Klart på 25 minuter.', tags: ['Snabbt', 'Glutenfritt'],
     created_at: new Date(Date.now() - 3600000 * 48).toISOString(), likes_count: 17, user_liked: false, author_email: 'johan@example.com' },
-  { id: 'd5', user_id: '', image_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop',
+  { id: 'd5', user_id: '', image_url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&h=400&fit=crop', thumbnail_url: null,
     caption: 'Tomatsoppa från grunden med basilikaolja. Värmande och underbar.', tags: ['Veganskt'],
     created_at: new Date(Date.now() - 3600000 * 72).toISOString(), likes_count: 29, user_liked: false, author_email: 'maja@example.com' },
 ]
@@ -66,16 +67,17 @@ function PostCard({
 }) {
   const [imgErr, setImgErr] = useState(false)
   const isVideo = isVideoUrl(post.image_url)
+  // For videos: prefer thumbnail_url; for images: use image_url directly
+  const displayImg = isVideo ? (post.thumbnail_url ?? null) : post.image_url
 
   const mediaEl = (
     <div className="relative overflow-hidden" style={{ aspectRatio: featured ? '16/9' : '3/2' }}>
-      {post.image_url && !imgErr ? (
+      {displayImg && !imgErr ? (
         <img
-          src={post.image_url}
+          src={displayImg}
           alt={post.caption}
           onError={() => setImgErr(true)}
           className="w-full h-full object-cover"
-          style={isVideo ? { filter: 'brightness(0.6)' } : undefined}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center"
@@ -179,43 +181,112 @@ function PostCard({
 
 type DrawerTab = 'image' | 'video'
 
+// Extracts a JPEG frame blob from a video File client-side
+async function extractFrame(file: File): Promise<Blob | null> {
+  return new Promise(resolve => {
+    const video = document.createElement('video')
+    const objUrl = URL.createObjectURL(file)
+    video.src = objUrl
+    video.muted = true
+    video.playsInline = true
+    video.preload = 'metadata'
+
+    const doCapture = () => {
+      const w = Math.min(video.videoWidth || 640, 640)
+      const h = video.videoHeight ? Math.round(w * video.videoHeight / video.videoWidth) : 360
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) { URL.revokeObjectURL(objUrl); resolve(null); return }
+      ctx.drawImage(video, 0, 0, w, h)
+      canvas.toBlob(blob => { URL.revokeObjectURL(objUrl); resolve(blob) }, 'image/jpeg', 0.85)
+    }
+
+    video.addEventListener('loadeddata', () => {
+      video.currentTime = Math.min(0.5, (video.duration || 1) * 0.1)
+    }, { once: true })
+    video.addEventListener('seeked', doCapture, { once: true })
+    video.addEventListener('error', () => { URL.revokeObjectURL(objUrl); resolve(null) }, { once: true })
+    video.load()
+  })
+}
+
 function NewPostDrawer({
   open, onClose, onSubmit,
 }: {
   open: boolean; onClose: () => void
-  onSubmit: (mediaUrl: string, caption: string, tags: string[]) => Promise<void>
+  onSubmit: (mediaUrl: string, thumbnailUrl: string | null, caption: string, tags: string[]) => Promise<void>
 }) {
   const [tab, setTab] = useState<DrawerTab>('image')
   const [imageUrl, setImageUrl] = useState('')
   const [tiktokUrl, setTiktokUrl] = useState('')
   const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [thumbBlob, setThumbBlob] = useState<Blob | null>(null)
+  const [thumbPreview, setThumbPreview] = useState<string | null>(null)
+  const [extractingThumb, setExtractingThumb] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
   const [caption, setCaption] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const thumbPreviewRef = useRef<string | null>(null)
+
+  // Auto-extract frame when video file changes
+  useEffect(() => {
+    if (!videoFile) { setThumbBlob(null); setThumbPreview(null); return }
+    setExtractingThumb(true)
+    extractFrame(videoFile).then(blob => {
+      setExtractingThumb(false)
+      if (!blob) return
+      setThumbBlob(blob)
+      if (thumbPreviewRef.current) URL.revokeObjectURL(thumbPreviewRef.current)
+      const prev = URL.createObjectURL(blob)
+      thumbPreviewRef.current = prev
+      setThumbPreview(prev)
+    })
+  }, [videoFile])
+
+  // Cleanup preview URL
+  useEffect(() => () => { if (thumbPreviewRef.current) URL.revokeObjectURL(thumbPreviewRef.current) }, [])
 
   useEffect(() => {
     if (open) setTimeout(() => textareaRef.current?.focus(), 300)
-    else { setImageUrl(''); setTiktokUrl(''); setVideoFile(null); setCaption(''); setSelectedTags([]); setUploadProgress('') }
+    else {
+      setImageUrl(''); setTiktokUrl(''); setVideoFile(null)
+      setThumbBlob(null); setUploadProgress('')
+      setCaption(''); setSelectedTags([])
+      if (thumbPreviewRef.current) { URL.revokeObjectURL(thumbPreviewRef.current); thumbPreviewRef.current = null }
+      setThumbPreview(null)
+    }
   }, [open])
 
-  async function uploadVideo(file: File): Promise<string | null> {
+  function handleCustomThumb(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setThumbBlob(file)
+    if (thumbPreviewRef.current) URL.revokeObjectURL(thumbPreviewRef.current)
+    const prev = URL.createObjectURL(file)
+    thumbPreviewRef.current = prev
+    setThumbPreview(prev)
+  }
+
+  async function uploadVideo(file: File, thumb: Blob | null): Promise<{ videoUrl: string | null; thumbnailUrl: string | null }> {
     setUploading(true)
     setUploadProgress('Laddar upp video…')
     const fd = new FormData()
     fd.append('video', file)
+    if (thumb) fd.append('thumbnail', thumb, 'thumb.jpg')
     const res = await fetch('/api/community/upload', { method: 'POST', body: fd })
     setUploading(false)
     if (!res.ok) {
       const d = await res.json()
       setUploadProgress(`Fel: ${d.error}`)
-      return null
+      return { videoUrl: null, thumbnailUrl: null }
     }
-    const { url } = await res.json()
-    setUploadProgress('Video uppladdad!')
-    return url
+    const { url, thumbnailUrl } = await res.json()
+    setUploadProgress('Uppladdad!')
+    return { videoUrl: url, thumbnailUrl: thumbnailUrl ?? null }
   }
 
   async function submit() {
@@ -223,19 +294,22 @@ function NewPostDrawer({
     setSaving(true)
 
     let mediaUrl = ''
+    let thumbUrl: string | null = null
+
     if (tab === 'image') {
       mediaUrl = imageUrl.trim()
     } else if (tab === 'video') {
       if (videoFile) {
-        const url = await uploadVideo(videoFile)
-        if (!url) { setSaving(false); return }
-        mediaUrl = url
+        const { videoUrl, thumbnailUrl } = await uploadVideo(videoFile, thumbBlob)
+        if (!videoUrl) { setSaving(false); return }
+        mediaUrl = videoUrl
+        thumbUrl = thumbnailUrl
       } else if (tiktokUrl.trim()) {
         mediaUrl = tiktokUrl.trim()
       }
     }
 
-    await onSubmit(mediaUrl, caption.trim(), selectedTags)
+    await onSubmit(mediaUrl, thumbUrl, caption.trim(), selectedTags)
     setSaving(false)
   }
 
@@ -321,14 +395,11 @@ function NewPostDrawer({
                 <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
                   Ladda upp videofil (max 100 MB)
                 </label>
-                <label
-                  className="pressable"
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-                    padding: '20px', borderRadius: '12px', cursor: 'pointer',
-                    border: '2px dashed rgba(0,0,0,0.15)', background: videoFile ? '#f0fdf4' : '#fafaf8',
-                  }}
-                >
+                <label className="pressable" style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+                  padding: '20px', borderRadius: '12px', cursor: 'pointer',
+                  border: '2px dashed rgba(0,0,0,0.15)', background: videoFile ? '#f0fdf4' : '#fafaf8',
+                }}>
                   <input type="file" accept="video/mp4,video/quicktime,video/webm,video/*" className="hidden"
                     onChange={e => setVideoFile(e.target.files?.[0] ?? null)} />
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={videoFile ? '#1C3A2A' : '#aaa'} strokeWidth="1.5">
@@ -337,11 +408,7 @@ function NewPostDrawer({
                   <span style={{ fontSize: '13px', fontWeight: 500, color: videoFile ? '#1C3A2A' : '#6B6B6B' }}>
                     {videoFile ? videoFile.name : 'Välj MP4 / MOV / WebM'}
                   </span>
-                  {videoFile && (
-                    <span style={{ fontSize: '11px', color: '#9B9B9B' }}>
-                      {(videoFile.size / 1024 / 1024).toFixed(1)} MB
-                    </span>
-                  )}
+                  {videoFile && <span style={{ fontSize: '11px', color: '#9B9B9B' }}>{(videoFile.size / 1024 / 1024).toFixed(1)} MB</span>}
                 </label>
                 {uploadProgress && (
                   <p style={{ fontSize: '12px', marginTop: '6px', color: uploadProgress.startsWith('Fel') ? '#dc2626' : '#1C3A2A' }}>
@@ -349,6 +416,36 @@ function NewPostDrawer({
                   </p>
                 )}
               </div>
+
+              {/* Thumbnail section — shown when a video file is selected */}
+              {videoFile && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Thumbnail
+                    </label>
+                    <label className="pressable" style={{ fontSize: '11px', fontWeight: 600, color: '#1C3A2A', cursor: 'pointer', padding: '3px 8px', borderRadius: '6px', border: '1.5px solid #1C3A2A' }}>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleCustomThumb} />
+                      Byt bild
+                    </label>
+                  </div>
+
+                  {extractingThumb ? (
+                    <div style={{ height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0ee', borderRadius: '10px' }}>
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #ccc', borderTopColor: '#1C3A2A', animation: 'spin 0.8s linear infinite' }} />
+                    </div>
+                  ) : thumbPreview ? (
+                    <div style={{ borderRadius: '10px', overflow: 'hidden', aspectRatio: '16/9' }}>
+                      <img src={thumbPreview} alt="Thumbnail" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div style={{ height: '100px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#f0f0ee', borderRadius: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>🖼</span>
+                      <span style={{ fontSize: '11px', color: '#9B9B9B' }}>Ingen thumbnail hittades</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -421,13 +518,14 @@ export default function CommunityPage() {
       setIsDemo(true)
     } else {
       const mapped: Post[] = data.map((p: {
-        id: string; user_id: string; image_url: string | null; caption: string;
-        tags: string[] | null; created_at: string; user_email: string | null;
+        id: string; user_id: string; image_url: string | null; thumbnail_url: string | null;
+        caption: string; tags: string[] | null; created_at: string; user_email: string | null;
         post_likes: { user_id: string }[]
       }) => ({
         id: p.id,
         user_id: p.user_id,
         image_url: p.image_url,
+        thumbnail_url: p.thumbnail_url ?? null,
         caption: p.caption,
         tags: p.tags ?? [],
         created_at: p.created_at,
@@ -464,20 +562,18 @@ export default function CommunityPage() {
     ))
   }
 
-  async function handleNewPost(imageUrl: string, caption: string, tags: string[]) {
+  async function handleNewPost(imageUrl: string, thumbnailUrl: string | null, caption: string, tags: string[]) {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    // Try with tags + user_email; fall back without them if columns don't exist yet
     let data: Record<string, unknown> | null = null
     let error: unknown = null
     const full = await supabase
       .from('social_posts')
-      .insert({ user_id: user.id, image_url: imageUrl || null, caption, tags, user_email: user.email })
+      .insert({ user_id: user.id, image_url: imageUrl || null, thumbnail_url: thumbnailUrl, caption, tags, user_email: user.email })
       .select().single()
     if (full.error) {
-      // Fallback: insert without extra columns (migration not yet applied)
       const basic = await supabase
         .from('social_posts')
         .insert({ user_id: user.id, image_url: imageUrl || null, caption })
@@ -491,12 +587,13 @@ export default function CommunityPage() {
 
     if (!error && data) {
       const newPost: Post = {
-        id: data.id,
+        id: data.id as string,
         user_id: user.id,
         image_url: imageUrl || null,
+        thumbnail_url: thumbnailUrl,
         caption,
         tags,
-        created_at: data.created_at,
+        created_at: data.created_at as string,
         likes_count: 0,
         user_liked: false,
         author_email: user.email ?? null,

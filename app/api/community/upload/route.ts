@@ -44,5 +44,21 @@ export async function POST(req: NextRequest) {
   if (uploadErr) return NextResponse.json({ error: uploadErr.message }, { status: 500 })
 
   const { data: { publicUrl } } = admin.storage.from('videos').getPublicUrl(path)
-  return NextResponse.json({ url: publicUrl })
+
+  // Optional thumbnail
+  let thumbnailUrl: string | null = null
+  const thumbFile = formData.get('thumbnail') as File | null
+  if (thumbFile && thumbFile.size > 0) {
+    const thumbPath = `${user.id}/${Date.now()}_thumb.jpg`
+    const thumbBytes = await thumbFile.arrayBuffer()
+    const { error: thumbErr } = await admin.storage
+      .from('videos')
+      .upload(thumbPath, thumbBytes, { contentType: 'image/jpeg', upsert: false })
+    if (!thumbErr) {
+      const { data: { publicUrl: tp } } = admin.storage.from('videos').getPublicUrl(thumbPath)
+      thumbnailUrl = tp
+    }
+  }
+
+  return NextResponse.json({ url: publicUrl, thumbnailUrl })
 }

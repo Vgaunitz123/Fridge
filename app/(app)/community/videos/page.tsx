@@ -9,6 +9,7 @@ import { sv } from 'date-fns/locale'
 type VideoPost = {
   id: string
   image_url: string
+  thumbnail_url: string | null
   caption: string
   tags: string[]
   created_at: string
@@ -198,12 +199,13 @@ export default function VideosPage() {
     )
 
     setPosts(videos.map((p: {
-      id: string; image_url: string; caption: string; tags: string[] | null;
-      created_at: string; user_email: string | null;
+      id: string; image_url: string; thumbnail_url: string | null; caption: string;
+      tags: string[] | null; created_at: string; user_email: string | null;
       post_likes: { user_id: string }[]
     }) => ({
       id: p.id,
       image_url: p.image_url,
+      thumbnail_url: p.thumbnail_url ?? null,
       caption: p.caption,
       tags: p.tags ?? [],
       created_at: p.created_at,
@@ -272,11 +274,11 @@ export default function VideosPage() {
     <div
       ref={containerRef}
       style={{
-        height: '100svh',
+        position: 'absolute',
+        inset: 0,
         overflowY: 'scroll',
         scrollSnapType: 'y mandatory',
         background: '#000',
-        // Hide scrollbar
         scrollbarWidth: 'none',
       }}
       className="no-scrollbar"
