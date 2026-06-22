@@ -19,10 +19,13 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [stats, setStats] = useState<Stats>({ fridgeItems: 0, recipes: 0, posts: 0, likes: 0 })
   const [loading, setLoading] = useState(true)
-  const [avatarKey, setAvatarKey] = useState(Date.now())
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarErr, setAvatarErr] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [bio, setBio] = useState('')
+  const [editingBio, setEditingBio] = useState(false)
+  const [savingBio, setSavingBio] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -33,6 +36,17 @@ export default function ProfilePage() {
       if (!user) { router.push('/login'); return }
       setEmail(user.email ?? null)
       setUserId(user.id)
+      const avatarFromMeta = (user.user_metadata?.avatar_url as string) ?? null
+      setAvatarUrl(avatarFromMeta)
+
+      // Upsert user_profiles so this user appears in search
+      const username = user.email?.split('@')[0] ?? ''
+      const { data: profileRow } = await supabase
+        .from('user_profiles')
+        .upsert({ user_id: user.id, username, avatar_url: avatarFromMeta }, { onConflict: 'user_id' })
+        .select('bio')
+        .single()
+      setBio(profileRow?.bio ?? '')
 
       const [{ count: fridgeCount }, { count: recipeCount }, postsRes] = await Promise.all([
         supabase.from('fridge_items').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
@@ -62,10 +76,20 @@ export default function ProfilePage() {
     try { json = await res.json() } catch { /* non-JSON response */ }
     if (res.ok) {
       setAvatarErr(false)
-      setAvatarKey(Date.now())
+      // Append timestamp to bust the browser cache for the same storage path
+      setAvatarUrl(json.url + `?t=${Date.now()}`)
     } else {
       setUploadError(json.error ?? `Fel ${res.status}`)
     }
+  }
+
+  async function saveBio() {
+    if (!userId) return
+    setSavingBio(true)
+    const supabase = createClient()
+    await supabase.from('user_profiles').update({ bio }).eq('user_id', userId)
+    setEditingBio(false)
+    setSavingBio(false)
   }
 
   async function handleLogout() {
@@ -76,9 +100,6 @@ export default function ProfilePage() {
 
   const username = email?.split('@')[0] ?? ''
   const initials = username.slice(0, 2).toUpperCase() || '?'
-  const avatarUrl = userId
-    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${userId}/avatar.jpg?v=${avatarKey}`
-    : null
 
   return (
     <div style={{ background: '#F5F3EE', minHeight: '100vh', paddingBottom: '100px' }}>
@@ -102,8 +123,7 @@ export default function ProfilePage() {
           <div style={{ width: '88px', height: '88px', borderRadius: '50%', overflow: 'hidden', background: '#E8E5DE' }}>
             {avatarUrl && !avatarErr ? (
               <img
-                key={avatarKey}
-                src={avatarUrl}
+                src={avatarUrl!}
                 alt={username}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onError={() => setAvatarErr(true)}
@@ -149,7 +169,35 @@ export default function ProfilePage() {
             <p style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '3px' }}>
               @{username}
             </p>
-            <p style={{ fontSize: '13px', color: '#9B9B9B' }}>{email}</p>
+            <p style={{ fontSize: '13px', color: '#9B9B9B', marginBottom: '12px' }}>{email}</p>
+
+            {/* Bio */}
+            {editingBio ? (
+              <div style={{ width: '100%' }}>
+                <textarea
+                  value={bio}
+                  onChange={e => setBio(e.target.value)}
+                  placeholder="Berätta om dig själv…"
+                  rows={3}
+                  maxLength={200}
+                  autoFocus
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #1C3A2A', background: '#fff', fontSize: '13px', color: '#1A1A1A', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '8px' }}
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setEditingBio(false)} style={{ flex: 1, padding: '8px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'transparent', fontSize: '13px', fontWeight: 600, color: '#6B6B6B', cursor: 'pointer' }}>Avbryt</button>
+                  <button onClick={saveBio} disabled={savingBio} style={{ flex: 1, padding: '8px', borderRadius: '10px', border: 'none', background: '#1C3A2A', fontSize: '13px', fontWeight: 600, color: '#fff', cursor: savingBio ? 'not-allowed' : 'pointer' }}>
+                    {savingBio ? 'Sparar…' : 'Spara'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setEditingBio(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'center', width: '100%' }}>
+                {bio
+                  ? <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5, marginBottom: '2px' }}>{bio}</p>
+                  : <p style={{ fontSize: '13px', color: '#C0C0C0', fontStyle: 'italic' }}>Lägg till bio…</p>
+                }
+              </button>
+            )}
           </>
         )}
       </div>

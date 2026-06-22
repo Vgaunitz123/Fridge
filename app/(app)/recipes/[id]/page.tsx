@@ -2,9 +2,12 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { Recipe, FridgeItem } from '@/lib/types'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ShoppingList from '@/components/recipes/ShoppingList'
 import { mealdbLookup } from '@/lib/mealdb'
 import PublishRecipeButton from '@/components/recipes/PublishRecipeButton'
+import RecipeHeroImage from '@/components/recipes/RecipeHeroImage'
+import RecipeInteractions from '@/components/recipes/RecipeInteractions'
+import IngredientChecklist from '@/components/recipes/IngredientChecklist'
+import CookingSteps from '@/components/recipes/CookingSteps'
 
 const GRADIENTS = [
   'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
@@ -25,165 +28,173 @@ function normalize(s: string) {
   return s.toLowerCase().trim()
 }
 
-function hasIngredient(fridgeItems: FridgeItem[], ingredientName: string): boolean {
-  const target = normalize(ingredientName)
-  return fridgeItems.some(item => {
-    const n = normalize(item.name)
-    return n.includes(target) || target.includes(n)
-  })
-}
-
 export default async function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createServerSupabaseClient()
 
   let recipe: Recipe | null = null
-
   if (id.startsWith('mealdb_')) {
     recipe = await mealdbLookup(id.replace('mealdb_', ''))
   } else {
     const { data } = await supabase.from('recipes').select('*').eq('id', id).single()
     recipe = data as Recipe | null
   }
-
   if (!recipe) notFound()
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: fridgeData } = user
-    ? await supabase.from('fridge_items').select('*').eq('user_id', user.id)
-    : { data: [] as FridgeItem[] }
+  const fridgeItems: FridgeItem[] = user
+    ? ((await supabase.from('fridge_items').select('*').eq('user_id', user.id)).data ?? []) as FridgeItem[]
+    : []
 
-  const fridgeItems: FridgeItem[] = fridgeData ?? []
-
-  const haveIngredients: string[] = []
-  const missingIngredients: string[] = []
-
-  for (const ing of recipe.ingredients ?? []) {
-    if (hasIngredient(fridgeItems, ing.name)) {
-      haveIngredients.push(ing.name)
-    } else {
-      missingIngredients.push(ing.name)
+  const fridgeMap: Record<string, boolean> = {}
+  for (const item of fridgeItems) {
+    const n = normalize(item.name)
+    fridgeMap[n] = true
+    for (const ing of recipe.ingredients ?? []) {
+      const t = normalize(ing.name)
+      if (n.includes(t) || t.includes(n)) fridgeMap[t] = true
     }
   }
+
+  let likesCount = 0
+  let userLiked = false
+  let ratings: { rating: number }[] = []
+  let userRating: number | null = null
+
+  try {
+    const { count } = await supabase.from('recipe_likes').select('user_id', { count: 'exact', head: true }).eq('recipe_id', id)
+    likesCount = count ?? 0
+  } catch {}
+
+  try {
+    if (user) {
+      const { data } = await supabase.from('recipe_likes').select('recipe_id').eq('recipe_id', id).eq('user_id', user.id).single()
+      userLiked = !!data
+    }
+  } catch {}
+
+  try {
+    const { data } = await supabase.from('recipe_ratings').select('rating').eq('recipe_id', id)
+    ratings = (data ?? []) as { rating: number }[]
+  } catch {}
+
+  try {
+    if (user) {
+      const { data } = await supabase.from('recipe_ratings').select('rating').eq('recipe_id', id).eq('user_id', user.id).single()
+      userRating = (data as { rating: number } | null)?.rating ?? null
+    }
+  } catch {}
+
+  const avgRating = ratings.length > 0 ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : null
 
   const gradient = pick(recipe.title, GRADIENTS)
   const emoji = pick(recipe.title, FOOD_EMOJIS)
 
   return (
-    <div className="pb-10">
-      {/* Hero */}
-      <div className="flex items-center justify-center relative overflow-hidden" style={{ height: '260px', background: gradient }}>
-        {recipe.image_url
-          ? <img src={recipe.image_url} alt={recipe.title} className="absolute inset-0 w-full h-full object-cover" />
-          : <span className="text-8xl drop-shadow-lg select-none">{emoji}</span>
-        }
-        {recipe.image_url && <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.28)' }} />}
+    <div style={{ background: '#F5F3EE', minHeight: '100vh', paddingBottom: '40px' }}>
 
+      {/* Hero */}
+      <div style={{ position: 'relative', height: '300px', background: gradient }}>
+        {/* emoji shown behind the image; hidden once image loads */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: '80px', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))' }}>{emoji}</span>
+        </div>
+        <RecipeHeroImage title={recipe.title} imageUrl={recipe.image_url ?? null} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%)' }} />
+
+        {/* Back button */}
         <Link
           href="/recipes"
-          className="absolute top-4 left-4 flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold"
-          style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(8px)', color: '#fff' }}
+          style={{
+            position: 'absolute', top: '52px', left: '16px',
+            width: '38px', height: '38px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', textDecoration: 'none',
+          }}
         >
-          ←
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7"/>
+          </svg>
         </Link>
 
-        <div
-          className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold"
-          style={{ background: 'rgba(0,0,0,0.25)', backdropFilter: 'blur(8px)', color: '#fff' }}
-        >
-          ⏱ {recipe.cook_time_minutes} min
-        </div>
-
-        {/* Missing badge */}
-        {missingIngredients.length > 0 && (
-          <div
-            className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(220,38,38,0.85)', backdropFilter: 'blur(8px)', color: '#fff' }}
-          >
-            Saknar {missingIngredients.length} vara{missingIngredients.length !== 1 ? 'r' : ''}
+        {/* Title overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+            {recipe.tags?.map(tag => (
+              <span key={tag} style={{
+                fontSize: '11px', fontWeight: 700, color: '#fff',
+                background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(4px)',
+                padding: '3px 10px', borderRadius: '100px',
+              }}>
+                {tag}
+              </span>
+            ))}
           </div>
-        )}
-      </div>
-
-      <div className="px-5 pt-5 space-y-6">
-        {/* Title */}
-        <div>
-          <h1 className="text-2xl font-bold leading-tight mb-1" style={{ fontFamily: 'var(--font-playfair)', color: '#1c1917' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif', lineHeight: 1.2, margin: 0 }}>
             {recipe.title}
           </h1>
-          <p className="text-sm" style={{ color: '#78716c' }}>{recipe.description}</p>
-          {recipe.tags?.length > 0 && (
-            <div className="flex gap-2 flex-wrap mt-3">
-              {recipe.tags.map(tag => (
-                <span key={tag} className="px-3 py-1 rounded-full text-xs font-semibold" style={{ background: '#f0fdf4', color: '#1a4a2e' }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
+          {recipe.description && (
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.8)', marginTop: '6px', lineHeight: 1.5 }}>
+              {recipe.description}
+            </p>
           )}
         </div>
+      </div>
 
-        {/* Fridge check + Shopping list */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#d4850a' }}>
-            Vad behöver du?
+      {/* Stats bar */}
+      <div style={{
+        display: 'flex', gap: '0',
+        background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)',
+      }}>
+        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.cook_time_minutes}</p>
+          <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>minuter</p>
+        </div>
+        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.ingredients?.length ?? 0}</p>
+          <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ingredienser</p>
+        </div>
+        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.steps?.length ?? 0}</p>
+          <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>steg</p>
+        </div>
+        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+            {avgRating ? avgRating.toFixed(1) : '—'}
           </p>
-          <ShoppingList missing={missingIngredients} have={haveIngredients} />
+          <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>betyg</p>
+        </div>
+      </div>
+
+      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* Ingredient checklist */}
+        <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+          <IngredientChecklist
+            ingredients={recipe.ingredients ?? []}
+            fridgeMap={fridgeMap}
+          />
         </div>
 
-        {/* Full ingredient list */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#d4850a' }}>
-            Alla ingredienser
-          </p>
-          <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(28,25,23,0.08)' }}>
-            {recipe.ingredients?.map((ing, i) => (
-              <div
-                key={i}
-                className="flex items-center justify-between px-4 py-3"
-                style={{
-                  background: i % 2 === 0 ? '#fff' : '#faf7f2',
-                  borderBottom: i < (recipe.ingredients?.length ?? 0) - 1 ? '1px solid rgba(28,25,23,0.06)' : 'none',
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ background: hasIngredient(fridgeItems, ing.name) ? '#16a34a' : '#dc2626' }}
-                  />
-                  <span className="text-sm" style={{ color: '#1c1917' }}>{ing.name}</span>
-                </div>
-                <span className="text-sm font-semibold" style={{ color: '#78716c' }}>
-                  {ing.amount} {ing.unit}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Cooking steps */}
+        <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+          <CookingSteps steps={recipe.steps ?? []} />
         </div>
 
-        {/* Steps */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#d4850a' }}>
-            Tillagning
-          </p>
-          <div className="space-y-4">
-            {recipe.steps?.map(step => (
-              <div key={step.step} className="flex gap-4">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5"
-                  style={{ background: '#1a4a2e', color: '#faf7f2' }}
-                >
-                  {step.step}
-                </div>
-                <div className="flex-1 rounded-2xl px-4 py-3" style={{ background: '#fff', border: '1px solid rgba(28,25,23,0.07)' }}>
-                  <p className="text-sm leading-relaxed" style={{ color: '#44403c' }}>{step.instruction}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Likes + ratings */}
+        <RecipeInteractions
+          recipeId={id}
+          initialLikes={likesCount}
+          initialUserLiked={userLiked}
+          initialAvgRating={avgRating}
+          initialRatingCount={ratings.length}
+          initialUserRating={userRating}
+          isLoggedIn={!!user}
+        />
 
+        {/* Publish to community */}
         <PublishRecipeButton
           recipeId={id}
           title={recipe.title}
@@ -192,12 +203,8 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
           tags={recipe.tags ?? []}
         />
 
-        <Link href="/recipes" className="flex items-center gap-2 text-sm font-semibold" style={{ color: '#1a4a2e' }}>
-          ← Tillbaka till recept
-        </Link>
-
         {recipe.source && recipe.source_url && (
-          <p style={{ fontSize: '11px', color: '#aaa', marginTop: '4px' }}>
+          <p style={{ textAlign: 'center', fontSize: '11px', color: '#aaa' }}>
             Källa:{' '}
             <a href={recipe.source_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1a4a2e' }}>
               {recipe.source}

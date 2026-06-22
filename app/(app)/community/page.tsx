@@ -6,6 +6,11 @@ import { formatDistanceToNow } from 'date-fns'
 import { sv } from 'date-fns/locale'
 import Link from 'next/link'
 
+type SearchUser    = { id: string; username: string; avatar_url: string | null }
+type SearchRecipe  = { id: string; title: string; image_url: string | null }
+type SearchVideo   = { id: string; caption: string; thumbnail_url: string | null; author_username: string }
+type SearchResults = { users: SearchUser[]; recipes: SearchRecipe[]; videos: SearchVideo[] }
+
 function isVideoUrl(url: string | null): boolean {
   if (!url) return false
   return url.includes('tiktok.com') || url.includes('/videos/') || /\.(mp4|mov|webm)(\?|$)/i.test(url)
@@ -242,12 +247,14 @@ function NewPostDrawer({
   const [extractingThumb, setExtractingThumb] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState('')
+  const [imageUploading, setImageUploading] = useState(false)
   const [caption, setCaption] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const thumbPreviewRef = useRef<string | null>(null)
   const tiktokThumbTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const imageFileInputRef = useRef<HTMLInputElement>(null)
 
   // Auto-extract frame when video file changes
   useEffect(() => {
@@ -290,6 +297,7 @@ function NewPostDrawer({
       setCaption(''); setSelectedTags([])
       if (thumbPreviewRef.current) { URL.revokeObjectURL(thumbPreviewRef.current); thumbPreviewRef.current = null }
       setThumbPreview(null)
+      if (imageFileInputRef.current) imageFileInputRef.current.value = ''
     }
   }, [open])
 
@@ -301,6 +309,25 @@ function NewPostDrawer({
     const prev = URL.createObjectURL(file)
     thumbPreviewRef.current = prev
     setThumbPreview(prev)
+  }
+
+  async function handleImageFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.type === 'image/png' ? 'png' : 'jpg'
+      const { data: { user } } = await supabase.auth.getUser()
+      const path = `community/${user?.id ?? 'anon'}/${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('images').upload(path, file, { upsert: true, contentType: file.type })
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path)
+      setImageUrl(publicUrl)
+    } catch (err) {
+      console.error('Image upload failed', err)
+    }
+    setImageUploading(false)
   }
 
   async function uploadVideo(file: File, thumb: Blob | null): Promise<{ videoUrl: string | null; thumbnailUrl: string | null }> {
@@ -388,15 +415,43 @@ function NewPostDrawer({
           {/* IMAGE tab */}
           {tab === 'image' && (
             <div className="mb-4">
-              <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '6px' }}>
-                Bildlänk (URL)
-              </label>
-              <input type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://…"
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box' }} />
-              {imageUrl && (
-                <div className="mt-2 overflow-hidden" style={{ borderRadius: '8px', aspectRatio: '3/2' }}>
-                  <img src={imageUrl} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              <input
+                ref={imageFileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleImageFileUpload}
+              />
+              {imageUploading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: '2px dashed rgba(0,0,0,0.12)', borderRadius: '12px', padding: '32px', background: '#FAFAF8' }}>
+                  <div style={{ width: '20px', height: '20px', border: '2px solid #1C3A2A', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                  <span style={{ fontSize: '14px', color: '#6B6B6B' }}>Laddar upp…</span>
                 </div>
+              ) : imageUrl ? (
+                <div style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden', aspectRatio: '3/2' }}>
+                  <img src={imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <button
+                    onClick={() => { setImageUrl(''); if (imageFileInputRef.current) imageFileInputRef.current.value = '' }}
+                    style={{ position: 'absolute', top: '8px', right: '8px', width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >✕</button>
+                  <button
+                    onClick={() => imageFileInputRef.current?.click()}
+                    style={{ position: 'absolute', bottom: '8px', right: '8px', padding: '5px 12px', borderRadius: '8px', background: 'rgba(0,0,0,0.55)', border: 'none', color: '#fff', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                  >Byt foto</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => imageFileInputRef.current?.click()}
+                  style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '2px dashed rgba(0,0,0,0.15)', borderRadius: '12px', padding: '32px 16px', background: '#FAFAF8', cursor: 'pointer' }}
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                  </svg>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A' }}>Välj foto</span>
+                  <span style={{ fontSize: '12px', color: '#9B9B9B' }}>JPG, PNG · max 10 MB</span>
+                </button>
               )}
             </div>
           )}
@@ -549,6 +604,25 @@ export default function CommunityPage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [actionSheetOpen, setActionSheetOpen] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResults | null>(null)
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current)
+    if (query.length < 2) { setSearchResults(null); setSearching(false); return }
+    setSearching(true)
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+        const json = await res.json()
+        setSearchResults(json)
+      } catch { setSearchResults(null) }
+      setSearching(false)
+    }, 300)
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current) }
+  }, [query])
 
   const fetchPosts = useCallback(async () => {
     const supabase = createClient()
@@ -675,25 +749,154 @@ export default function CommunityPage() {
         </button>
       </div>
 
-      {/* Filter pills */}
-      <div className="px-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
-        {FILTERS.map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className="pressable"
-            style={{
-              padding: '6px 15px', borderRadius: '100px', fontSize: '13px', fontWeight: 500,
-              whiteSpace: 'nowrap', flexShrink: 0,
-              background: filter === f ? '#1C3A2A' : 'transparent',
-              color: filter === f ? '#fff' : '#1A1A1A',
-              border: `1.5px solid ${filter === f ? '#1C3A2A' : 'rgba(0,0,0,0.18)'}`,
-            }}
+      {/* Search bar */}
+      <div className="px-4 mb-3">
+        <div style={{ position: 'relative' }}>
+          <svg
+            style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round"
           >
-            {f}
-          </button>
-        ))}
+            <circle cx="11" cy="11" r="7.5"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>
+          </svg>
+          <input
+            type="search"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Sök skapare, recept, videor…"
+            style={{
+              width: '100%', padding: '10px 36px 10px 36px', borderRadius: '12px',
+              border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff',
+              fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box', fontFamily: 'inherit',
+              outline: 'none',
+            }}
+          />
+          {query.length > 0 && (
+            <button
+              onClick={() => setQuery('')}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: '16px', lineHeight: 1, padding: '2px' }}
+            >✕</button>
+          )}
+        </div>
       </div>
+
+      {/* Filter pills — hidden while searching */}
+      {!query && (
+        <div className="px-4 mb-4 flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          {FILTERS.map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className="pressable"
+              style={{
+                padding: '6px 15px', borderRadius: '100px', fontSize: '13px', fontWeight: 500,
+                whiteSpace: 'nowrap', flexShrink: 0,
+                background: filter === f ? '#1C3A2A' : 'transparent',
+                color: filter === f ? '#fff' : '#1A1A1A',
+                border: `1.5px solid ${filter === f ? '#1C3A2A' : 'rgba(0,0,0,0.18)'}`,
+              }}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Search results ── */}
+      {query.length >= 2 && (
+        <div className="px-4 pb-28">
+          {searching ? (
+            <div className="flex items-center justify-center py-10 gap-2">
+              <div className="w-5 h-5 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#1C3A2A' }} />
+              <span style={{ fontSize: '13px', color: '#6B6B6B' }}>Söker…</span>
+            </div>
+          ) : searchResults && (searchResults.users.length + searchResults.recipes.length + searchResults.videos.length) === 0 ? (
+            <div className="flex flex-col items-center justify-center py-14 gap-2">
+              <span style={{ fontSize: '36px', opacity: 0.3 }}>🔍</span>
+              <p style={{ fontSize: '14px', color: '#6B6B6B' }}>Inga resultat för "{query}"</p>
+            </div>
+          ) : searchResults ? (
+            <div className="flex flex-col gap-5">
+              {/* Users */}
+              {searchResults.users.length > 0 && (
+                <section>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>Skapare</p>
+                  <div className="flex flex-col gap-2">
+                    {searchResults.users.map(u => (
+                      <Link key={u.id} href={`/profile/${u.id}`} style={{ textDecoration: 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                          <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#1C3A2A', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                            {u.avatar_url ? (
+                              <img src={u.avatar_url} alt={u.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <span style={{ fontSize: '15px', fontWeight: 700, color: '#fff' }}>{u.username[0]?.toUpperCase()}</span>
+                            )}
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A1A' }}>@{u.username}</span>
+                          <svg style={{ marginLeft: 'auto' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Recipes */}
+              {searchResults.recipes.length > 0 && (
+                <section>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>Recept</p>
+                  <div className="flex flex-col gap-2">
+                    {searchResults.recipes.map(r => (
+                      <Link key={r.id} href={`/recipes/${r.id}`} style={{ textDecoration: 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#E8E5DE', flexShrink: 0, overflow: 'hidden' }}>
+                            {r.image_url ? (
+                              <img src={r.image_url} alt={r.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>🍽</div>
+                            )}
+                          </div>
+                          <span style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>{r.title}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Videos */}
+              {searchResults.videos.length > 0 && (
+                <section>
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>Videor</p>
+                  <div className="flex flex-col gap-2">
+                    {searchResults.videos.map(v => (
+                      <Link key={v.id} href="/inspiration" style={{ textDecoration: 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#111', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {v.thumbnail_url ? (
+                              <img src={v.thumbnail_url} alt={v.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.5" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: '13px', color: '#9B9B9B', marginBottom: '1px' }}>@{v.author_username}</p>
+                            <p style={{ fontSize: '14px', fontWeight: 500, color: '#1A1A1A', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{v.caption || 'Video'}</p>
+                          </div>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {/* ── Normal feed (hidden while search is active) ── */}
+      {!query && <>
 
       {/* Demo notice */}
       {isDemo && !loading && (
@@ -748,6 +951,8 @@ export default function CommunityPage() {
           </>
         )}
       </div>
+
+      </>}
 
       <NewPostDrawer
         open={drawerOpen}

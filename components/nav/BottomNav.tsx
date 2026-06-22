@@ -41,6 +41,30 @@ function PantryIcon({ active }: { active: boolean }) {
   )
 }
 
+function FreezerIcon({ active }: { active: boolean }) {
+  const c = active ? '#1C3A2A' : '#9aa5a0'
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="2" width="16" height="20" rx="3" stroke={c} strokeWidth="1.7"/>
+      <line x1="4" y1="9" x2="20" y2="9" stroke={c} strokeWidth="1.7"/>
+      <line x1="12" y1="2" x2="12" y2="9" stroke={c} strokeWidth="1.5" strokeDasharray="1.5 2"/>
+      <line x1="9" y1="13" x2="15" y2="13" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="16.5" x2="15" y2="16.5" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="20" x2="15" y2="20" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function SearchIcon({ active }: { active: boolean }) {
+  const c = active ? '#1C3A2A' : '#9aa5a0'
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="11" cy="11" r="7.5" stroke={c} strokeWidth="1.7"/>
+      <line x1="16.5" y1="16.5" x2="21" y2="21" stroke={c} strokeWidth="1.7" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 function CommunityIcon({ active }: { active: boolean }) {
   const c = active ? '#1C3A2A' : '#9aa5a0'
   return (
@@ -64,15 +88,15 @@ function ProfileIcon({ active }: { active: boolean }) {
 }
 
 const NAV_ITEMS = [
-  { href: '/fridge',    label: 'Kylskåp',   Icon: FridgeIcon },
-  { href: '/recipes',   label: 'Recept',    Icon: RecipeIcon },
-  { href: '/community', label: 'Community', Icon: CommunityIcon },
-  { href: '/profile',   label: 'Profil',    Icon: ProfileIcon },
+  { href: '/fridge',     label: 'Kylskåp',   Icon: FridgeIcon },
+  { href: '/recipes',    label: 'Recept',    Icon: RecipeIcon },
+  { href: '/community',  label: 'Community', Icon: CommunityIcon },
+  { href: '/profile',    label: 'Profil',    Icon: ProfileIcon },
 ]
 
 export default function BottomNav() {
   const pathname = usePathname()
-  if (pathname === '/community/videos') return null
+  if (pathname === '/community/videos' || pathname.startsWith('/inspiration')) return null
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 px-3 pb-3">

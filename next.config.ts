@@ -2,15 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async headers() {
+    const coep = [
+      { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+      { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
+    ]
     return [
-      {
-        // ffmpeg.wasm needs SharedArrayBuffer → requires these two headers
-        source: '/community/create',
-        headers: [
-          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-          { key: 'Cross-Origin-Embedder-Policy', value: 'credentialless' },
-        ],
-      },
+      { source: '/community/create', headers: coep },
+      { source: '/inspiration',      headers: coep },
     ]
   },
 };

@@ -13,13 +13,17 @@ type Props = {
 }
 
 const CATEGORIES = [
-  { value: 'dairy',     label: '🥛 Mejeri' },
-  { value: 'meat',      label: '🥩 Kött & Fisk' },
-  { value: 'vegetable', label: '🥦 Grönsaker' },
-  { value: 'fruit',     label: '🍎 Frukt' },
-  { value: 'bread',     label: '🍞 Bröd' },
-  { value: 'pantry',    label: '🧂 Skafferi' },
-  { value: 'other',     label: '🥡 Övrigt' },
+  { value: 'dairy',            label: '🥛 Mejeri (Kyl)' },
+  { value: 'meat',             label: '🥩 Kött & Fisk (Kyl)' },
+  { value: 'vegetable',        label: '🥦 Grönsaker (Kyl)' },
+  { value: 'fruit',            label: '🍎 Frukt (Kyl)' },
+  { value: 'other',            label: '🥡 Övrigt (Kyl)' },
+  { value: 'bread',            label: '🍞 Bröd (Skafferi)' },
+  { value: 'pantry',           label: '🧂 Konserver & Kryddor' },
+  { value: 'frozen_meat',      label: '🥩 Kött & Fisk (Frys)' },
+  { value: 'frozen_vegetable', label: '🥦 Grönsaker (Frys)' },
+  { value: 'frozen_ready',     label: '🍱 Färdigrätter (Frys)' },
+  { value: 'frozen_other',     label: '❄️ Övrigt (Frys)' },
 ]
 
 const UNITS = ['st', 'g', 'kg', 'dl', 'liter', 'förp', 'burk', 'påse']

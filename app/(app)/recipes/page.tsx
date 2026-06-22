@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { FridgeItem, Recipe } from '@/lib/types'
 import RecipeCard from '@/components/recipes/RecipeCard'
+import { calcMatch, matchLabel, matchColors, type MatchResult } from '@/lib/matchRecipe'
+import ToplistaSection from '@/components/recipes/ToplistaSection'
 import Link from 'next/link'
 
 const FILTERS = ['Alla', 'Snabbt', 'Vegetarisk', 'Barnvänl', 'Veganskt', 'Glutenfritt']
@@ -14,15 +16,39 @@ function pickColor(title: string) {
   return PLACEHOLDER_COLORS[Math.abs(h) % PLACEHOLDER_COLORS.length]
 }
 
-function FeaturedCard({ recipe }: { recipe: (typeof DEMO_RECIPES)[0] }) {
-  const [err, setErr] = useState(false)
-  const photo = !err && recipe.imageUrl
+function isRecipeClickable(id: string | undefined) {
+  if (!id) return false
+  if (id.startsWith('mealdb_')) return true
+  if (id.startsWith('spoonacular_') || id.startsWith('edamam_') || /^d\d+$/.test(id)) return false
+  return true // UUID = own recipe
+}
+
+type FeaturedRecipe = Recipe & { imageUrl?: string }
+
+function FeaturedMatchBadge({ match }: { match: MatchResult }) {
+  const { bg, text, bar } = matchColors(match.pct)
+  const label = matchLabel(match)
   return (
-    <Link href={`/recipes/${recipe.id}`} style={{ display: 'block', textDecoration: 'none', marginBottom: '12px' }}>
+    <div style={{ margin: '0 16px 14px', borderRadius: '8px', background: bg, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+        <div style={{ width: `${match.pct}%`, height: '100%', background: bar, borderRadius: '2px' }} />
+      </div>
+      <span style={{ fontSize: '12px', fontWeight: 700, color: text, whiteSpace: 'nowrap', flexShrink: 0 }}>{match.pct}%</span>
+      <span style={{ fontSize: '11px', color: text, opacity: 0.85 }}>{label}</span>
+    </div>
+  )
+}
+
+function FeaturedCard({ recipe, match }: { recipe: FeaturedRecipe; match?: MatchResult | null }) {
+  const [err, setErr] = useState(false)
+  const imageUrl = recipe.image_url ?? recipe.imageUrl
+  const photo = !err && imageUrl
+  const isClickable = isRecipeClickable(recipe.id)
+  const inner = (
       <div className="card-hover fade-up overflow-hidden" style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08)' }}>
         <div className="relative overflow-hidden" style={{ height: '200px' }}>
           {photo
-            ? <img src={recipe.imageUrl} alt={recipe.title} onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <img src={imageUrl} alt={recipe.title} onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ width: '100%', height: '100%', background: pickColor(recipe.title) }} />
           }
           <div className="absolute top-3 right-3 px-2 py-1 text-xs font-semibold" style={{ background: '#1C3A2A', color: '#fff', borderRadius: '4px', fontSize: '11px' }}>
@@ -34,13 +60,16 @@ function FeaturedCard({ recipe }: { recipe: (typeof DEMO_RECIPES)[0] }) {
             ))}
           </div>
         </div>
-        <div style={{ padding: '14px 16px' }}>
+        <div style={{ padding: '14px 16px 10px' }}>
           <h3 style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '4px' }}>{recipe.title}</h3>
           <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>{recipe.description}</p>
         </div>
+        {match && <FeaturedMatchBadge match={match} />}
       </div>
-    </Link>
   )
+  return isClickable
+    ? <Link href={`/recipes/${recipe.id}`} style={{ display: 'block', textDecoration: 'none', marginBottom: '12px' }}>{inner}</Link>
+    : <div style={{ marginBottom: '12px' }}>{inner}</div>
 }
 
 const UNS = 'https://images.unsplash.com/photo-'
@@ -76,7 +105,9 @@ export default function RecipesPage() {
   const [showGenerate, setShowGenerate] = useState(false)
   const [externalRecipes, setExternalRecipes] = useState<Recipe[] | null>(null)
   const [externalLoading, setExternalLoading] = useState(true)
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([])
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
 
   const fetchFridge = useCallback(async () => {
     const supabase = createClient()
@@ -84,20 +115,35 @@ export default function RecipesPage() {
     setFridgeItems(data ?? [])
   }, [])
 
+  const fetchMyRecipes = useCallback(async () => {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('recipes')
+      .select('*')
+      .eq('created_by', user.id)
+      .order('created_at', { ascending: false })
+    setMyRecipes((data ?? []) as Recipe[])
+  }, [])
+
   const fetchExternal = useCallback(async (q = '') => {
     setExternalLoading(true)
     try {
       const res = await fetch(`/api/recipes/external${q ? `?q=${encodeURIComponent(q)}` : ''}`)
       const data = await res.json()
-      if (data.recipes) setExternalRecipes(data.recipes)
+      // Only replace results if we got actual hits — keeps browse cache for Swedish local filtering
+      if (data.recipes && (!q || data.recipes.length > 0)) {
+        setExternalRecipes(data.recipes)
+      }
     } catch {
-      // keep DEMO_RECIPES as fallback — handled below
+      // keep previous results as fallback
     } finally {
       setExternalLoading(false)
     }
   }, [])
 
-  useEffect(() => { fetchFridge(); fetchExternal() }, [fetchFridge, fetchExternal])
+  useEffect(() => { fetchFridge(); fetchExternal(); fetchMyRecipes() }, [fetchFridge, fetchExternal, fetchMyRecipes])
 
   // Merge duplicates by name (case-insensitive), sum quantities
   const uniqueItems = useMemo(() => {
@@ -118,6 +164,12 @@ export default function RecipesPage() {
     setSelected(prev => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n })
   }
 
+  // Only compute match when user has fridge items
+  function getMatch(r: Recipe): MatchResult | null {
+    if (fridgeItems.length === 0) return null
+    return calcMatch(r, fridgeItems)
+  }
+
   async function generate() {
     if (!selected.size) return
     setGenerating(true)
@@ -128,29 +180,65 @@ export default function RecipesPage() {
       body: JSON.stringify({ ingredients: Array.from(selected), filters: {} }),
     })
     const data = await res.json()
-    if (!res.ok || data.error) setError(data.error ?? 'Något gick fel')
-    else setGeneratedRecipes(data.recipes)
+    if (!res.ok || data.error) {
+      setError(data.error ?? 'Något gick fel')
+    } else {
+      const sorted = (data.recipes as Recipe[]).slice().sort((a, b) => {
+        const ma = calcMatch(a, fridgeItems)
+        const mb = calcMatch(b, fridgeItems)
+        return (mb?.pct ?? 0) - (ma?.pct ?? 0)
+      })
+      setGeneratedRecipes(sorted)
+    }
     setGenerating(false)
   }
+
+  const isSearching = searchQuery.trim().length > 0
 
   // Use external recipes if loaded, else fall back to DEMO_RECIPES
   const baseRecipes = (externalRecipes ?? DEMO_RECIPES).map(r => ({
     ...r,
-    // Ensure DEMO_RECIPES has required Recipe fields
     ingredients: (r as Recipe).ingredients ?? [],
     steps: (r as Recipe).steps ?? [],
     created_by: (r as Recipe).created_by ?? null,
     created_at: (r as Recipe).created_at ?? '',
   })) as Recipe[]
 
-  const displayRecipes = generatedRecipes.length > 0 ? null : baseRecipes.filter(r => {
-    const matchesFilter = activeFilter === 'Alla' || r.tags.includes(activeFilter)
-    const matchesSearch = searchQuery.trim() === '' ||
-      r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (r.description ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesFilter && matchesSearch
-  })
+  const matchesQuery = (r: { title: string; description?: string | null; tags: string[] }) => {
+    const q = searchQuery.toLowerCase()
+    return r.title.toLowerCase().includes(q) ||
+      (r.description ?? '').toLowerCase().includes(q) ||
+      r.tags.some(t => t.toLowerCase().includes(q))
+  }
+
+  // Own recipes matching the search query (shown inline when searching)
+  const myRecipesFiltered = isSearching ? myRecipes.filter(matchesQuery) : myRecipes
+
+  const displayRecipes = generatedRecipes.length > 0 ? null : (() => {
+    const external = baseRecipes.filter(r => {
+      if (isSearching) return matchesQuery(r)
+      return activeFilter === 'Alla' || r.tags.includes(activeFilter)
+    })
+
+    let list: Recipe[]
+    if (isSearching) {
+      const ownIds = new Set(myRecipesFiltered.map(r => r.id))
+      list = [...myRecipesFiltered, ...external.filter(r => !ownIds.has(r.id))]
+    } else {
+      list = external
+    }
+
+    // Sort by match percentage when user has fridge items — null (no ingredient data) goes last
+    if (fridgeItems.length > 0) {
+      list = list.slice().sort((a, b) => {
+        const ma = calcMatch(a, fridgeItems)
+        const mb = calcMatch(b, fridgeItems)
+        return (mb?.pct ?? -1) - (ma?.pct ?? -1)
+      })
+    }
+
+    return list
+  })()
 
   return (
     <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
@@ -172,7 +260,10 @@ export default function RecipesPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Lägg till
           </Link>
-          <button style={{ color: '#1A1A1A' }}>
+          <button
+            onClick={() => searchInputRef.current?.focus()}
+            style={{ color: '#1A1A1A' }}
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
             </svg>
@@ -192,6 +283,7 @@ export default function RecipesPage() {
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
+            ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => {
@@ -242,6 +334,9 @@ export default function RecipesPage() {
           </button>
         ))}
       </div>
+
+      {/* Topplista */}
+      <ToplistaSection />
 
       {/* AI generate toggle */}
       <div className="px-4 mb-4">
@@ -343,6 +438,23 @@ export default function RecipesPage() {
         )}
       </div>
 
+      {/* My recipes — hidden when searching (they appear inline in results) */}
+      {myRecipes.length > 0 && !isSearching && (
+        <div className="px-4 mb-5">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+            <p style={{ fontSize: '12px', fontWeight: 700, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Mina recept
+            </p>
+            <Link href="/recipes/new" style={{ fontSize: '12px', fontWeight: 600, color: '#1C3A2A', textDecoration: 'none' }}>
+              + Nytt recept
+            </Link>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            {myRecipes.map(r => <RecipeCard key={r.id} recipe={r} match={getMatch(r)} />)}
+          </div>
+        </div>
+      )}
+
       {/* Generated recipes */}
       {generatedRecipes.length > 0 && (
         <div className="px-4 mb-4">
@@ -350,7 +462,7 @@ export default function RecipesPage() {
             Genererade recept
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-            {generatedRecipes.map(r => <RecipeCard key={r.id ?? r.title} recipe={r} />)}
+            {generatedRecipes.map(r => <RecipeCard key={r.id ?? r.title} recipe={r} match={getMatch(r)} />)}
           </div>
         </div>
       )}
@@ -391,15 +503,21 @@ export default function RecipesPage() {
 
       {displayRecipes && displayRecipes.length > 0 && (
         <div className="px-4 pb-28">
+          {!externalLoading && !externalRecipes && (
+            <p style={{ fontSize: '11px', color: '#9B9B9B', marginBottom: '10px', textAlign: 'center' }}>
+              Inspiration — klicka på dina egna recept ovan för att laga
+            </p>
+          )}
+
           {/* Featured — first card full-width with taller photo */}
           {displayRecipes[0] && (
-            <FeaturedCard recipe={displayRecipes[0]} />
+            <FeaturedCard recipe={displayRecipes[0] as FeaturedRecipe} match={getMatch(displayRecipes[0])} />
           )}
 
           {/* Grid — staggered entry */}
           <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             {displayRecipes.slice(1).map(r => (
-              <RecipeCard key={r.id} recipe={r as never} />
+              <RecipeCard key={r.id} recipe={r as never} showLink={isRecipeClickable(r.id)} match={getMatch(r)} />
             ))}
           </div>
         </div>

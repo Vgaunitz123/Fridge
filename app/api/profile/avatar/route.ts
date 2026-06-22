@@ -31,8 +31,7 @@ export async function POST(req: NextRequest) {
 
     await admin.storage.createBucket('avatars', { public: true, fileSizeLimit: 5 * 1024 * 1024 }).catch(() => {})
 
-    const ext = file.type === 'image/png' ? 'png' : 'jpg'
-    const path = `${user.id}/avatar.${ext}`
+    const path = `${user.id}/avatar.jpg`
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const { error } = await admin.storage
@@ -42,6 +41,12 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: `Storage: ${error.message}` }, { status: 500 })
 
     const { data: { publicUrl } } = admin.storage.from('avatars').getPublicUrl(path)
+
+    // Persist URL in user metadata so the profile page knows an avatar exists
+    await admin.auth.admin.updateUserById(user.id, {
+      user_metadata: { avatar_url: publicUrl },
+    })
+
     return NextResponse.json({ url: publicUrl })
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Okänt fel'

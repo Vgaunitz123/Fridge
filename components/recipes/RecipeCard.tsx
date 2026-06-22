@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { Recipe } from '@/lib/types'
 import { useState } from 'react'
+import type { MatchResult } from '@/lib/matchRecipe'
+import { matchLabel, matchColors } from '@/lib/matchRecipe'
 
-// Neutral warm placeholder when no photo — no emoji, no orange
 const PLACEHOLDER_COLORS = [
   '#D6CFC4', '#C8C2B6', '#D4CCBF', '#C6BFB3', '#D0C9BC',
 ]
@@ -18,11 +19,44 @@ function pick<T>(title: string, arr: T[]): T {
 type Props = {
   recipe: Recipe & { imageUrl?: string; image?: string }
   showLink?: boolean
+  match?: MatchResult | null
 }
 
-function CardInner({ recipe }: { recipe: Props['recipe'] }) {
+function MatchBadge({ match }: { match: MatchResult }) {
+  const { bg, text, bar } = matchColors(match.pct)
+  const label = matchLabel(match)
+
+  return (
+    <div style={{
+      margin: '0 12px 10px',
+      borderRadius: '8px',
+      background: bg,
+      padding: '5px 8px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+    }}>
+      {/* Progress bar */}
+      <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
+        <div style={{ width: `${match.pct}%`, height: '100%', background: bar, borderRadius: '2px', transition: 'width 0.4s ease' }} />
+      </div>
+      {/* Pct */}
+      <span style={{ fontSize: '11px', fontWeight: 700, color: text, whiteSpace: 'nowrap', flexShrink: 0 }}>
+        {match.pct}%
+      </span>
+      {/* Label */}
+      <span style={{ fontSize: '10px', color: text, opacity: 0.85, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '90px' }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchResult | null }) {
   const [imgError, setImgError] = useState(false)
-  const photo = (!imgError && (recipe.image_url || (recipe as Record<string, unknown>).imageUrl)) as string | null
+  const explicit = recipe.image_url || (recipe as Record<string, unknown>).imageUrl as string | undefined
+  const unsplash = `https://source.unsplash.com/featured/?food,${encodeURIComponent(recipe.title)}`
+  const photo = imgError ? null : (explicit || unsplash)
   const placeholderColor = pick(recipe.title, PLACEHOLDER_COLORS)
 
   return (
@@ -34,7 +68,7 @@ function CardInner({ recipe }: { recipe: Props['recipe'] }) {
         boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
-      {/* Hero — 3:2 ratio, real photo or neutral placeholder */}
+      {/* Hero */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '3/2' }}>
         {photo ? (
           <img
@@ -47,21 +81,15 @@ function CardInner({ recipe }: { recipe: Props['recipe'] }) {
           <div className="w-full h-full" style={{ background: placeholderColor }} />
         )}
 
-        {/* Time badge — top right, green */}
+        {/* Time badge */}
         <div
-          className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 text-xs font-semibold"
-          style={{
-            background: '#1C3A2A',
-            color: '#fff',
-            borderRadius: '4px',
-            fontSize: '11px',
-            letterSpacing: '0.02em',
-          }}
+          className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5"
+          style={{ background: '#1C3A2A', color: '#fff', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}
         >
           {recipe.cook_time_minutes} min
         </div>
 
-        {/* Tags — bottom left on image */}
+        {/* Tags */}
         {recipe.tags && recipe.tags.length > 0 && (
           <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap">
             {recipe.tags.slice(0, 2).map(tag => (
@@ -87,38 +115,32 @@ function CardInner({ recipe }: { recipe: Props['recipe'] }) {
       </div>
 
       {/* Content */}
-      <div className="p-3">
+      <div className="p-3 pb-2">
         <h3
           className="leading-snug mb-1"
-          style={{
-            fontFamily: 'Georgia, serif',
-            fontWeight: 500,
-            fontSize: '14px',
-            color: '#1A1A1A',
-          }}
+          style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '14px', color: '#1A1A1A' }}
         >
           {recipe.title}
         </h3>
         {recipe.description && (
-          <p
-            className="line-clamp-2"
-            style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}
-          >
+          <p className="line-clamp-2" style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>
             {recipe.description}
           </p>
         )}
       </div>
+
+      {match && <MatchBadge match={match} />}
     </div>
   )
 }
 
-export default function RecipeCard({ recipe, showLink = true }: Props) {
+export default function RecipeCard({ recipe, showLink = true, match }: Props) {
   if (showLink && recipe.id) {
     return (
       <Link href={`/recipes/${recipe.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <CardInner recipe={recipe} />
+        <CardInner recipe={recipe} match={match} />
       </Link>
     )
   }
-  return <CardInner recipe={recipe} />
+  return <CardInner recipe={recipe} match={match} />
 }
