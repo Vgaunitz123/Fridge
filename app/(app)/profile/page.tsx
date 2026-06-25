@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-type Stats = { fridgeItems: number; recipes: number; posts: number; likes: number }
+type Stats = { fridgeItems: number; likedRecipes: number; posts: number; createdRecipes: number }
 
 const SETTINGS = [
   { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>, label: 'Notifikationer', sub: 'Påminnelser om utgångsdatum' },
@@ -17,7 +17,7 @@ const SETTINGS = [
 export default function ProfilePage() {
   const [email, setEmail] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
-  const [stats, setStats] = useState<Stats>({ fridgeItems: 0, recipes: 0, posts: 0, likes: 0 })
+  const [stats, setStats] = useState<Stats>({ fridgeItems: 0, likedRecipes: 0, posts: 0, createdRecipes: 0 })
   const [loading, setLoading] = useState(true)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarErr, setAvatarErr] = useState(false)
@@ -48,14 +48,13 @@ export default function ProfilePage() {
         .single()
       setBio(profileRow?.bio ?? '')
 
-      const [{ count: fridgeCount }, { count: recipeCount }, postsRes] = await Promise.all([
+      const [{ count: fridgeCount }, { count: createdCount }, { count: likedCount }, { count: postCount }] = await Promise.all([
         supabase.from('fridge_items').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('recipes').select('*', { count: 'exact', head: true }).eq('created_by', user.id),
-        supabase.from('social_posts').select('*, post_likes(user_id)').eq('user_id', user.id),
+        supabase.from('recipe_likes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('social_posts').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
       ])
-      const posts = postsRes.data ?? []
-      const totalLikes = posts.reduce((s: number, p: { post_likes: unknown[] }) => s + (p.post_likes?.length ?? 0), 0)
-      setStats({ fridgeItems: fridgeCount ?? 0, recipes: recipeCount ?? 0, posts: posts.length, likes: totalLikes })
+      setStats({ fridgeItems: fridgeCount ?? 0, createdRecipes: createdCount ?? 0, likedRecipes: likedCount ?? 0, posts: postCount ?? 0 })
       setLoading(false)
     }
     load()
@@ -212,18 +211,20 @@ export default function ProfilePage() {
           {/* Stats grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
             {[
-              { value: stats.fridgeItems, label: 'Varor i kylen', color: '#1C3A2A', bg: '#EBF2ED', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="4" y="2" width="16" height="20" rx="3"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="8" y1="5.5" x2="8" y2="7.5" strokeLinecap="round"/><line x1="8" y1="12.5" x2="8" y2="16.5" strokeLinecap="round"/></svg> },
-              { value: stats.recipes, label: 'Sparade recept', color: '#b45309', bg: '#fff7ed', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4C4 3 5 2 6 2H18C19 2 20 3 20 4V20C20 21 19 22 18 22H6C5 22 4 21 4 20V4Z"/><line x1="8" y1="8" x2="16" y2="8" strokeLinecap="round"/><line x1="8" y1="12" x2="16" y2="12" strokeLinecap="round"/><line x1="8" y1="16" x2="12" y2="16" strokeLinecap="round"/></svg> },
-              { value: stats.posts, label: 'Community-inlägg', color: '#1C3A2A', bg: '#EBF2ED', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> },
-              { value: stats.likes, label: 'Gillar totalt', color: '#e11d48', bg: '#fff1f2', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
+              { value: stats.fridgeItems,    label: 'Varor i kylen',   color: '#1C3A2A', bg: '#EBF2ED', href: '/fridge',                 icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="4" y="2" width="16" height="20" rx="3"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="8" y1="5.5" x2="8" y2="7.5" strokeLinecap="round"/><line x1="8" y1="12.5" x2="8" y2="16.5" strokeLinecap="round"/></svg> },
+              { value: stats.likedRecipes,   label: 'Gillade recept',  color: '#e11d48', bg: '#fff1f2', href: '/profile/liked-recipes',   icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
+              { value: stats.posts,          label: 'Mina inlägg',     color: '#1C3A2A', bg: '#EBF2ED', href: '/profile/my-posts',        icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> },
+              { value: stats.createdRecipes, label: 'Skapade recept',  color: '#b45309', bg: '#fff7ed', href: '/profile/my-recipes',      icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6z"/><line x1="6" y1="17" x2="18" y2="17"/></svg> },
             ].map(s => (
-              <div key={s.label} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '18px 16px 14px', boxShadow: 'var(--shadow-sm)' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
-                  {s.icon}
+              <Link key={s.label} href={s.href} style={{ textDecoration: 'none', display: 'block' }} className="pressable">
+                <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '18px 16px 14px', boxShadow: 'var(--shadow-sm)' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
+                    {s.icon}
+                  </div>
+                  <p style={{ fontSize: '26px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)', lineHeight: 1, marginBottom: '3px' }}>{s.value}</p>
+                  <p style={{ fontSize: '11px', color: '#9B9B9B', fontWeight: 600 }}>{s.label}</p>
                 </div>
-                <p style={{ fontSize: '26px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)', lineHeight: 1, marginBottom: '3px' }}>{s.value}</p>
-                <p style={{ fontSize: '11px', color: '#9B9B9B', fontWeight: 600 }}>{s.label}</p>
-              </div>
+              </Link>
             ))}
           </div>
 
