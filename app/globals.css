@@ -62,10 +62,24 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-dm-sans), system-ui, sans-serif;
+    font-family: var(--font-sans);
     font-size: 15px;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Headings always use the display serif */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  /* Input/textarea inherit the sans-serif stack */
+  input, textarea, select, button {
+    font-family: inherit;
   }
 }
 

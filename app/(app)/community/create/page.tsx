@@ -381,7 +381,7 @@ export default function CreateVideoPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '12px' }}>
         <div style={{ fontSize: '48px' }}>✓</div>
-        <p style={{ fontFamily: 'Georgia, serif', fontSize: '20px', color: '#1C3A2A' }}>Publicerad!</p>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#1C3A2A' }}>Publicerad!</p>
         <p style={{ fontSize: '13px', color: '#6B6B6B' }}>Skickar till flödet…</p>
       </div>
     )
@@ -395,7 +395,7 @@ export default function CreateVideoPage() {
         <Link href="/community" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', fontSize: '16px', fontWeight: 700, flexShrink: 0 }}>
           ←
         </Link>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
           Videoeditor
         </h1>
         {/* Quick upload link */}
@@ -569,7 +569,7 @@ export default function CreateVideoPage() {
       {rendering && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', zIndex: 100 }}>
           <div style={{ background: '#fff', borderRadius: '20px', padding: '28px 32px', width: '280px', textAlign: 'center' }}>
-            <p style={{ fontFamily: 'Georgia, serif', fontSize: '18px', fontWeight: 500, color: '#1A1A1A', marginBottom: '6px' }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: '#1A1A1A', marginBottom: '6px' }}>
               Renderar video
             </p>
             <p style={{ fontSize: '12px', color: '#6B6B6B', marginBottom: '20px' }}>{renderPhase}</p>

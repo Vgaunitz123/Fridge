@@ -132,7 +132,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               </span>
             ))}
           </div>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif', lineHeight: 1.2, margin: 0 }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)', lineHeight: 1.2, margin: 0 }}>
             {recipe.title}
           </h1>
           {recipe.description && (
@@ -149,19 +149,19 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
         background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)',
       }}>
         <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.cook_time_minutes}</p>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.cook_time_minutes}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>minuter</p>
         </div>
         <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.ingredients?.length ?? 0}</p>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.ingredients?.length ?? 0}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ingredienser</p>
         </div>
         <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>{recipe.steps?.length ?? 0}</p>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.steps?.length ?? 0}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>steg</p>
         </div>
         <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center' }}>
-          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+          <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
             {avgRating ? avgRating.toFixed(1) : '—'}
           </p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>betyg</p>

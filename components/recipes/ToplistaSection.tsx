@@ -81,7 +81,7 @@ function TopCard({ entry, rank }: { entry: TopRecipe; rank: number }) {
       <div style={{ padding: '8px 8px 10px' }}>
         <p style={{
           fontSize: '12px', fontWeight: 600, color: '#1A1A1A',
-          lineHeight: 1.35, fontFamily: 'Georgia, serif',
+          lineHeight: 1.35, fontFamily: 'var(--font-display)',
           display: '-webkit-box', WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical', overflow: 'hidden',
         }}>

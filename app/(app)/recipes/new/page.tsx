@@ -19,7 +19,7 @@ const input = {
   color: '#1A1A1A',
   fontSize: '15px',
   outline: 'none',
-  fontFamily: 'system-ui, sans-serif',
+  fontFamily: 'var(--font-sans)',
   lineHeight: '1.6',
 } as const
 
@@ -149,7 +149,7 @@ export default function NewRecipePage() {
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         </button>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '22px', color: '#1A1A1A' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '22px', color: '#1A1A1A' }}>
           Lägg upp recept
         </h1>
       </div>

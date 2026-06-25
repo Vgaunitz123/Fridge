@@ -269,7 +269,7 @@ export default function VideosPage() {
     return (
       <div style={{ background: '#000', minHeight: '100svh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
         <Link href="/community" style={{ position: 'absolute', top: '52px', left: '16px', color: '#fff', fontSize: '20px' }}>←</Link>
-        <p style={{ color: '#fff', fontSize: '18px', fontFamily: 'Georgia, serif' }}>Inga videos ännu</p>
+        <p style={{ color: '#fff', fontSize: '18px', fontFamily: 'var(--font-display)' }}>Inga videos ännu</p>
         <p style={{ color: '#666', fontSize: '13px' }}>Dela en video från community-flödet</p>
         <Link href="/community" style={{ marginTop: '8px', padding: '12px 24px', borderRadius: '12px', background: '#1C3A2A', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
           Dela en video

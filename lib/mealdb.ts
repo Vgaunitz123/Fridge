@@ -103,19 +103,23 @@ export async function mealdbLookup(mealId: string): Promise<Recipe | null> {
 }
 
 export async function mealdbSearch(query: string): Promise<Recipe[]> {
-  const res = await fetch(`${MEALDB}/search.php?s=${encodeURIComponent(query)}`,
-    { next: { revalidate: 3600 } })
-  if (!res.ok) return []
-  const data = await res.json()
-  return (data.meals ?? []).map((m: MealFull) => mealFullToRecipe(m))
+  try {
+    const res = await fetch(`${MEALDB}/search.php?s=${encodeURIComponent(query)}`,
+      { next: { revalidate: 3600 } })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.meals ?? []).map((m: MealFull) => mealFullToRecipe(m))
+  } catch { return [] }
 }
 
 export async function mealdbCategory(category: string, limit: number): Promise<Recipe[]> {
-  const res = await fetch(`${MEALDB}/filter.php?c=${encodeURIComponent(category)}`,
-    { next: { revalidate: 3600 } })
-  if (!res.ok) return []
-  const data = await res.json()
-  return ((data.meals ?? []) as { idMeal: string; strMeal: string; strMealThumb: string }[])
-    .slice(0, limit)
-    .map(m => mealMinimalToRecipe(m, category))
+  try {
+    const res = await fetch(`${MEALDB}/filter.php?c=${encodeURIComponent(category)}`,
+      { next: { revalidate: 3600 } })
+    if (!res.ok) return []
+    const data = await res.json()
+    return ((data.meals ?? []) as { idMeal: string; strMeal: string; strMealThumb: string }[])
+      .slice(0, limit)
+      .map(m => mealMinimalToRecipe(m, category))
+  } catch { return [] }
 }

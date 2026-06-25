@@ -40,7 +40,7 @@ function Avatar({ username, avatarUrl, size = 40 }: { username: string; avatarUr
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.32, fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif',
+      fontSize: size * 0.32, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)',
     }}>
       {initials}
     </div>
@@ -234,7 +234,7 @@ export default function SearchPage() {
       {/* Header */}
       <div style={{ padding: '52px 16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
             Sök
           </h1>
           <Link href="/inspiration" style={{ fontSize: '12px', color: '#1C3A2A', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -301,7 +301,7 @@ export default function SearchPage() {
       ) : totalResults === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 24px' }}>
           <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
-          <p style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '6px' }}>
+          <p style={{ fontSize: '16px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '6px' }}>
             Inga resultat för &ldquo;{query}&rdquo;
           </p>
           <p style={{ fontSize: '13px', color: '#9B9B9B' }}>Försök med ett annat sökord</p>

@@ -52,7 +52,7 @@ function Avatar({ username, avatarUrl, size }: { username: string; avatarUrl: st
       width: size, height: size, borderRadius: '50%',
       background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.3, fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif',
+      fontSize: size * 0.3, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)',
     }}>
       {initials}
     </div>
@@ -218,7 +218,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
         <Link href="/search" style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
         </Link>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>Profil</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>Profil</h1>
         {isOwn && (
           <Link href="/profile" style={{ fontSize: '12px', color: '#1C3A2A', fontWeight: 600, textDecoration: 'none' }}>
             Redigera →
@@ -231,7 +231,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <Avatar username={displayName} avatarUrl={profile?.avatar_url ?? null} size={72} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '2px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '2px' }}>
               @{displayName}
             </h2>
             {profile?.bio && (
@@ -283,7 +283,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
               { value: totalPostLikes,  label: 'Gillar' },
             ].map((s, i, arr) => (
               <div key={s.label} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '14px 8px', borderRight: i < arr.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                <span style={{ fontSize: '22px', fontWeight: 700, color: '#1C3A2A', fontFamily: 'Georgia, serif', lineHeight: 1 }}>{s.value}</span>
+                <span style={{ fontSize: '22px', fontWeight: 700, color: '#1C3A2A', fontFamily: 'var(--font-display)', lineHeight: 1 }}>{s.value}</span>
                 <span style={{ fontSize: '10px', color: '#9B9B9B', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '4px' }}>{s.label}</span>
               </div>
             ))}
@@ -304,7 +304,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
           {tab === 'posts' && (
             posts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '6px' }}>Inga inlägg än</p>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '6px' }}>Inga inlägg än</p>
                 <p style={{ fontSize: '13px', color: '#9B9B9B' }}>{isOwn ? 'Dela ditt första inlägg från community-sidan' : `${displayName} har inte delat något än`}</p>
                 {isOwn && <Link href="/community" style={{ display: 'inline-block', marginTop: '14px', padding: '10px 24px', borderRadius: '12px', background: '#1C3A2A', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Gå till community</Link>}
               </div>
@@ -336,7 +336,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
           {tab === 'videos' && (
             videos.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '6px' }}>Inga videor än</p>
+                <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '6px' }}>Inga videor än</p>
                 <p style={{ fontSize: '13px', color: '#9B9B9B' }}>{isOwn ? 'Dela din första video från Film-fliken' : `${displayName} har inte delat några videor`}</p>
                 {isOwn && <Link href="/inspiration" style={{ display: 'inline-block', marginTop: '14px', padding: '10px 24px', borderRadius: '12px', background: '#1C3A2A', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>Gå till Film</Link>}
               </div>

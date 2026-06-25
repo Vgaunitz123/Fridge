@@ -69,7 +69,7 @@ export default function CookingSteps({ steps }: { steps: RecipeStep[] }) {
                     <span style={{
                       fontSize: '14px', fontWeight: 700,
                       color: isActive ? '#fff' : '#6B6B6B',
-                      fontFamily: 'Georgia, serif',
+                      fontFamily: 'var(--font-display)',
                     }}>
                       {step.step}
                     </span>
@@ -140,7 +140,7 @@ export default function CookingSteps({ steps }: { steps: RecipeStep[] }) {
           textAlign: 'center',
         }}>
           <p style={{ fontSize: '20px', marginBottom: '4px' }}>🎉</p>
-          <p style={{ fontSize: '15px', fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif' }}>
+          <p style={{ fontSize: '15px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)' }}>
             Receptet är klart!
           </p>
           <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>

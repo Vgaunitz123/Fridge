@@ -390,7 +390,7 @@ function NewPostDrawer({
 
         <div className="px-5 pb-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A' }}>
               Dela med communityn
             </h2>
             <button onClick={onClose} style={{ color: '#6B6B6B', fontSize: '20px', lineHeight: 1 }}>✕</button>
@@ -734,7 +734,7 @@ export default function CommunityPage() {
     <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between">
-        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
           Community
         </h1>
         <button
@@ -919,7 +919,7 @@ export default function CommunityPage() {
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div style={{ fontSize: '48px', opacity: 0.3 }}>🍽</div>
-            <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
               Inga inlägg här än
             </p>
             <p style={{ fontSize: '13px', color: '#6B6B6B', textAlign: 'center' }}>

@@ -118,7 +118,7 @@ function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchRe
       <div className="p-3 pb-2">
         <h3
           className="leading-snug mb-1"
-          style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '14px', color: '#1A1A1A' }}
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '14px', color: '#1A1A1A' }}
         >
           {recipe.title}
         </h3>

@@ -106,7 +106,7 @@ export default function ProfilePage() {
 
       {/* Header */}
       <div style={{ padding: '56px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '28px', fontWeight: 500, color: '#1A1A1A' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 500, color: '#1A1A1A' }}>
           Profil
         </h1>
         {userId && (
@@ -129,7 +129,7 @@ export default function ProfilePage() {
                 onError={() => setAvatarErr(true)}
               />
             ) : (
-              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif' }}>
+              <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #1C3A2A, #2D5A3F)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)' }}>
                 {loading ? '' : initials}
               </div>
             )}
@@ -166,7 +166,7 @@ export default function ProfilePage() {
 
         {!loading && (
           <>
-            <p style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '3px' }}>
+            <p style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '3px' }}>
               @{username}
             </p>
             <p style={{ fontSize: '13px', color: '#9B9B9B', marginBottom: '12px' }}>{email}</p>
@@ -221,7 +221,7 @@ export default function ProfilePage() {
                 <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
                   {s.icon}
                 </div>
-                <p style={{ fontSize: '26px', fontWeight: 700, color: s.color, fontFamily: 'Georgia, serif', lineHeight: 1, marginBottom: '3px' }}>{s.value}</p>
+                <p style={{ fontSize: '26px', fontWeight: 700, color: s.color, fontFamily: 'var(--font-display)', lineHeight: 1, marginBottom: '3px' }}>{s.value}</p>
                 <p style={{ fontSize: '11px', color: '#9B9B9B', fontWeight: 600 }}>{s.label}</p>
               </div>
             ))}

@@ -119,7 +119,7 @@ function IngredientSheet({ recipeId, userId, onClose }: {
         <div style={{ padding: '4px 20px 10px', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '19px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>Ingredienser</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '19px', fontWeight: 500, color: '#1A1A1A', marginBottom: '2px' }}>Ingredienser</h2>
               {recipeTitle ? <p style={{ fontSize: '12px', color: '#9B9B9B' }}>{recipeTitle}</p> : null}
             </div>
             <button onClick={onClose} style={{ color: '#6B6B6B', fontSize: '20px', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1, padding: '4px', marginTop: '2px' }}>✕</button>
@@ -765,7 +765,7 @@ function UploadDrawer({ open, onClose, onUploaded }: {
 
         <div style={{ padding: '8px 20px 40px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#1A1A1A' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A' }}>
               Dela video
             </h2>
             {!uploading && (
@@ -980,7 +980,7 @@ export default function InspirationPage() {
               <polyline points="15 18 9 12 15 6"/>
             </svg>
           </Link>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 500, color: '#fff' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#fff' }}>
             Inspiration
           </h1>
         </div>
@@ -1010,7 +1010,7 @@ export default function InspirationPage() {
       ) : setupRequired ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100dvh', padding: '24px', textAlign: 'center', gap: '14px' }}>
           <span style={{ fontSize: '52px' }}>🎬</span>
-          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, fontFamily: 'Georgia, serif' }}>Konfiguration krävs</p>
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)' }}>Konfiguration krävs</p>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', lineHeight: 1.6 }}>
             Kör <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 6px', borderRadius: '4px' }}>supabase/migrations/005_videos.sql</code> i Supabase-dashboardens SQL-editor.
           </p>
@@ -1019,7 +1019,7 @@ export default function InspirationPage() {
       ) : videos.length === 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100dvh', padding: '24px', textAlign: 'center', gap: '14px' }}>
           <span style={{ fontSize: '52px' }}>🎬</span>
-          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, fontFamily: 'Georgia, serif' }}>Inga videos än</p>
+          <p style={{ color: '#fff', fontSize: '18px', fontWeight: 700, fontFamily: 'var(--font-display)' }}>Inga videos än</p>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Var den första att dela matinspiration!</p>
           <button
             onClick={() => setUploadOpen(true)}

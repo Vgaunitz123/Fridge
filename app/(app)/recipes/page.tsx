@@ -61,7 +61,7 @@ function FeaturedCard({ recipe, match }: { recipe: FeaturedRecipe; match?: Match
           </div>
         </div>
         <div style={{ padding: '14px 16px 10px' }}>
-          <h3 style={{ fontFamily: 'Georgia, serif', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '4px' }}>{recipe.title}</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '4px' }}>{recipe.title}</h3>
           <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>{recipe.description}</p>
         </div>
         {match && <FeaturedMatchBadge match={match} />}
@@ -244,7 +244,7 @@ export default function RecipesPage() {
     <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
       {/* Header */}
       <div className="px-4 pt-12 pb-3 flex items-center justify-between">
-        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
           Recept &amp; Mat
         </h1>
         <div className="flex items-center gap-2">

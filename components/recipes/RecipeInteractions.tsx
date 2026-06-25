@@ -142,7 +142,7 @@ export default function RecipeInteractions({
         {/* Average */}
         {avgRating !== null && ratingCount > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif' }}>
+            <span style={{ fontSize: '28px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
               {avgRating.toFixed(1)}
             </span>
             <div>

@@ -102,7 +102,7 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
             </div>
 
             <div style={{ padding: '12px 20px 0' }}>
-              <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '20px', fontWeight: 600, color: '#1A1A1A', marginBottom: '16px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 600, color: '#1A1A1A', marginBottom: '16px' }}>
                 Dela i community
               </h3>
 
@@ -111,7 +111,7 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
                   <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: '#EBF2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
-                  <p style={{ fontSize: '17px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'Georgia, serif', marginBottom: '6px' }}>
+                  <p style={{ fontSize: '17px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)', marginBottom: '6px' }}>
                     Publicerat!
                   </p>
                   <p style={{ fontSize: '13px', color: '#9B9B9B', marginBottom: '24px' }}>
