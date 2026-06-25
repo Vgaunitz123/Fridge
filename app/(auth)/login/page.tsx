@@ -35,23 +35,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#ffffff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--surface)' }}>
       {/* Fridge hero illustration */}
       <div
         className="relative overflow-hidden flex items-end justify-center"
-        style={{ height: '42vh', background: 'linear-gradient(180deg, #e8edf0 0%, #d4dde2 100%)' }}
+        style={{ height: '42vh', background: 'linear-gradient(180deg, #EBE6DB 0%, #D8D0C4 100%)' }}
       >
         {/* Fridge interior mockup */}
         <div className="w-full h-full flex flex-col justify-between p-4 pb-0">
           {/* Top shelf */}
-          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(160,148,132,0.4)' }}>
             <div className="text-5xl">🥛</div>
             <div className="text-4xl">🧀</div>
             <div className="text-4xl">🥚</div>
             <div className="text-4xl">🍳</div>
           </div>
           {/* Mid shelf */}
-          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(160,148,132,0.4)' }}>
             <div className="text-5xl">🥩</div>
             <div className="text-4xl">🥦</div>
             <div className="text-4xl">🍎</div>
@@ -66,7 +66,7 @@ export default function LoginPage() {
         </div>
         {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-16"
-          style={{ background: 'linear-gradient(to top, #fff, transparent)' }} />
+          style={{ background: 'linear-gradient(to top, #F5F3EE, transparent)' }} />
       </div>
 
       {/* App name */}

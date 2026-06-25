@@ -112,7 +112,7 @@ function IngredientSheet({ recipeId, userId, onClose }: {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 70, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)' }} onClick={onClose} />
-      <div style={{ position: 'relative', background: '#FAFAF8', borderRadius: '20px 20px 0 0', maxHeight: '82vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'relative', background: 'var(--surface)', borderRadius: '20px 20px 0 0', maxHeight: '82vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px', flexShrink: 0 }}>
           <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
         </div>
@@ -141,13 +141,13 @@ function IngredientSheet({ recipeId, userId, onClose }: {
                   <div key={ing.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       {have ? (
-                        <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#E0ECDF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2D5A3F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
                       ) : (
                         <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'rgba(0,0,0,0.05)', flexShrink: 0 }} />
                       )}
-                      <span style={{ fontSize: '14px', color: have ? '#15803d' : '#1A1A1A', fontWeight: have ? 500 : 400 }}>{ing.name}</span>
+                      <span style={{ fontSize: '14px', color: have ? '#1C3A2A' : '#1A1A1A', fontWeight: have ? 500 : 400 }}>{ing.name}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ fontSize: '13px', color: '#9B9B9B' }}>{ing.amount} {ing.unit}</span>
@@ -157,13 +157,13 @@ function IngredientSheet({ recipeId, userId, onClose }: {
                           disabled={isAdded || isAdding}
                           style={{
                             width: '28px', height: '28px', borderRadius: '50%',
-                            background: isAdded ? '#d1fae5' : '#1C3A2A',
+                            background: isAdded ? '#E0ECDF' : '#1C3A2A',
                             border: 'none', cursor: isAdded ? 'default' : 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                           }}
                         >
                           {isAdded ? (
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2D5A3F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                           ) : (
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                           )}
@@ -185,8 +185,8 @@ function IngredientSheet({ recipeId, userId, onClose }: {
                   disabled={allAdded}
                   style={{
                     width: '100%', padding: '13px', borderRadius: '12px',
-                    background: allAdded ? '#d1fae5' : '#1C3A2A',
-                    color: allAdded ? '#15803d' : '#fff',
+                    background: allAdded ? '#E0ECDF' : '#1C3A2A',
+                    color: allAdded ? '#1C3A2A' : '#fff',
                     fontSize: '14px', fontWeight: 700,
                     border: 'none', cursor: allAdded ? 'default' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -194,7 +194,7 @@ function IngredientSheet({ recipeId, userId, onClose }: {
                 >
                   {allAdded ? (
                     <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       Lagt till i inköpslistan!
                     </>
                   ) : `Lägg till alla saknade (${missing.filter(i => !added.has(i.name)).length})`}
@@ -591,7 +591,7 @@ function VideoTrimmer({ file, onDone, onCancel }: {
           onChange={e => setOverlayText(e.target.value)}
           placeholder="Skriv text som bränns in i videon…"
           maxLength={80}
-          style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box', fontFamily: 'inherit' }}
+          style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)', fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box', fontFamily: 'inherit' }}
         />
       </div>
 
@@ -757,7 +757,7 @@ function UploadDrawer({ open, onClose, onUploaded }: {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} onClick={!uploading ? onClose : undefined} />
-      <div style={{ position: 'relative', background: '#FAFAF8', borderRadius: '20px 20px 0 0', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ position: 'relative', background: 'var(--surface)', borderRadius: '20px 20px 0 0', maxHeight: '90vh', overflowY: 'auto' }}>
         {/* Handle */}
         <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
           <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
@@ -850,7 +850,7 @@ function UploadDrawer({ open, onClose, onUploaded }: {
                   rows={3}
                   maxLength={300}
                   disabled={uploading}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)', fontSize: '14px', color: '#1A1A1A', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 />
               </div>
 
@@ -1023,7 +1023,7 @@ export default function InspirationPage() {
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Var den första att dela matinspiration!</p>
           <button
             onClick={() => setUploadOpen(true)}
-            style={{ marginTop: '8px', padding: '13px 28px', borderRadius: '100px', background: '#fff', color: '#1A1A1A', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer' }}
+            style={{ marginTop: '8px', padding: '13px 28px', borderRadius: '100px', background: 'var(--surface)', color: '#1A1A1A', fontSize: '14px', fontWeight: 700, border: 'none', cursor: 'pointer' }}
           >
             Ladda upp video
           </button>

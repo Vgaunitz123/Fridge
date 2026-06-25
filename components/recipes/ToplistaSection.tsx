@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { HeartIcon } from 'lucide-react'
 import type { Recipe } from '@/lib/types'
 
 type TopRecipe = { recipe: Recipe; likes: number }
 
 const RANK_COLORS = ['#F5C518', '#A8A9AD', '#CD7F32']
-const RANK_LABELS = ['🥇', '🥈', '🥉']
 
 const PLACEHOLDER_COLORS = ['#D6CFC4', '#C8C2B6', '#D4CCBF', '#C6BFB3', '#D0C9BC']
 function pickColor(title: string) {
@@ -31,8 +31,8 @@ function TopCard({ entry, rank }: { entry: TopRecipe; rank: number }) {
     <div style={{
       width: '140px',
       flexShrink: 0,
-      background: '#fff',
-      borderRadius: '12px',
+      background: 'var(--surface)',
+      borderRadius: 'var(--radius-md)',
       overflow: 'hidden',
       boxShadow: rank === 0
         ? '0 2px 12px rgba(245,197,24,0.25), 0 1px 4px rgba(0,0,0,0.08)'
@@ -56,11 +56,12 @@ function TopCard({ entry, rank }: { entry: TopRecipe; rank: number }) {
           width: '24px', height: '24px', borderRadius: '50%',
           background: RANK_COLORS[rank] ?? 'rgba(0,0,0,0.5)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: rank < 3 ? '13px' : '10px',
-          fontWeight: 700, color: '#fff',
+          fontSize: '11px',
+          fontWeight: 800, color: rank < 3 ? '#1A1A1A' : '#fff',
           boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+          letterSpacing: '-0.02em',
         }}>
-          {rank < 3 ? RANK_LABELS[rank] : `#${rank + 1}`}
+          {`#${rank + 1}`}
         </div>
 
         {/* Like count */}
@@ -124,7 +125,7 @@ export default function ToplistaSection() {
         <p style={{ fontSize: '12px', fontWeight: 700, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Topplista
         </p>
-        <span style={{ fontSize: '12px' }}>❤️</span>
+        <HeartIcon size={13} fill="#dc2626" stroke="none" />
       </div>
 
       {loading ? (

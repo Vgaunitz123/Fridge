@@ -317,8 +317,8 @@ export default function CreateVideoPage() {
       }
 
       setRenderPhase('Slutför…')
-      const data = await ff.readFile(videoFile) as Uint8Array
-      const blob = new Blob([data], { type: 'video/mp4' })
+      const data = await ff.readFile(videoFile)
+      const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'video/mp4' })
 
       if (renderedUrlRef.current) URL.revokeObjectURL(renderedUrlRef.current)
       const url = URL.createObjectURL(blob)
@@ -392,7 +392,7 @@ export default function CreateVideoPage() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '52px 16px 12px', background: '#F5F3EE' }}>
-        <Link href="/community" style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', fontSize: '16px', fontWeight: 700, flexShrink: 0 }}>
+        <Link href="/community" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--surface)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', fontSize: '16px', fontWeight: 700, flexShrink: 0 }}>
           ←
         </Link>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>
@@ -424,7 +424,7 @@ export default function CreateVideoPage() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
               </button>
               <div style={{ flex: 1, height: '3px', background: 'rgba(255,255,255,0.2)', borderRadius: '2px' }}>
-                <div style={{ height: '100%', background: '#fff', borderRadius: '2px', width: `${((selected.trimEnd - selected.trimStart) / (selected.duration || 1)) * 100}%` }} />
+                <div style={{ height: '100%', background: 'var(--surface)', borderRadius: '2px', width: `${((selected.trimEnd - selected.trimStart) / (selected.duration || 1)) * 100}%` }} />
               </div>
               <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: 600 }}>
                 {fmt(selected.trimEnd - selected.trimStart)}
@@ -441,7 +441,7 @@ export default function CreateVideoPage() {
 
       {/* Rendered badge */}
       {renderedUrl && (
-        <div style={{ margin: '0 16px 12px', padding: '10px 14px', borderRadius: '10px', background: '#f0fdf4', border: '1px solid rgba(28,58,42,0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ margin: '0 16px 12px', padding: '10px 14px', borderRadius: '10px', background: '#EBF2ED', border: '1px solid rgba(28,58,42,0.2)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           <p style={{ fontSize: '13px', color: '#1C3A2A', fontWeight: 600 }}>Video renderad — förhandsgranska ovan</p>
         </div>
@@ -465,7 +465,7 @@ export default function CreateVideoPage() {
         {tab === 'clips' && !renderedUrl && (
           <div>
             {/* Add clips button */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: '#fff', border: '2px dashed rgba(28,58,42,0.25)', cursor: 'pointer', marginBottom: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '12px', background: 'var(--surface)', border: '2px dashed rgba(28,58,42,0.25)', cursor: 'pointer', marginBottom: '12px' }}>
               <input type="file" accept="video/*" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
               <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1C3A2A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -510,7 +510,7 @@ export default function CreateVideoPage() {
         {/* MUSIC tab */}
         {tab === 'music' && !renderedUrl && (
           <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', borderRadius: '12px', background: '#fff', border: `2px dashed ${musicFile ? '#1C3A2A' : 'rgba(0,0,0,0.12)'}`, cursor: 'pointer', marginBottom: '12px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', borderRadius: '12px', background: 'var(--surface)', border: `2px dashed ${musicFile ? '#1C3A2A' : 'rgba(0,0,0,0.12)'}`, cursor: 'pointer', marginBottom: '12px' }}>
               <input type="file" accept="audio/*" className="hidden" onChange={e => setMusicFile(e.target.files?.[0] ?? null)} />
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: musicFile ? '#1C3A2A' : '#E8E5DE', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={musicFile ? '#fff' : '#6B6B6B'} strokeWidth="1.8"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -526,7 +526,7 @@ export default function CreateVideoPage() {
             </label>
 
             {musicFile && (
-              <div style={{ padding: '14px', background: '#fff', borderRadius: '12px' }}>
+              <div style={{ padding: '14px', background: 'var(--surface)', borderRadius: '12px' }}>
                 <label style={{ fontSize: '11px', fontWeight: 600, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '8px' }}>
                   Musikvolym — {Math.round(musicVol * 100)}%
                 </label>
@@ -553,7 +553,7 @@ export default function CreateVideoPage() {
                 onChange={e => setCaption(e.target.value)}
                 placeholder="Berätta om videon…"
                 rows={3}
-                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', resize: 'none', lineHeight: 1.55, boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)', fontSize: '14px', color: '#1A1A1A', resize: 'none', lineHeight: 1.55, boxSizing: 'border-box' }}
               />
             </div>
 
@@ -568,7 +568,7 @@ export default function CreateVideoPage() {
       {/* Render progress */}
       {rendering && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', zIndex: 100 }}>
-          <div style={{ background: '#fff', borderRadius: '20px', padding: '28px 32px', width: '280px', textAlign: 'center' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: '20px', padding: '28px 32px', width: '280px', textAlign: 'center' }}>
             <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 500, color: '#1A1A1A', marginBottom: '6px' }}>
               Renderar video
             </p>

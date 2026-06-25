@@ -38,7 +38,7 @@ export default function RegisterPage() {
 
   if (registered) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: '#fff' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: 'var(--surface)' }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-5" style={{ background: '#e8f0e9' }}>📬</div>
         <h2 className="text-xl font-semibold mb-2 text-center" style={{ color: '#111211' }}>Kolla din e-post!</h2>
         <p className="text-sm text-center mb-6" style={{ color: '#6b6f6b' }}>
@@ -50,21 +50,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#ffffff' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--surface)' }}>
       {/* Hero */}
-      <div className="relative overflow-hidden flex items-end justify-center" style={{ height: '35vh', background: 'linear-gradient(180deg,#e8edf0 0%,#d4dde2 100%)' }}>
+      <div className="relative overflow-hidden flex items-end justify-center" style={{ height: '35vh', background: 'linear-gradient(180deg,#EBE6DB 0%,#D8D0C4 100%)' }}>
         <div className="w-full h-full flex flex-col justify-between p-4 pb-0">
-          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(160,148,132,0.4)' }}>
             <div className="text-5xl">🥛</div><div className="text-4xl">🧀</div><div className="text-4xl">🥚</div><div className="text-4xl">🍳</div>
           </div>
-          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(200,220,230,0.6)' }}>
+          <div className="flex justify-around items-end pb-1" style={{ borderBottom: '2px solid rgba(160,148,132,0.4)' }}>
             <div className="text-5xl">🥩</div><div className="text-4xl">🥦</div><div className="text-4xl">🍎</div><div className="text-5xl">🐟</div>
           </div>
           <div className="flex justify-around items-center py-2">
             <div className="text-4xl">🧂</div><div className="text-3xl">🫙</div><div className="text-4xl">🫐</div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-16" style={{ background: 'linear-gradient(to top,#fff,transparent)' }} />
+        <div className="absolute bottom-0 left-0 right-0 h-16" style={{ background: 'linear-gradient(to top,#F5F3EE,transparent)' }} />
       </div>
 
       <div className="text-center py-5">

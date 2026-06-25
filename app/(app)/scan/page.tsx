@@ -8,6 +8,7 @@ import AddItemDialog from '@/components/fridge/AddItemDialog'
 import { FridgeItem } from '@/lib/types'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { ReceiptTextIcon, PackageIcon, CameraIcon, CheckCircle2Icon, PencilIcon, RefrigeratorIcon, ArchiveIcon, PartyPopperIcon, KeyRoundIcon, SparklesIcon, CheckIcon } from 'lucide-react'
 
 type State = 'idle' | 'scanning' | 'results' | 'saving' | 'done' | 'no_api_key'
 type ScanMode = 'receipt' | 'product' | null
@@ -102,7 +103,7 @@ export default function ScanPage() {
         <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#d4850a' }}>
           Lägg till varor
         </p>
-        <h1 className="text-3xl font-bold" style={{ fontFamily: 'var(--font-playfair)', color: '#1c1917' }}>
+        <h1 className="text-3xl font-bold" style={{ fontFamily: 'var(--font-display)', color: '#1c1917' }}>
           Skanna & Lägg till
         </h1>
         <p className="text-sm mt-1" style={{ color: '#78716c' }}>
@@ -119,16 +120,16 @@ export default function ScanPage() {
               onClick={() => setScanMode('receipt')}
               className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
               style={{
-                background: scanMode === 'receipt' ? '#f0fdf4' : '#fff',
+                background: scanMode === 'receipt' ? '#EBF2ED' : '#fff',
                 border: `2px solid ${scanMode === 'receipt' ? '#1C3A2A' : 'rgba(28,25,23,0.08)'}`,
                 boxShadow: '0 1px 3px rgba(28,25,23,0.05)',
               }}
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: '#f0fdf4' }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: '#EBF2ED', color: '#1C3A2A' }}
               >
-                🧾
+                <ReceiptTextIcon size={22} strokeWidth={1.8} />
               </div>
               <div>
                 <p className="font-semibold text-sm" style={{ color: '#1c1917' }}>Skanna kvitto</p>
@@ -136,7 +137,7 @@ export default function ScanPage() {
                   Fotografera ditt kassakvitto — vi hittar alla varor automatiskt
                 </p>
               </div>
-              {scanMode === 'receipt' && <span className="ml-auto text-lg">✓</span>}
+              {scanMode === 'receipt' && <CheckIcon size={18} className="ml-auto" style={{ color: '#1C3A2A', flexShrink: 0 }} strokeWidth={2.5} />}
             </button>
 
             {/* Product scan */}
@@ -144,16 +145,16 @@ export default function ScanPage() {
               onClick={() => setScanMode('product')}
               className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
               style={{
-                background: scanMode === 'product' ? '#f0fdf4' : '#fff',
+                background: scanMode === 'product' ? '#EBF2ED' : '#fff',
                 border: `2px solid ${scanMode === 'product' ? '#1C3A2A' : 'rgba(28,25,23,0.08)'}`,
                 boxShadow: '0 1px 3px rgba(28,25,23,0.05)',
               }}
             >
               <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ background: '#fff7ed' }}
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: '#FBF3E4', color: '#7A4F00' }}
               >
-                📦
+                <PackageIcon size={22} strokeWidth={1.8} />
               </div>
               <div>
                 <p className="font-semibold text-sm" style={{ color: '#1c1917' }}>Skanna produkt</p>
@@ -161,7 +162,7 @@ export default function ScanPage() {
                   Ta ett foto av en vara eller kylskåpet — AI:n känner igen innehållet
                 </p>
               </div>
-              {scanMode === 'product' && <span className="ml-auto text-lg">✓</span>}
+              {scanMode === 'product' && <CheckIcon size={18} className="ml-auto" style={{ color: '#1C3A2A', flexShrink: 0 }} strokeWidth={2.5} />}
             </button>
 
             {/* Camera upload if mode selected */}
@@ -172,15 +173,15 @@ export default function ScanPage() {
                 style={{
                   borderRadius: '20px',
                   border: `2px dashed ${isDragActive ? '#1C3A2A' : 'rgba(28,25,23,0.15)'}`,
-                  background: isDragActive ? '#f0fdf4' : '#faf7f2',
+                  background: isDragActive ? '#EBF2ED' : '#faf7f2',
                   padding: '32px 24px',
                   textAlign: 'center',
                 }}
               >
                 <input {...getInputProps()} />
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style={{ background: '#f0fdf4' }}>
-                    📷
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: '#EBF2ED', color: '#1C3A2A' }}>
+                    <CameraIcon size={26} strokeWidth={1.8} />
                   </div>
                   <p className="font-semibold text-sm" style={{ color: '#1c1917' }}>
                     {isDragActive ? 'Släpp bilden här' : scanMode === 'receipt' ? 'Fotografera kvittot' : 'Fotografera produkten'}
@@ -194,8 +195,8 @@ export default function ScanPage() {
                         if (f) { setFile(f); setPreview(URL.createObjectURL(f)) }
                       }}
                     />
-                    <span className="text-xs font-semibold px-4 py-2 rounded-full" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
-                      📸 Öppna kameran
+                    <span className="text-xs font-semibold px-4 py-2 rounded-full flex items-center gap-1.5" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
+                      <CameraIcon size={12} strokeWidth={2.5} /> Öppna kameran
                     </span>
                   </label>
                 </div>
@@ -217,7 +218,7 @@ export default function ScanPage() {
               )}
               {state === 'done' && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2" style={{ background: 'rgba(26,74,46,0.88)', backdropFilter: 'blur(4px)' }}>
-                  <span className="text-5xl">✅</span>
+                  <CheckCircle2Icon size={48} style={{ color: '#fff' }} strokeWidth={1.5} />
                   <p className="text-white text-sm font-semibold">Varor sparade!</p>
                   <p className="text-white/70 text-xs">Skickar dig till kylskåpet…</p>
                 </div>
@@ -232,17 +233,17 @@ export default function ScanPage() {
             {error && (
               <div className="px-4 py-3 rounded-2xl text-sm"
                 style={error.startsWith('Demo')
-                  ? { background: '#f0f9ff', color: '#0369a1', border: '1px solid rgba(3,105,161,0.2)' }
+                  ? { background: '#EBF2ED', color: '#1C3A2A', border: '1px solid rgba(28,58,42,0.2)' }
                   : { background: '#fff7ed', color: '#92400e', border: '1px solid rgba(217,119,6,0.2)' }}>
                 {error}
               </div>
             )}
 
             {state === 'no_api_key' && (
-              <div className="fade-up rounded-2xl overflow-hidden" style={{ border: '1.5px solid rgba(220,38,38,0.2)', background: '#fff' }}>
+              <div className="fade-up rounded-2xl overflow-hidden" style={{ border: '1.5px solid rgba(220,38,38,0.2)', background: 'var(--surface)' }}>
                 <div className="px-5 py-4" style={{ background: '#fef2f2', borderBottom: '1px solid rgba(220,38,38,0.12)' }}>
                   <div className="flex items-center gap-2 mb-1">
-                    <span style={{ fontSize: '18px' }}>🔑</span>
+                    <KeyRoundIcon size={18} style={{ color: '#991b1b' }} strokeWidth={2} />
                     <p className="font-bold text-sm" style={{ color: '#991b1b' }}>AI-skanningen är inte konfigurerad</p>
                   </div>
                   <p className="text-xs" style={{ color: '#b91c1c' }}>
@@ -280,8 +281,8 @@ export default function ScanPage() {
             )}
 
             {state === 'idle' && (
-              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold pressable" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
-                ✨ Hitta varor automatiskt
+              <button onClick={handleScan} className="w-full py-3.5 rounded-xl text-sm font-semibold pressable flex items-center justify-center gap-2" style={{ background: '#1C3A2A', color: '#faf7f2' }}>
+                <SparklesIcon size={14} strokeWidth={2}/> Hitta varor automatiskt
               </button>
             )}
 
@@ -291,7 +292,7 @@ export default function ScanPage() {
                   <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#78716c' }}>
                     Hittade {ingredients.length} varor
                   </p>
-                  <span className="text-lg">🎉</span>
+                  <PartyPopperIcon size={16} style={{ color: '#1C3A2A' }} strokeWidth={1.8} />
                 </div>
 
                 {(['fridge', 'pantry'] as const).map(loc => {
@@ -300,12 +301,12 @@ export default function ScanPage() {
                   return (
                     <div key={loc}>
                       <div className="flex items-center gap-2 mb-1.5 px-1">
-                        <span className="text-base">{loc === 'fridge' ? '🧊' : '🏠'}</span>
-                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: loc === 'fridge' ? '#0369a1' : '#92400e' }}>
+                        {loc === 'fridge' ? <RefrigeratorIcon size={14} strokeWidth={2} style={{ color: '#1C3A2A' }}/> : <ArchiveIcon size={14} strokeWidth={2} style={{ color: '#92400e' }}/>}
+                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: loc === 'fridge' ? '#1C3A2A' : '#92400e' }}>
                           {loc === 'fridge' ? 'Kylskåp' : 'Skafferi'}
                         </span>
                       </div>
-                      <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${loc === 'fridge' ? 'rgba(3,105,161,0.15)' : 'rgba(146,64,14,0.15)'}` }}>
+                      <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${loc === 'fridge' ? 'rgba(28,58,42,0.15)' : 'rgba(146,64,14,0.15)'}` }}>
                         {group.map((ing) => {
                           const globalIdx = ingredients.indexOf(ing)
                           return (
@@ -313,7 +314,7 @@ export default function ScanPage() {
                               className="w-full flex items-center gap-3 px-4 py-3 text-left"
                               style={{
                                 background: ing.selected
-                                  ? (loc === 'fridge' ? '#f0f9ff' : '#fffbeb')
+                                  ? (loc === 'fridge' ? '#F5F3EE' : '#fffbeb')
                                   : '#fff',
                                 borderBottom: group.indexOf(ing) < group.length - 1 ? '1px solid rgba(28,25,23,0.05)' : 'none',
                               }}
@@ -374,13 +375,13 @@ export default function ScanPage() {
           onClick={() => setManualOpen(true)}
           className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl text-left transition-all active:scale-98"
           style={{
-            background: '#fff',
+            background: 'var(--surface)',
             border: '2px solid rgba(28,25,23,0.08)',
             boxShadow: '0 1px 3px rgba(28,25,23,0.05)',
           }}
         >
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: '#faf7f2' }}>
-            ✏️
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#F0EDE8', color: '#1C3A2A' }}>
+            <PencilIcon size={20} strokeWidth={1.8} />
           </div>
           <div>
             <p className="font-semibold text-sm" style={{ color: '#1c1917' }}>Lägg till vara manuellt</p>

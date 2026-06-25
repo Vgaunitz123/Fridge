@@ -117,7 +117,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Avatar card */}
-      <div style={{ margin: '20px 16px 16px', background: '#fff', borderRadius: '20px', padding: '28px 20px 24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ margin: '20px 16px 16px', background: 'var(--surface)', borderRadius: '20px', padding: '28px 20px 24px', textAlign: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         {/* Avatar with upload overlay */}
         <div style={{ position: 'relative', width: '88px', height: '88px', margin: '0 auto 14px' }}>
           <div style={{ width: '88px', height: '88px', borderRadius: '50%', overflow: 'hidden', background: '#E8E5DE' }}>
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                   rows={3}
                   maxLength={200}
                   autoFocus
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #1C3A2A', background: '#fff', fontSize: '13px', color: '#1A1A1A', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '8px' }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '10px', border: '1.5px solid #1C3A2A', background: 'var(--surface)', fontSize: '13px', color: '#1A1A1A', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', marginBottom: '8px' }}
                 />
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={() => setEditingBio(false)} style={{ flex: 1, padding: '8px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'transparent', fontSize: '13px', fontWeight: 600, color: '#6B6B6B', cursor: 'pointer' }}>Avbryt</button>
@@ -210,14 +210,14 @@ export default function ProfilePage() {
         <div style={{ padding: '0 16px' }}>
 
           {/* Stats grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
             {[
               { value: stats.fridgeItems, label: 'Varor i kylen', color: '#1C3A2A', bg: '#EBF2ED', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="4" y="2" width="16" height="20" rx="3"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="8" y1="5.5" x2="8" y2="7.5" strokeLinecap="round"/><line x1="8" y1="12.5" x2="8" y2="16.5" strokeLinecap="round"/></svg> },
               { value: stats.recipes, label: 'Sparade recept', color: '#b45309', bg: '#fff7ed', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 4C4 3 5 2 6 2H18C19 2 20 3 20 4V20C20 21 19 22 18 22H6C5 22 4 21 4 20V4Z"/><line x1="8" y1="8" x2="16" y2="8" strokeLinecap="round"/><line x1="8" y1="12" x2="16" y2="12" strokeLinecap="round"/><line x1="8" y1="16" x2="12" y2="16" strokeLinecap="round"/></svg> },
               { value: stats.posts, label: 'Community-inlägg', color: '#1C3A2A', bg: '#EBF2ED', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> },
               { value: stats.likes, label: 'Gillar totalt', color: '#e11d48', bg: '#fff1f2', icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> },
             ].map(s => (
-              <div key={s.label} style={{ background: '#fff', borderRadius: '14px', padding: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+              <div key={s.label} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '18px 16px 14px', boxShadow: 'var(--shadow-sm)' }}>
                 <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: s.bg, color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '10px' }}>
                   {s.icon}
                 </div>
@@ -228,7 +228,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Settings */}
-          <div style={{ background: '#fff', borderRadius: '16px', overflow: 'hidden', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
             <p style={{ fontSize: '11px', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '14px 16px 8px' }}>
               Inställningar
             </p>
@@ -247,7 +247,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Logout */}
-          <button onClick={handleLogout} className="pressable" style={{ padding: '14px', borderRadius: '14px', background: '#fff', color: '#dc2626', border: '1.5px solid rgba(220,38,38,0.15)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}>
+          <button onClick={handleLogout} className="pressable" style={{ padding: '14px', borderRadius: 'var(--radius-md)', background: 'var(--surface)', color: '#dc2626', border: '1.5px solid rgba(220,38,38,0.15)', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             Logga ut
           </button>

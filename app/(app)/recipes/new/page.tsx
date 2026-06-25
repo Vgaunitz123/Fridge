@@ -13,8 +13,8 @@ type Step = { instruction: string }
 const input = {
   width: '100%',
   padding: '11px 14px',
-  borderRadius: '8px',
-  background: '#fff',
+  borderRadius: '12px',
+  background: 'var(--surface)',
   border: '1.5px solid rgba(0,0,0,0.12)',
   color: '#1A1A1A',
   fontSize: '15px',
@@ -141,8 +141,8 @@ export default function NewRecipePage() {
         <button
           onClick={() => router.back()}
           style={{
-            width: '36px', height: '36px', borderRadius: '8px',
-            background: '#fff', border: '1.5px solid rgba(0,0,0,0.1)',
+            width: '36px', height: '36px', borderRadius: '10px',
+            background: 'var(--surface)', border: '1.5px solid rgba(0,0,0,0.1)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}
@@ -157,7 +157,7 @@ export default function NewRecipePage() {
       <div className="px-4 pb-32 space-y-6">
 
         {/* Grundinfo */}
-        <section style={{ background: '#fff', borderRadius: '8px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <section style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '22px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B6B6B', marginBottom: '14px' }}>
             Grundinfo
           </p>
@@ -228,7 +228,7 @@ export default function NewRecipePage() {
                       position: 'absolute', bottom: '8px', right: '8px',
                       display: 'flex', alignItems: 'center', gap: '5px',
                       background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
-                      color: '#fff', border: 'none', borderRadius: '8px',
+                      color: '#fff', border: 'none', borderRadius: '10px',
                       padding: '6px 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer',
                     }}
                   >
@@ -259,7 +259,7 @@ export default function NewRecipePage() {
                     width: '100%', padding: '28px 16px',
                     borderRadius: '10px',
                     border: '2px dashed rgba(0,0,0,0.15)',
-                    background: uploading ? '#F5F3EE' : '#FAFAF8',
+                    background: uploading ? '#F5F3EE' : 'var(--surface)',
                     cursor: uploading ? 'default' : 'pointer',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
                     transition: 'background 0.15s',
@@ -291,7 +291,7 @@ export default function NewRecipePage() {
         </section>
 
         {/* Taggar */}
-        <section style={{ background: '#fff', borderRadius: '8px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <section style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '22px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B6B6B', marginBottom: '12px' }}>
             Taggar
           </p>
@@ -317,7 +317,7 @@ export default function NewRecipePage() {
         </section>
 
         {/* Ingredienser */}
-        <section style={{ background: '#fff', borderRadius: '8px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <section style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '22px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B6B6B', marginBottom: '14px' }}>
             Ingredienser *
           </p>
@@ -356,7 +356,7 @@ export default function NewRecipePage() {
             onClick={addIngredient}
             style={{
               marginTop: '10px', width: '100%', padding: '10px',
-              borderRadius: '8px', border: '1.5px dashed rgba(0,0,0,0.15)',
+              borderRadius: '10px', border: '1.5px dashed rgba(0,0,0,0.15)',
               background: 'transparent', color: '#6B6B6B', fontSize: '13px',
               fontWeight: 500, cursor: 'pointer',
             }}
@@ -366,7 +366,7 @@ export default function NewRecipePage() {
         </section>
 
         {/* Steg */}
-        <section style={{ background: '#fff', borderRadius: '8px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <section style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '22px 20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B6B6B', marginBottom: '14px' }}>
             Tillagningssteg *
           </p>
@@ -403,7 +403,7 @@ export default function NewRecipePage() {
             onClick={addStep}
             style={{
               marginTop: '10px', width: '100%', padding: '10px',
-              borderRadius: '8px', border: '1.5px dashed rgba(0,0,0,0.15)',
+              borderRadius: '10px', border: '1.5px dashed rgba(0,0,0,0.15)',
               background: 'transparent', color: '#6B6B6B', fontSize: '13px',
               fontWeight: 500, cursor: 'pointer',
             }}
@@ -422,7 +422,7 @@ export default function NewRecipePage() {
           disabled={saving}
           style={{
             width: '100%', padding: '15px',
-            borderRadius: '8px',
+            borderRadius: '14px',
             background: saving ? '#9aada4' : '#1C3A2A',
             color: '#fff', fontSize: '15px', fontWeight: 600,
             border: 'none', cursor: saving ? 'not-allowed' : 'pointer',

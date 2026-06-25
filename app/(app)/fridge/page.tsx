@@ -7,6 +7,13 @@ import AddItemDialog from '@/components/fridge/AddItemDialog'
 import SnabbsaldoSection from '@/components/fridge/SnabbsaldoSection'
 import Link from 'next/link'
 import { differenceInDays } from 'date-fns'
+import { RefrigeratorIcon, ArchiveIcon, SnowflakeIcon, AlertTriangleIcon } from 'lucide-react'
+
+const TABS = [
+  { id: 'fridge'  as const, Icon: RefrigeratorIcon, label: 'Kyl' },
+  { id: 'pantry'  as const, Icon: ArchiveIcon,       label: 'Skafferi' },
+  { id: 'freezer' as const, Icon: SnowflakeIcon,     label: 'Frys' },
+]
 
 const CATEGORY_EMOJI: Record<string, string> = {
   dairy: '🥛', meat: '🥩', vegetable: '🥦', fruit: '🍎',
@@ -43,7 +50,7 @@ function expiryDot(expiry: string | null) {
   if (d < 0)  return '#dc2626'
   if (d <= 2)  return '#ea580c'
   if (d <= 5)  return '#d97706'
-  return '#22c55e'
+  return '#2D5A3F'
 }
 
 function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) => void }) {
@@ -54,7 +61,7 @@ function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) 
       className="group relative inline-flex items-center gap-1.5 select-none"
       style={{
         padding: '5px 11px 5px 7px',
-        background: '#ffffff',
+        background: 'var(--surface)',
         borderRadius: '100px',
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         border: '1px solid rgba(0,0,0,0.06)',
@@ -141,7 +148,7 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#F5F3EE' }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-3">
+      <div className="px-4 pt-14 pb-4">
         <div className="flex items-center justify-between mb-4">
           <p style={{ fontSize: '13px', color: '#6B6B6B', fontWeight: 500 }}>
             {loading ? '…' : `${items.length} varor`}
@@ -151,30 +158,26 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
         {/* Tab toggle */}
         <div
           className="flex p-1"
-          style={{ background: '#E8E5DE', borderRadius: '10px' }}
+          style={{ background: '#E8E5DE', borderRadius: 'var(--radius-md)' }}
         >
-          {([
-            { id: 'fridge',  emoji: '🧊', label: 'Kyl' },
-            { id: 'pantry',  emoji: '🏠', label: 'Skafferi' },
-            { id: 'freezer', emoji: '❄️', label: 'Frys' },
-          ] as const).map(t => (
+          {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2"
+              className="flex-1 flex items-center justify-center gap-1.5 py-2.5"
               style={{
-                borderRadius: '8px',
+                borderRadius: '10px',
                 fontSize: '12px',
                 fontWeight: 600,
                 transition: 'all 0.15s',
                 background: tab === t.id ? '#fff' : 'transparent',
-                color: tab === t.id ? '#1A1A1A' : '#6B6B6B',
+                color: tab === t.id ? '#1C3A2A' : '#6B6B6B',
                 boxShadow: tab === t.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
                 border: 'none',
                 cursor: 'pointer',
               }}
             >
-              <span>{t.emoji}</span>
+              <t.Icon size={14} strokeWidth={2.2} />
               {t.label}
             </button>
           ))}
@@ -189,9 +192,9 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
 
       {/* Expiry warning — only on fridge tab */}
       {(isFridge || isFreezer) && expiringSoon.length > 0 && (
-        <div className="mx-4 mb-2 px-4 py-2.5 flex items-center gap-2"
-          style={{ background: '#fff8e6', borderRadius: '8px', border: '1px solid rgba(212,133,10,0.2)' }}>
-          <span style={{ fontSize: '14px' }}>⚠️</span>
+        <div className="mx-4 mb-3 px-4 py-3 flex items-center gap-2"
+          style={{ background: '#fff8e6', borderRadius: 'var(--radius-md)', border: '1px solid rgba(212,133,10,0.2)' }}>
+          <AlertTriangleIcon size={15} style={{ color: '#7a4f00', flexShrink: 0 }} strokeWidth={2.2} />
           <p style={{ fontSize: '12px', color: '#7a4f00', fontWeight: 500 }}>
             {expiringSoon.map(i => i.name).join(', ')} håller på att gå ut
           </p>
@@ -205,19 +208,19 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
           background: 'linear-gradient(180deg, #dceef8 0%, #c8e0f4 40%, #b8d4ee 100%)',
           boxShadow: 'inset 0 2px 10px rgba(255,255,255,0.8), inset 0 -2px 6px rgba(0,60,120,0.1), 0 2px 12px rgba(0,0,0,0.1)',
           border: '1.5px solid #90c0e0',
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           minHeight: '400px',
         } : isFridge ? {
           background: 'linear-gradient(180deg, #e8ecef 0%, #dde3e8 40%, #d5dde3 100%)',
           boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.7), inset 0 -2px 6px rgba(0,0,0,0.08), 0 2px 12px rgba(0,0,0,0.1)',
           border: '1.5px solid #c4cfd6',
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           minHeight: '400px',
         } : {
           background: 'linear-gradient(180deg, #f0e6d3 0%, #e8d8c0 40%, #dfd0b4 100%)',
           boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.6), 0 2px 12px rgba(0,0,0,0.08)',
           border: '1.5px solid #c8b89a',
-          borderRadius: '16px',
+          borderRadius: 'var(--radius-lg)',
           minHeight: '400px',
         }}
       >
@@ -231,12 +234,16 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <div className="text-5xl animate-pulse">{isFreezer ? '❄️' : isFridge ? '🧊' : '📦'}</div>
+            <div className="animate-pulse" style={{ color: 'rgba(0,0,0,0.2)' }}>
+              {isFreezer ? <SnowflakeIcon size={40} strokeWidth={1.5}/> : isFridge ? <RefrigeratorIcon size={40} strokeWidth={1.5}/> : <ArchiveIcon size={40} strokeWidth={1.5}/>}
+            </div>
             <p style={{ fontSize: '13px', color: '#9a9a9a' }}>Laddar…</p>
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 gap-2">
-            <div className="text-5xl opacity-25">{isFreezer ? '❄️' : isFridge ? '🧊' : '📦'}</div>
+            <div style={{ color: 'rgba(0,0,0,0.18)' }}>
+              {isFreezer ? <SnowflakeIcon size={40} strokeWidth={1.2}/> : isFridge ? <RefrigeratorIcon size={40} strokeWidth={1.2}/> : <ArchiveIcon size={40} strokeWidth={1.2}/>}
+            </div>
             <p style={{ fontSize: '13px', color: '#9a9a9a' }}>
               {isFreezer ? 'Frysen är tom' : isFridge ? 'Kylskåpet är tomt' : 'Skafferiet är tomt'}
             </p>
@@ -294,11 +301,11 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
       </div>
 
       {/* Bottom buttons */}
-      <div className="px-3 pb-28 flex flex-col gap-2">
+      <div className="px-4 pb-28 flex flex-col gap-3">
         <Link
           href="/scan"
           className="pressable flex items-center justify-center gap-2 py-4 text-sm font-semibold"
-          style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: '8px' }}
+          style={{ background: '#1C3A2A', color: '#fff', textDecoration: 'none', borderRadius: 'var(--radius-md)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
           Skanna kvitto / AI-foto
@@ -306,14 +313,14 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
         <button
           onClick={() => setDialogOpen(true)}
           className="pressable py-3.5 text-sm font-semibold"
-          style={{ background: '#fff', color: '#1A1A1A', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: '8px' }}
+          style={{ background: 'var(--surface)', color: '#1A1A1A', border: '1.5px solid rgba(0,0,0,0.1)', borderRadius: 'var(--radius-md)' }}
         >
           + Lägg till {isFreezer ? 'frysvara' : isFridge ? 'kylvara' : 'skafferivara'} manuellt
         </button>
 
         {(isFridge || isFreezer) && (
           <div className="flex items-center justify-center gap-4 pt-1">
-            {[['#22c55e','OK'],['#d97706','≤5 d'],['#ea580c','≤2 d'],['#dc2626','Gått ut']].map(([c,l]) => (
+            {[['#2D5A3F','OK'],['#d97706','≤5 d'],['#ea580c','≤2 d'],['#dc2626','Gått ut']].map(([c,l]) => (
               <div key={l} className="flex items-center gap-1">
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: c, display: 'inline-block' }} />
                 <span style={{ fontSize: '10px', color: '#9aa5a0' }}>{l}</span>

@@ -10,11 +10,11 @@ import IngredientChecklist from '@/components/recipes/IngredientChecklist'
 import CookingSteps from '@/components/recipes/CookingSteps'
 
 const GRADIENTS = [
-  'linear-gradient(135deg, #f59e0b 0%, #ea580c 100%)',
-  'linear-gradient(135deg, #34d399 0%, #0d9488 100%)',
-  'linear-gradient(135deg, #fb7185 0%, #e11d48 100%)',
-  'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
-  'linear-gradient(135deg, #fde68a 0%, #f59e0b 100%)',
+  'linear-gradient(135deg, #d97706 0%, #c2450a 100%)',  // saffron → paprika
+  'linear-gradient(135deg, #2D5A3F 0%, #1C3A2A 100%)',  // forest mid → deep
+  'linear-gradient(135deg, #9e3423 0%, #7a1f14 100%)',  // clay → terracotta
+  'linear-gradient(135deg, #5c4033 0%, #3d2b1f 100%)',  // espresso → walnut
+  'linear-gradient(135deg, #c9a84c 0%, #8b6914 100%)',  // turmeric → saffron
 ]
 const FOOD_EMOJIS = ['🍝', '🥘', '🫕', '🥗', '🍲', '🫔']
 
@@ -145,22 +145,24 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
 
       {/* Stats bar */}
       <div style={{
-        display: 'flex', gap: '0',
-        background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.07)',
+        display: 'flex', margin: '16px 16px 0',
+        background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-sm)',
+        overflow: 'hidden',
       }}>
-        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ flex: 1, padding: '16px 12px', textAlign: 'center', borderRight: '1px solid rgba(28,22,16,0.07)' }}>
           <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.cook_time_minutes}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>minuter</p>
         </div>
-        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ flex: 1, padding: '16px 12px', textAlign: 'center', borderRight: '1px solid rgba(28,22,16,0.07)' }}>
           <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.ingredients?.length ?? 0}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>ingredienser</p>
         </div>
-        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center', borderRight: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ flex: 1, padding: '16px 12px', textAlign: 'center', borderRight: '1px solid rgba(28,22,16,0.07)' }}>
           <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>{recipe.steps?.length ?? 0}</p>
           <p style={{ fontSize: '10px', fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>steg</p>
         </div>
-        <div style={{ flex: 1, padding: '14px 16px', textAlign: 'center' }}>
+        <div style={{ flex: 1, padding: '16px 12px', textAlign: 'center' }}>
           <p style={{ fontSize: '18px', fontWeight: 700, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
             {avgRating ? avgRating.toFixed(1) : '—'}
           </p>
@@ -168,10 +170,10 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
         </div>
       </div>
 
-      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
         {/* Ingredient checklist */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <IngredientChecklist
             ingredients={recipe.ingredients ?? []}
             fridgeMap={fridgeMap}
@@ -179,7 +181,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
         </div>
 
         {/* Cooking steps */}
-        <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '20px', boxShadow: 'var(--shadow-sm)', border: '1px solid rgba(28,22,16,0.04)' }}>
           <CookingSteps steps={recipe.steps ?? []} />
         </div>
 

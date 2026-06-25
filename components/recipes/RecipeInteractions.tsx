@@ -105,9 +105,9 @@ export default function RecipeInteractions({
         disabled={!isLoggedIn || liking}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-          background: liked ? '#FFF0F0' : '#fff',
+          background: liked ? '#FFF0F0' : 'var(--surface)',
           border: `1.5px solid ${liked ? 'rgba(220,38,38,0.3)' : 'rgba(0,0,0,0.1)'}`,
-          borderRadius: '16px', padding: '16px 20px',
+          borderRadius: 'var(--radius-lg)', padding: '16px 20px',
           cursor: isLoggedIn ? 'pointer' : 'default',
           width: '100%', transition: 'all 0.15s',
         }}
@@ -137,7 +137,7 @@ export default function RecipeInteractions({
       </button>
 
       {/* Rating + comment */}
-      <div style={{ background: '#fff', borderRadius: '16px', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', padding: '20px', border: '1px solid rgba(0,0,0,0.07)' }}>
 
         {/* Average */}
         {avgRating !== null && ratingCount > 0 && (
@@ -162,7 +162,7 @@ export default function RecipeInteractions({
 
         {/* Success state */}
         {submitted && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: '#EBF2ED', borderRadius: '12px', marginBottom: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', background: '#EBF2ED', borderRadius: 'var(--radius-md)', marginBottom: '14px' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="2.5" strokeLinecap="round">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
@@ -223,8 +223,8 @@ export default function RecipeInteractions({
               placeholder="Hur blev rätten? Tips, ändringar..."
               rows={3}
               style={{
-                width: '100%', padding: '12px', borderRadius: '10px',
-                border: '1.5px solid rgba(0,0,0,0.12)', background: '#FAFAF8',
+                width: '100%', padding: '12px', borderRadius: 'var(--radius-sm)',
+                border: '1.5px solid rgba(0,0,0,0.12)', background: 'var(--surface)',
                 fontSize: '14px', color: '#1A1A1A', lineHeight: 1.5,
                 resize: 'none', outline: 'none', fontFamily: 'inherit',
                 boxSizing: 'border-box',
@@ -234,7 +234,7 @@ export default function RecipeInteractions({
               <button
                 onClick={() => { setPendingRating(null); setComment('') }}
                 style={{
-                  flex: 1, padding: '12px', borderRadius: '10px',
+                  flex: 1, padding: '12px', borderRadius: 'var(--radius-sm)',
                   background: 'transparent', border: '1.5px solid rgba(0,0,0,0.12)',
                   fontSize: '14px', fontWeight: 600, color: '#6B6B6B', cursor: 'pointer',
                 }}

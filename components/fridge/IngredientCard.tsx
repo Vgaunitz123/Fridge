@@ -13,17 +13,17 @@ function expiryInfo(expiryDate: string | null) {
   if (days === 0) return { label: 'Idag', bg: '#fef2f2', color: '#dc2626' }
   if (days === 1) return { label: 'Imorgon', bg: '#fff7ed', color: '#ea580c' }
   if (days <= 3) return { label: `${days} dagar`, bg: '#fffbeb', color: '#d97706' }
-  return { label: `${days} dagar`, bg: '#f0fdf4', color: '#16a34a' }
+  return { label: `${days} dagar`, bg: '#EBF2ED', color: '#2D5A3F' }
 }
 
 const CATEGORY_STYLE: Record<string, { emoji: string; bg: string }> = {
-  dairy:     { emoji: '🥛', bg: '#eff6ff' },
-  meat:      { emoji: '🥩', bg: '#fff1f2' },
-  vegetable: { emoji: '🥦', bg: '#f0fdf4' },
-  fruit:     { emoji: '🍎', bg: '#fef2f2' },
-  bread:     { emoji: '🍞', bg: '#fffbeb' },
-  pantry:    { emoji: '🧂', bg: '#f8fafc' },
-  other:     { emoji: '🥡', bg: '#faf7f2' },
+  dairy:     { emoji: '🥛', bg: '#F0EDE8' },   // warm sand
+  meat:      { emoji: '🥩', bg: '#F5EBE6' },   // warm blush
+  vegetable: { emoji: '🥦', bg: '#EBF2ED' },   // light forest
+  fruit:     { emoji: '🍎', bg: '#F5EBE6' },   // warm blush
+  bread:     { emoji: '🍞', bg: '#FBF3E4' },   // warm amber
+  pantry:    { emoji: '🧂', bg: '#F0EDE8' },   // warm sand
+  other:     { emoji: '🥡', bg: '#FAF7F2' },   // off-white
 }
 
 export default function IngredientCard({ item, onDelete }: Props) {
@@ -32,11 +32,12 @@ export default function IngredientCard({ item, onDelete }: Props) {
 
   return (
     <div
-      className="rounded-2xl p-3.5 relative group cursor-default transition-all duration-200"
+      className="p-3.5 relative group cursor-default transition-all duration-200"
       style={{
         background: bg,
         border: '1px solid rgba(28,25,23,0.06)',
         boxShadow: '0 1px 2px rgba(28,25,23,0.04)',
+        borderRadius: 'var(--radius-lg)',
       }}
     >
       <button

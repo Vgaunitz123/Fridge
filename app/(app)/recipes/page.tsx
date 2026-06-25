@@ -7,6 +7,7 @@ import RecipeCard from '@/components/recipes/RecipeCard'
 import { calcMatch, matchLabel, matchColors, type MatchResult } from '@/lib/matchRecipe'
 import ToplistaSection from '@/components/recipes/ToplistaSection'
 import Link from 'next/link'
+import { ChefHatIcon, SearchIcon } from 'lucide-react'
 
 const FILTERS = ['Alla', 'Snabbt', 'Vegetarisk', 'Barnvänl', 'Veganskt', 'Glutenfritt']
 
@@ -29,7 +30,7 @@ function FeaturedMatchBadge({ match }: { match: MatchResult }) {
   const { bg, text, bar } = matchColors(match.pct)
   const label = matchLabel(match)
   return (
-    <div style={{ margin: '0 16px 14px', borderRadius: '8px', background: bg, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ margin: '0 16px 14px', borderRadius: 'var(--radius-sm)', background: bg, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
         <div style={{ width: `${match.pct}%`, height: '100%', background: bar, borderRadius: '2px' }} />
       </div>
@@ -45,31 +46,31 @@ function FeaturedCard({ recipe, match }: { recipe: FeaturedRecipe; match?: Match
   const photo = !err && imageUrl
   const isClickable = isRecipeClickable(recipe.id)
   const inner = (
-      <div className="card-hover fade-up overflow-hidden" style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.08)' }}>
-        <div className="relative overflow-hidden" style={{ height: '200px' }}>
+      <div className="card-hover fade-up overflow-hidden" style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+        <div className="relative overflow-hidden" style={{ height: '210px' }}>
           {photo
             ? <img src={imageUrl} alt={recipe.title} onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ width: '100%', height: '100%', background: pickColor(recipe.title) }} />
           }
-          <div className="absolute top-3 right-3 px-2 py-1 text-xs font-semibold" style={{ background: '#1C3A2A', color: '#fff', borderRadius: '4px', fontSize: '11px' }}>
+          <div className="absolute top-3 right-3 px-2.5 py-1 text-xs font-semibold" style={{ background: '#1C3A2A', color: '#fff', borderRadius: 'var(--radius-xs)', fontSize: '11px' }}>
             {recipe.cook_time_minutes} min
           </div>
           <div className="absolute bottom-3 left-3 flex gap-1.5 flex-wrap">
             {recipe.tags.slice(0, 2).map(t => (
-              <span key={t} style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(6px)', color: '#fff', borderRadius: '3px' }}>{t}</span>
+              <span key={t} style={{ padding: '2px 8px', fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.42)', backdropFilter: 'blur(6px)', color: '#fff', borderRadius: 'var(--radius-xs)' }}>{t}</span>
             ))}
           </div>
         </div>
-        <div style={{ padding: '14px 16px 10px' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '4px' }}>{recipe.title}</h3>
-          <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>{recipe.description}</p>
+        <div style={{ padding: '16px 18px 14px' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '17px', color: '#1A1A1A', marginBottom: '5px' }}>{recipe.title}</h3>
+          <p style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.55 }}>{recipe.description}</p>
         </div>
         {match && <FeaturedMatchBadge match={match} />}
       </div>
   )
   return isClickable
-    ? <Link href={`/recipes/${recipe.id}`} style={{ display: 'block', textDecoration: 'none', marginBottom: '12px' }}>{inner}</Link>
-    : <div style={{ marginBottom: '12px' }}>{inner}</div>
+    ? <Link href={`/recipes/${recipe.id}`} style={{ display: 'block', textDecoration: 'none', marginBottom: '16px' }}>{inner}</Link>
+    : <div style={{ marginBottom: '16px' }}>{inner}</div>
 }
 
 const UNS = 'https://images.unsplash.com/photo-'
@@ -243,8 +244,8 @@ export default function RecipesPage() {
   return (
     <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-3 flex items-center justify-between">
-        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
+      <div className="px-4 pt-14 pb-4 flex items-center justify-between">
+        <h1 style={{ fontSize: '28px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
           Recept &amp; Mat
         </h1>
         <div className="flex items-center gap-2">
@@ -278,7 +279,7 @@ export default function RecipesPage() {
 
       {/* Search */}
       <div className="px-4 mb-3">
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="flex items-center gap-3 px-4 py-3" style={{ borderRadius: 'var(--radius-md)', background: 'var(--surface)', border: '1.5px solid rgba(28,22,16,0.09)' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
@@ -345,12 +346,12 @@ export default function RecipesPage() {
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl"
           style={{ background: '#1C3A2A', color: '#fff' }}
         >
-          <span style={{ fontSize: '14px', fontWeight: 600 }}>👨‍🍳 Generera recept med dina varor</span>
+          <span style={{ fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}><ChefHatIcon size={15} strokeWidth={2}/> Generera recept med dina varor</span>
           <span style={{ fontSize: '18px' }}>{showGenerate ? '−' : '+'}</span>
         </button>
 
         {showGenerate && (
-          <div className="mt-2 rounded-xl p-4 fade-up" style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
+          <div className="mt-2 p-4 fade-up" style={{ borderRadius: 'var(--radius-md)', background: 'var(--surface)', border: '1.5px solid rgba(28,22,16,0.09)' }}>
             <div className="flex items-center justify-between mb-2.5">
               <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Välj ingredienser
@@ -449,7 +450,7 @@ export default function RecipesPage() {
               + Nytt recept
             </Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             {myRecipes.map(r => <RecipeCard key={r.id} recipe={r} match={getMatch(r)} />)}
           </div>
         </div>
@@ -461,7 +462,7 @@ export default function RecipesPage() {
           <p style={{ fontSize: '12px', fontWeight: 700, color: '#6b6f6b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '10px' }}>
             Genererade recept
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             {generatedRecipes.map(r => <RecipeCard key={r.id ?? r.title} recipe={r} match={getMatch(r)} />)}
           </div>
         </div>
@@ -487,7 +488,7 @@ export default function RecipesPage() {
       {/* Browse recipes */}
       {displayRecipes && displayRecipes.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 px-4">
-          <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
+          <div style={{ marginBottom: '12px', color: 'rgba(0,0,0,0.18)' }}><SearchIcon size={48} strokeWidth={1.2}/></div>
           <p style={{ fontSize: '16px', fontWeight: 600, color: '#111211', marginBottom: '4px' }}>Inga recept hittades</p>
           <p style={{ fontSize: '13px', color: '#6b6f6b', textAlign: 'center' }}>
             Prova ett annat sökord eller ändra filtret
@@ -502,7 +503,7 @@ export default function RecipesPage() {
       )}
 
       {displayRecipes && displayRecipes.length > 0 && (
-        <div className="px-4 pb-28">
+        <div className="px-4 pb-28 pt-2">
           {!externalLoading && !externalRecipes && (
             <p style={{ fontSize: '11px', color: '#9B9B9B', marginBottom: '10px', textAlign: 'center' }}>
               Inspiration — klicka på dina egna recept ovan för att laga
@@ -515,7 +516,7 @@ export default function RecipesPage() {
           )}
 
           {/* Grid — staggered entry */}
-          <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             {displayRecipes.slice(1).map(r => (
               <RecipeCard key={r.id} recipe={r as never} showLink={isRecipeClickable(r.id)} match={getMatch(r)} />
             ))}

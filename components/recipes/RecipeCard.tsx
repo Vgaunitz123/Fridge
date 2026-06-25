@@ -28,13 +28,13 @@ function MatchBadge({ match }: { match: MatchResult }) {
 
   return (
     <div style={{
-      margin: '0 12px 10px',
-      borderRadius: '8px',
+      margin: '0 14px 12px',
+      borderRadius: '10px',
       background: bg,
-      padding: '5px 8px',
+      padding: '6px 10px',
       display: 'flex',
       alignItems: 'center',
-      gap: '6px',
+      gap: '8px',
     }}>
       {/* Progress bar */}
       <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.08)', borderRadius: '2px', overflow: 'hidden' }}>
@@ -63,9 +63,9 @@ function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchRe
     <div
       className="card-hover fade-up overflow-hidden"
       style={{
-        background: '#fff',
-        borderRadius: '8px',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.06)',
+        background: 'var(--surface)',
+        borderRadius: 'var(--radius-lg)',
+        boxShadow: 'var(--shadow-sm)',
       }}
     >
       {/* Hero */}
@@ -83,15 +83,15 @@ function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchRe
 
         {/* Time badge */}
         <div
-          className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5"
-          style={{ background: '#1C3A2A', color: '#fff', borderRadius: '4px', fontSize: '11px', fontWeight: 600 }}
+          className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1"
+          style={{ background: '#1C3A2A', color: '#fff', borderRadius: 'var(--radius-xs)', fontSize: '11px', fontWeight: 600 }}
         >
           {recipe.cook_time_minutes} min
         </div>
 
         {/* Tags */}
         {recipe.tags && recipe.tags.length > 0 && (
-          <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap">
+          <div className="absolute bottom-2.5 left-2.5 flex gap-1 flex-wrap">
             {recipe.tags.slice(0, 2).map(tag => (
               <span
                 key={tag}
@@ -103,8 +103,8 @@ function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchRe
                   fontWeight: 600,
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase',
-                  padding: '2px 7px',
-                  borderRadius: '3px',
+                  padding: '2px 8px',
+                  borderRadius: 'var(--radius-xs)',
                 }}
               >
                 {tag}
@@ -115,15 +115,15 @@ function CardInner({ recipe, match }: { recipe: Props['recipe']; match?: MatchRe
       </div>
 
       {/* Content */}
-      <div className="p-3 pb-2">
+      <div style={{ padding: '14px 16px 12px' }}>
         <h3
-          className="leading-snug mb-1"
-          style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '14px', color: '#1A1A1A' }}
+          className="leading-snug mb-1.5"
+          style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: '15px', color: '#1A1A1A' }}
         >
           {recipe.title}
         </h3>
         {recipe.description && (
-          <p className="line-clamp-2" style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.5 }}>
+          <p className="line-clamp-2" style={{ fontSize: '13px', color: '#6B6B6B', lineHeight: 1.55 }}>
             {recipe.description}
           </p>
         )}

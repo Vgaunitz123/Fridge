@@ -67,7 +67,7 @@ function UserCard({ user, currentUserId }: { user: UserResult; currentUserId: st
 
   return (
     <Link href={`/profile/${user.user_id}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#fff', borderRadius: '14px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', marginBottom: '8px', boxShadow: 'var(--shadow-xs)' }}>
         <Avatar username={user.username} avatarUrl={user.avatar_url} size={46} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: '14px', fontWeight: 700, color: '#1A1A1A', marginBottom: '2px' }}>@{user.username}</p>
@@ -102,7 +102,7 @@ function RecipeCard({ recipe }: { recipe: RecipeResult }) {
   const href = recipe.id.startsWith('mealdb_') || /^[0-9a-f-]{36}$/.test(recipe.id)
     ? `/recipes/${recipe.id}` : null
   const inner = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: '#fff', borderRadius: '14px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', marginBottom: '8px', boxShadow: 'var(--shadow-xs)' }}>
       <div style={{ width: '52px', height: '52px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#E8E5DE' }}>
         {recipe.image_url
           ? <img src={recipe.image_url} alt={recipe.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -124,7 +124,7 @@ function RecipeCard({ recipe }: { recipe: RecipeResult }) {
 function VideoCard({ video }: { video: VideoResult }) {
   return (
     <Link href={`/profile/${video.user_id}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: '#fff', borderRadius: '14px', marginBottom: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', marginBottom: '8px', boxShadow: 'var(--shadow-xs)' }}>
         <div style={{ width: '52px', height: '52px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, background: '#111', position: 'relative' }}>
           {video.thumbnail_url
             ? <img src={video.thumbnail_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -257,9 +257,9 @@ export default function SearchPage() {
             placeholder="Sök skapare, recept, videor…"
             style={{
               width: '100%', padding: '11px 14px 11px 40px',
-              borderRadius: '12px', border: '1.5px solid rgba(0,0,0,0.09)',
-              background: '#fff', fontSize: '15px', color: '#1A1A1A',
-              boxSizing: 'border-box', boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              borderRadius: 'var(--radius-sm)', border: '1.5px solid rgba(0,0,0,0.09)',
+              background: 'var(--surface)', fontSize: '15px', color: '#1A1A1A',
+              boxSizing: 'border-box', boxShadow: 'var(--shadow-xs)',
             }}
           />
           {query && (

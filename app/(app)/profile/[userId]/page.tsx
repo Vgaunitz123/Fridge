@@ -68,11 +68,11 @@ function PostSheet({ post, username, onClose }: { post: ProfilePost; username: s
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
-      <div className="relative" style={{ background: '#FAFAF8', borderRadius: '24px 24px 0 0', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className="relative" style={{ background: 'var(--surface)', borderRadius: '24px 24px 0 0', maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="flex justify-center pt-3 pb-0">
           <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.1)' }} />
         </div>
-        <div style={{ margin: '12px 16px 0', borderRadius: '16px', overflow: 'hidden', position: 'relative', aspectRatio: '4/3', background: '#0a0a0a' }}>
+        <div style={{ margin: '12px 16px 0', borderRadius: 'var(--radius-lg)', overflow: 'hidden', position: 'relative', aspectRatio: '4/3', background: '#0a0a0a' }}>
           {displayImg
             ? <img src={displayImg} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="1.5"><polygon points="5,3 19,12 5,21"/></svg></div>
@@ -215,7 +215,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
 
       {/* Header */}
       <div style={{ padding: '52px 16px 0', display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-        <Link href="/search" style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#fff', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', flexShrink: 0 }}>
+        <Link href="/search" style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'var(--surface)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: '#1A1A1A', flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>
         </Link>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500, color: '#1A1A1A', flex: 1 }}>Profil</h1>
@@ -227,7 +227,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
       </div>
 
       {/* Profile card */}
-      <div style={{ margin: '0 16px 14px', background: '#fff', borderRadius: '20px', padding: '24px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ margin: '0 16px 14px', background: 'var(--surface)', borderRadius: '20px', padding: '24px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
           <Avatar username={displayName} avatarUrl={profile?.avatar_url ?? null} size={72} />
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -256,7 +256,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
             disabled={followLoading}
             style={{
               width: '100%', marginTop: '16px', padding: '10px',
-              borderRadius: '12px', fontSize: '14px', fontWeight: 700,
+              borderRadius: 'var(--radius-sm)', fontSize: '14px', fontWeight: 700,
               background: isFollowing ? 'transparent' : '#1C3A2A',
               color: isFollowing ? '#1C3A2A' : '#fff',
               border: isFollowing ? '1.5px solid #1C3A2A' : '1.5px solid transparent',
@@ -276,7 +276,7 @@ export default function UserProfilePage({ params }: { params: Promise<{ userId: 
       ) : (
         <>
           {/* Stats */}
-          <div style={{ margin: '0 16px 14px', background: '#fff', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', display: 'flex' }}>
+          <div style={{ margin: '0 16px 14px', background: 'var(--surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-xs)', display: 'flex' }}>
             {[
               { value: posts.length,    label: 'Inlägg' },
               { value: videos.length,   label: 'Videor' },

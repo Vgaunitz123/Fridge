@@ -116,7 +116,7 @@ function PostCard({
               background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)',
               color: '#fff', fontSize: '10px', fontWeight: 600,
               letterSpacing: '0.06em', textTransform: 'uppercase',
-              padding: '2px 7px', borderRadius: '3px',
+              padding: '2px 7px', borderRadius: 'var(--radius-xs)',
             }}>{t}</span>
           ))}
         </div>
@@ -127,7 +127,7 @@ function PostCard({
   return (
     <div
       className="card-hover fade-up overflow-hidden"
-      style={{ background: '#fff', borderRadius: '8px', boxShadow: '0 1px 2px rgba(0,0,0,0.05), 0 2px 8px rgba(0,0,0,0.06)' }}
+      style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}
     >
       {/* Video posts → link to video feed; image posts → just the card */}
       {isVideo
@@ -136,7 +136,7 @@ function PostCard({
       }
 
       {/* Body */}
-      <div style={{ padding: '12px 14px 10px' }}>
+      <div style={{ padding: '14px 16px 14px' }}>
         {/* Author row */}
         <div className="flex items-center gap-2 mb-2">
           {post.user_id ? (
@@ -383,7 +383,7 @@ function NewPostDrawer({
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={onClose} />
 
-      <div className="relative scale-in" style={{ background: '#FAFAF8', borderRadius: '20px 20px 0 0', maxHeight: '94vh', overflowY: 'auto' }}>
+      <div className="relative scale-in" style={{ background: 'var(--surface)', borderRadius: '20px 20px 0 0', maxHeight: '94vh', overflowY: 'auto' }}>
         <div className="flex justify-center pt-3 pb-2">
           <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
         </div>
@@ -423,7 +423,7 @@ function NewPostDrawer({
                 onChange={handleImageFileUpload}
               />
               {imageUploading ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: '2px dashed rgba(0,0,0,0.12)', borderRadius: '12px', padding: '32px', background: '#FAFAF8' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', border: '2px dashed rgba(0,0,0,0.12)', borderRadius: 'var(--radius-md)', padding: '32px', background: 'var(--surface)' }}>
                   <div style={{ width: '20px', height: '20px', border: '2px solid #1C3A2A', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                   <span style={{ fontSize: '14px', color: '#6B6B6B' }}>Laddar upp…</span>
                 </div>
@@ -442,7 +442,7 @@ function NewPostDrawer({
               ) : (
                 <button
                   onClick={() => imageFileInputRef.current?.click()}
-                  style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '2px dashed rgba(0,0,0,0.15)', borderRadius: '12px', padding: '32px 16px', background: '#FAFAF8', cursor: 'pointer' }}
+                  style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '2px dashed rgba(0,0,0,0.15)', borderRadius: 'var(--radius-md)', padding: '32px 16px', background: 'var(--surface)', cursor: 'pointer' }}
                 >
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -466,7 +466,7 @@ function NewPostDrawer({
                 </label>
                 <input type="url" value={tiktokUrl} onChange={e => setTiktokUrl(e.target.value)}
                   placeholder="https://www.tiktok.com/@ditt_konto/video/…"
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '13px', color: '#1A1A1A', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)', fontSize: '13px', color: '#1A1A1A', boxSizing: 'border-box' }} />
                 <p style={{ fontSize: '11px', color: '#9B9B9B', marginTop: '4px' }}>
                   Öppna TikTok → din video → Dela → Kopiera länk
                 </p>
@@ -500,7 +500,7 @@ function NewPostDrawer({
                 <label className="pressable" style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
                   padding: '20px', borderRadius: '12px', cursor: 'pointer',
-                  border: '2px dashed rgba(0,0,0,0.15)', background: videoFile ? '#f0fdf4' : '#fafaf8',
+                  border: '2px dashed rgba(0,0,0,0.15)', background: videoFile ? '#EBF2ED' : '#fafaf8',
                 }}>
                   <input type="file" accept="video/mp4,video/quicktime,video/webm,video/*" className="hidden"
                     onChange={e => setVideoFile(e.target.files?.[0] ?? null)} />
@@ -559,7 +559,7 @@ function NewPostDrawer({
             <textarea ref={textareaRef} value={caption} onChange={e => setCaption(e.target.value)}
               placeholder="Vad lagade du? Dela receptet, tipset eller känslan…"
               rows={3}
-              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff', fontSize: '14px', color: '#1A1A1A', resize: 'none', lineHeight: 1.55, boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)', fontSize: '14px', color: '#1A1A1A', resize: 'none', lineHeight: 1.55, boxSizing: 'border-box' }} />
           </div>
 
           {/* Tags */}
@@ -733,8 +733,8 @@ export default function CommunityPage() {
   return (
     <div style={{ background: '#F5F3EE', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="px-4 pt-12 pb-3 flex items-center justify-between">
-        <h1 style={{ fontSize: '26px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
+      <div className="px-4 pt-14 pb-4 flex items-center justify-between">
+        <h1 style={{ fontSize: '28px', fontWeight: 500, color: '#1A1A1A', fontFamily: 'var(--font-display)' }}>
           Community
         </h1>
         <button
@@ -764,8 +764,8 @@ export default function CommunityPage() {
             onChange={e => setQuery(e.target.value)}
             placeholder="Sök skapare, recept, videor…"
             style={{
-              width: '100%', padding: '10px 36px 10px 36px', borderRadius: '12px',
-              border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff',
+              width: '100%', padding: '10px 36px 10px 36px', borderRadius: 'var(--radius-sm)',
+              border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)',
               fontSize: '14px', color: '#1A1A1A', boxSizing: 'border-box', fontFamily: 'inherit',
               outline: 'none',
             }}
@@ -823,7 +823,7 @@ export default function CommunityPage() {
                   <div className="flex flex-col gap-2">
                     {searchResults.users.map(u => (
                       <Link key={u.id} href={`/profile/${u.id}`} style={{ textDecoration: 'none' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-xs)' }}>
                           <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: '#1C3A2A', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                             {u.avatar_url ? (
                               <img src={u.avatar_url} alt={u.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -847,7 +847,7 @@ export default function CommunityPage() {
                   <div className="flex flex-col gap-2">
                     {searchResults.recipes.map(r => (
                       <Link key={r.id} href={`/recipes/${r.id}`} style={{ textDecoration: 'none' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-xs)' }}>
                           <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#E8E5DE', flexShrink: 0, overflow: 'hidden' }}>
                             {r.image_url ? (
                               <img src={r.image_url} alt={r.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -871,7 +871,7 @@ export default function CommunityPage() {
                   <div className="flex flex-col gap-2">
                     {searchResults.videos.map(v => (
                       <Link key={v.id} href="/inspiration" style={{ textDecoration: 'none' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', borderRadius: '12px', padding: '10px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--surface)', borderRadius: 'var(--radius-md)', padding: '10px 14px', boxShadow: 'var(--shadow-xs)' }}>
                           <div style={{ width: '44px', height: '44px', borderRadius: '8px', background: '#111', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {v.thumbnail_url ? (
                               <img src={v.thumbnail_url} alt={v.caption} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -901,16 +901,16 @@ export default function CommunityPage() {
       {/* Demo notice */}
       {isDemo && !loading && (
         <div className="mx-4 mb-4 px-4 py-2.5 rounded-xl flex items-center gap-2"
-          style={{ background: '#f0f9ff', border: '1px solid rgba(3,105,161,0.18)' }}>
+          style={{ background: '#EBF2ED', border: '1px solid rgba(28,58,42,0.18)' }}>
           <span style={{ fontSize: '14px' }}>✨</span>
-          <p style={{ fontSize: '12px', color: '#0369a1' }}>
+          <p style={{ fontSize: '12px', color: '#1C3A2A' }}>
             Exempelinlägg — bli den första att dela på riktigt!
           </p>
         </div>
       )}
 
       {/* Feed */}
-      <div className="px-4 pb-28">
+      <div className="px-4 pb-28 pt-2">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-6 h-6 rounded-full border-2 border-transparent animate-spin" style={{ borderTopColor: '#1C3A2A' }} />
@@ -937,13 +937,13 @@ export default function CommunityPage() {
           <>
             {/* Featured — first post full-width */}
             {displayed[0] && (
-              <div className="mb-3">
+              <div className="mb-4">
                 <PostCard post={displayed[0]} onLike={handleLike} featured />
               </div>
             )}
 
             {/* Staggered 2-col grid */}
-            <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="stagger" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
               {displayed.slice(1).map(post => (
                 <PostCard key={post.id} post={post} onLike={handleLike} />
               ))}
@@ -964,7 +964,7 @@ export default function CommunityPage() {
       {actionSheetOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end">
           <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }} onClick={() => setActionSheetOpen(false)} />
-          <div className="relative" style={{ background: '#FAFAF8', borderRadius: '20px 20px 0 0', padding: '8px 16px 40px' }}>
+          <div className="relative" style={{ background: 'var(--surface)', borderRadius: '20px 20px 0 0', padding: '8px 16px 40px' }}>
             <div className="flex justify-center py-3">
               <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(0,0,0,0.12)' }} />
             </div>
@@ -976,7 +976,7 @@ export default function CommunityPage() {
             <button
               onClick={() => { setActionSheetOpen(false); setDrawerOpen(true) }}
               className="pressable w-full flex items-center gap-14px text-left mb-3"
-              style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '14px 16px', cursor: 'pointer' }}
+              style={{ background: 'var(--surface)', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: 'var(--radius-md)', padding: '14px 16px', cursor: 'pointer' }}
             >
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EBF2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: '14px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -993,7 +993,7 @@ export default function CommunityPage() {
               href="/community/create"
               onClick={() => setActionSheetOpen(false)}
               className="pressable w-full flex items-center text-left"
-              style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '14px', padding: '14px 16px', cursor: 'pointer', textDecoration: 'none', display: 'flex' }}
+              style={{ background: 'var(--surface)', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: 'var(--radius-md)', padding: '14px 16px', cursor: 'pointer', textDecoration: 'none', display: 'flex' }}
             >
               <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#EBF2ED', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginRight: '14px' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C3A2A" strokeWidth="1.8" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>

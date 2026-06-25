@@ -45,7 +45,7 @@ export default function IngredientChecklist({ ingredients, fridgeMap }: Props) {
               onClick={() => toggle(i)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '13px 16px', background: isChecked ? '#F0F7F2' : i % 2 === 0 ? '#fff' : '#FAFAF8',
+                padding: '13px 16px', background: isChecked ? '#F0F7F2' : i % 2 === 0 ? 'var(--background)' : 'var(--surface)',
                 borderBottom: i < ingredients.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none',
                 border: 'none', cursor: 'pointer', textAlign: 'left',
                 transition: 'background 0.1s',
@@ -76,7 +76,7 @@ export default function IngredientChecklist({ ingredients, fridgeMap }: Props) {
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {inFridge && !isChecked && (
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#16a34a', background: '#f0fdf4', padding: '2px 7px', borderRadius: '100px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: 700, color: '#2D5A3F', background: '#EBF2ED', padding: '2px 7px', borderRadius: '100px' }}>
                     I kylen
                   </span>
                 )}

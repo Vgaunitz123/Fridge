@@ -44,20 +44,20 @@ export default function FeedPost({
   }
 
   const titleEl = (
-    <h3 className="font-bold text-base leading-snug" style={{ fontFamily: 'var(--font-playfair)', color: '#1c1917' }}>
+    <h3 className="font-bold text-base leading-snug" style={{ fontFamily: 'var(--font-display)', color: '#1c1917' }}>
       {title}
     </h3>
   )
 
   return (
     <div
-      className="rounded-3xl overflow-hidden hover-lift"
-      style={{ background: '#fff', boxShadow: '0 1px 3px rgba(28,25,23,0.06), 0 4px 16px rgba(28,25,23,0.08)' }}
+      className="overflow-hidden hover-lift"
+      style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}
     >
       {/* Hero image area */}
       <div
-        className="h-52 flex items-center justify-center relative"
-        style={{ background: gradient }}
+        className="flex items-center justify-center relative"
+        style={{ background: gradient, minHeight: '200px' }}
       >
         <span className="text-8xl drop-shadow-lg select-none">{emoji}</span>
 
@@ -84,11 +84,11 @@ export default function FeedPost({
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div style={{ padding: '16px 18px 18px' }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             {recipeId ? <Link href={`/recipes/${recipeId}`}>{titleEl}</Link> : titleEl}
-            <p className="text-sm mt-1 line-clamp-2" style={{ color: '#78716c' }}>
+            <p className="text-sm mt-1.5 line-clamp-2" style={{ color: '#78716c', lineHeight: 1.55 }}>
               {caption || description}
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function FeedPost({
         </div>
 
         {/* Author */}
-        <div className="flex items-center gap-2 mt-3 pt-3"
+        <div className="flex items-center gap-2 mt-4 pt-4"
           style={{ borderTop: '1px solid rgba(28,25,23,0.06)' }}>
           <AuthorInitials name={author} />
           <span className="text-xs font-medium" style={{ color: '#78716c' }}>{author}</span>

@@ -31,8 +31,8 @@ const UNITS = ['st', 'g', 'kg', 'dl', 'liter', 'förp', 'burk', 'påse']
 const inputStyle = {
   width: '100%',
   padding: '12px 14px',
-  borderRadius: '12px',
-  background: '#faf7f2',
+  borderRadius: 'var(--radius-sm)',
+  background: 'var(--surface)',
   border: '1.5px solid rgba(28,25,23,0.1)',
   color: '#1c1917',
   fontSize: '14px',
@@ -58,9 +58,9 @@ export default function AddItemDialog({ open, onClose, onAdd, defaultCategory = 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm mx-4 rounded-3xl p-6 border-0" style={{ background: '#fff' }}>
+      <DialogContent className="max-w-sm mx-4 rounded-3xl p-6 border-0" style={{ background: 'var(--surface)' }}>
         <DialogHeader>
-          <DialogTitle style={{ fontFamily: 'var(--font-playfair)', fontSize: '1.25rem', color: '#1c1917' }}>
+          <DialogTitle style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: '#1c1917' }}>
             Lägg till vara
           </DialogTitle>
         </DialogHeader>
@@ -99,7 +99,7 @@ export default function AddItemDialog({ open, onClose, onAdd, defaultCategory = 
                 Enhet
               </label>
               <Select value={unit} onValueChange={v => v && setUnit(v)}>
-                <SelectTrigger className="rounded-xl h-11" style={{ background: '#faf7f2', border: '1.5px solid rgba(28,25,23,0.1)' }}>
+                <SelectTrigger className="h-11" style={{ background: 'var(--surface)', border: '1.5px solid rgba(28,25,23,0.1)', borderRadius: 'var(--radius-sm)' }}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -114,7 +114,7 @@ export default function AddItemDialog({ open, onClose, onAdd, defaultCategory = 
               Kategori
             </label>
             <Select value={category} onValueChange={v => v && setCategory(v)}>
-              <SelectTrigger className="rounded-xl h-11 w-full" style={{ background: '#faf7f2', border: '1.5px solid rgba(28,25,23,0.1)' }}>
+              <SelectTrigger className="h-11 w-full" style={{ background: 'var(--surface)', border: '1.5px solid rgba(28,25,23,0.1)', borderRadius: 'var(--radius-sm)' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -139,19 +139,20 @@ export default function AddItemDialog({ open, onClose, onAdd, defaultCategory = 
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold"
-              style={{ background: '#f0ebe0', color: '#44403c' }}
+              className="flex-1 py-3 text-sm font-semibold"
+              style={{ background: '#f0ebe0', color: '#44403c', borderRadius: 'var(--radius-sm)' }}
             >
               Avbryt
             </button>
             <button
               type="submit"
               disabled={saving || !name}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all"
+              className="flex-1 py-3 text-sm font-semibold transition-all"
               style={{
                 background: saving || !name ? '#a3b8a8' : '#1a4a2e',
                 color: '#faf7f2',
                 cursor: saving || !name ? 'not-allowed' : 'pointer',
+                borderRadius: 'var(--radius-sm)',
               }}
             >
               {saving ? 'Sparar…' : 'Lägg till'}

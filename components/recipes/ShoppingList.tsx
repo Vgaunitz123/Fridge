@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ShoppingCartIcon, StoreIcon, CheckCircle2Icon, PartyPopperIcon, CheckIcon } from 'lucide-react'
 
 type Props = {
   missing: string[]
@@ -24,10 +25,10 @@ export default function ShoppingList({ missing, have }: Props) {
   if (missing.length === 0 && have.length > 0) {
     return (
       <div
-        className="rounded-2xl p-5 flex items-center gap-3"
-        style={{ background: '#f0fdf4', border: '1px solid rgba(26,74,46,0.15)' }}
+        className="p-5 flex items-center gap-3"
+        style={{ background: '#EBF2ED', border: '1px solid rgba(26,74,46,0.15)', borderRadius: 'var(--radius-lg)' }}
       >
-        <span className="text-3xl">🎉</span>
+        <PartyPopperIcon size={28} style={{ color: '#1C3A2A' }} strokeWidth={1.6} />
         <div>
           <p className="font-bold text-sm" style={{ color: '#1a4a2e' }}>Du har allt!</p>
           <p className="text-xs mt-0.5" style={{ color: '#4a7c5a' }}>Alla ingredienser finns i ditt kylskåp. Dags att laga!</p>
@@ -41,21 +42,21 @@ export default function ShoppingList({ missing, have }: Props) {
       {/* What you have */}
       {have.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#16a34a' }}>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#2D5A3F' }}>
             Du har ({have.length})
           </p>
           <div className="space-y-1.5">
             {have.map((item, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl"
-                style={{ background: '#f0fdf4', border: '1px solid rgba(22,163,74,0.15)' }}
+                className="flex items-center gap-3 px-4 py-2.5"
+                style={{ background: '#EBF2ED', border: '1px solid rgba(22,163,74,0.15)', borderRadius: 'var(--radius-md)' }}
               >
                 <div className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                  style={{ background: '#16a34a', color: '#fff' }}>
-                  ✓
+                  style={{ background: '#2D5A3F', color: '#fff' }}>
+                  <CheckIcon size={11} strokeWidth={3} />
                 </div>
-                <span className="text-sm" style={{ color: '#14532d' }}>{item}</span>
+                <span className="text-sm" style={{ color: '#1C3A2A' }}>{item}</span>
               </div>
             ))}
           </div>
@@ -73,16 +74,17 @@ export default function ShoppingList({ missing, have }: Props) {
               <button
                 key={i}
                 onClick={() => toggle(i)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left transition-all"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all"
                 style={{
-                  background: checked.has(i) ? '#f0fdf4' : '#fff5f5',
+                  background: checked.has(i) ? '#EBF2ED' : '#fff5f5',
                   border: `1px solid ${checked.has(i) ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.12)'}`,
+                  borderRadius: 'var(--radius-md)',
                 }}
               >
                 <div
                   className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-xs transition-all"
                   style={{
-                    background: checked.has(i) ? '#16a34a' : 'rgba(220,38,38,0.1)',
+                    background: checked.has(i) ? '#2D5A3F' : 'rgba(220,38,38,0.1)',
                     color: checked.has(i) ? '#fff' : '#dc2626',
                     border: checked.has(i) ? 'none' : '1.5px solid rgba(220,38,38,0.3)',
                   }}
@@ -92,7 +94,7 @@ export default function ShoppingList({ missing, have }: Props) {
                 <span
                   className="text-sm flex-1"
                   style={{
-                    color: checked.has(i) ? '#16a34a' : '#7f1d1d',
+                    color: checked.has(i) ? '#2D5A3F' : '#7f1d1d',
                     textDecoration: checked.has(i) ? 'line-through' : 'none',
                   }}
                 >
@@ -107,17 +109,17 @@ export default function ShoppingList({ missing, have }: Props) {
           {!ordered ? (
             <button
               onClick={() => setShowOrder(true)}
-              className="w-full mt-4 py-4 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-98"
-              style={{ background: '#1a4a2e', color: '#faf7f2' }}
+              className="w-full mt-4 py-4 text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-98"
+              style={{ background: '#1a4a2e', color: '#faf7f2', borderRadius: 'var(--radius-lg)' }}
             >
-              🛒 Beställ saknade varor
+              <ShoppingCartIcon size={15} strokeWidth={2}/> Beställ saknade varor
             </button>
           ) : (
             <div
-              className="mt-4 px-4 py-4 rounded-2xl flex items-center gap-3"
-              style={{ background: '#f0fdf4', border: '1px solid rgba(26,74,46,0.15)' }}
+              className="mt-4 px-4 py-4 flex items-center gap-3"
+              style={{ background: '#EBF2ED', border: '1px solid rgba(26,74,46,0.15)', borderRadius: 'var(--radius-lg)' }}
             >
-              <span className="text-2xl">✅</span>
+              <CheckCircle2Icon size={24} style={{ color: '#1C3A2A' }} strokeWidth={1.8} />
               <div>
                 <p className="font-semibold text-sm" style={{ color: '#1a4a2e' }}>Beställning lagd!</p>
                 <p className="text-xs mt-0.5" style={{ color: '#4a7c5a' }}>Varorna levereras inom 1–2 timmar.</p>
@@ -136,12 +138,12 @@ export default function ShoppingList({ missing, have }: Props) {
         >
           <div
             className="w-full max-w-md rounded-t-3xl p-6"
-            style={{ background: '#fff' }}
+            style={{ background: 'var(--surface)' }}
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: '#e7e5e4' }} />
 
-            <h2 className="text-xl font-bold mb-1" style={{ fontFamily: 'var(--font-playfair)', color: '#1c1917' }}>
+            <h2 className="text-xl font-bold mb-1" style={{ fontFamily: 'var(--font-display)', color: '#1c1917' }}>
               Beställ varor
             </h2>
             <p className="text-sm mb-5" style={{ color: '#78716c' }}>
@@ -159,17 +161,17 @@ export default function ShoppingList({ missing, have }: Props) {
             <div className="space-y-2">
               <button
                 onClick={() => { setOrdered(true); setShowOrder(false) }}
-                className="w-full py-3.5 rounded-xl text-sm font-semibold"
-                style={{ background: '#1a4a2e', color: '#faf7f2' }}
+                className="w-full py-3.5 text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: '#1a4a2e', color: '#faf7f2', borderRadius: 'var(--radius-sm)' }}
               >
-                🛒 Beställ via Mathem
+                <ShoppingCartIcon size={15} strokeWidth={2}/> Beställ via Mathem
               </button>
               <button
                 onClick={() => { setOrdered(true); setShowOrder(false) }}
-                className="w-full py-3.5 rounded-xl text-sm font-semibold"
-                style={{ background: '#f0ebe0', color: '#44403c' }}
+                className="w-full py-3.5 text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: '#f0ebe0', color: '#44403c', borderRadius: 'var(--radius-sm)' }}
               >
-                🏪 Hämta på ICA
+                <StoreIcon size={15} strokeWidth={2}/> Hämta på ICA
               </button>
               <button
                 onClick={() => setShowOrder(false)}

@@ -93,7 +93,7 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
           />
 
           <div style={{
-            position: 'relative', background: '#FAFAF8',
+            position: 'relative', background: 'var(--surface)',
             borderRadius: '24px 24px 0 0', padding: '0 0 40px',
             maxHeight: '88vh', overflowY: 'auto',
           }}>
@@ -190,7 +190,7 @@ export default function PublishRecipeButton({ title, description, imageUrl, tags
                     rows={3}
                     style={{
                       width: '100%', padding: '12px', borderRadius: '12px',
-                      border: '1.5px solid rgba(0,0,0,0.1)', background: '#fff',
+                      border: '1.5px solid rgba(0,0,0,0.1)', background: 'var(--surface)',
                       fontSize: '14px', color: '#1A1A1A', lineHeight: 1.5,
                       resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
                     }}
