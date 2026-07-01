@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { FridgeItem } from '@/lib/types'
 import AddItemDialog from '@/components/fridge/AddItemDialog'
-import SnabbsaldoSection from '@/components/fridge/SnabbsaldoSection'
 import Link from 'next/link'
 import { differenceInDays } from 'date-fns'
 import { RefrigeratorIcon, ArchiveIcon, SnowflakeIcon, AlertTriangleIcon } from 'lucide-react'
@@ -38,43 +37,84 @@ const PANTRY_SHELVES = [
 ]
 
 const FREEZER_SHELVES = [
-  { id: 'frozen_meat', label: 'Kött & Fisk',   categories: ['frozen_meat'] },
-  { id: 'frozen_veg',  label: 'Grönsaker',      categories: ['frozen_vegetable'] },
-  { id: 'frozen_ready',label: 'Färdigrätter',   categories: ['frozen_ready'] },
-  { id: 'frozen_other',label: 'Övrigt',         categories: ['frozen_other'] },
+  { id: 'frozen_meat',  label: 'Kött & Fisk',   categories: ['frozen_meat'] },
+  { id: 'frozen_veg',   label: 'Grönsaker',      categories: ['frozen_vegetable'] },
+  { id: 'frozen_ready', label: 'Färdigrätter',   categories: ['frozen_ready'] },
+  { id: 'frozen_other', label: 'Övrigt',         categories: ['frozen_other'] },
 ]
 
 function expiryDot(expiry: string | null) {
   if (!expiry) return null
   const d = differenceInDays(new Date(expiry), new Date())
   if (d < 0)  return '#dc2626'
-  if (d <= 2)  return '#ea580c'
-  if (d <= 5)  return '#d97706'
+  if (d <= 2) return '#ea580c'
+  if (d <= 5) return '#d97706'
   return '#2D5A3F'
 }
 
-function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) => void }) {
-  const dot = expiryDot(item.expiry_date)
+// ─── List-view item pill with inline quantity controls ────────────────────────
+
+function ItemTag({ item, onAdjust, onDelete }: {
+  item: FridgeItem
+  onAdjust: (id: string, delta: number) => void
+  onDelete: (id: string) => void
+}) {
+  const dot   = expiryDot(item.expiry_date)
   const emoji = CATEGORY_EMOJI[item.category] ?? '🥡'
+
   return (
     <div
-      className="group relative inline-flex items-center gap-1.5 select-none"
+      className="group relative inline-flex items-center select-none overflow-hidden"
       style={{
-        padding: '5px 11px 5px 7px',
         background: 'var(--surface)',
         borderRadius: '100px',
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
         border: '1px solid rgba(0,0,0,0.06)',
-        cursor: 'default',
       }}
     >
-      <span style={{ fontSize: '15px', lineHeight: 1 }}>{emoji}</span>
-      <span style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A1A', whiteSpace: 'nowrap' }}>
-        {item.name}
-      </span>
-      {dot && (
-        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: dot, flexShrink: 0 }} />
-      )}
+      {/* Name */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 8px' }}>
+        <span style={{ fontSize: '15px', lineHeight: 1 }}>{emoji}</span>
+        <span style={{ fontSize: '12px', fontWeight: 600, color: '#1A1A1A', whiteSpace: 'nowrap' }}>
+          {item.name}
+        </span>
+        {dot && (
+          <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: dot, flexShrink: 0 }} />
+        )}
+      </div>
+
+      {/* Divider */}
+      <div style={{ width: '1px', alignSelf: 'stretch', background: 'rgba(0,0,0,0.07)', flexShrink: 0 }} />
+
+      {/* Controls */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <button
+          onClick={() => onAdjust(item.id, -1)}
+          style={{
+            width: '28px', height: '32px', border: 'none', background: 'transparent',
+            fontSize: '17px', color: item.quantity <= 1 ? '#ccc' : '#888',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            lineHeight: 1, flexShrink: 0, paddingBottom: '1px',
+          }}
+        >−</button>
+        <span style={{ fontSize: '11px', fontWeight: 700, color: '#1C3A2A', textAlign: 'center', minWidth: '22px', whiteSpace: 'nowrap' }}>
+          {item.quantity}
+          {item.unit !== 'st' && (
+            <span style={{ fontSize: '8px', fontWeight: 500, marginLeft: '1px' }}>{item.unit}</span>
+          )}
+        </span>
+        <button
+          onClick={() => onAdjust(item.id, 1)}
+          style={{
+            width: '28px', height: '32px', border: 'none', background: 'transparent',
+            fontSize: '17px', color: '#1C3A2A',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            lineHeight: 1, flexShrink: 0, paddingBottom: '1px',
+          }}
+        >+</button>
+      </div>
+
+      {/* Delete on hover */}
       <button
         onClick={() => onDelete(item.id)}
         className="absolute -top-1.5 -right-1 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 rounded-full flex items-center justify-center text-white"
@@ -84,14 +124,207 @@ function ItemTag({ item, onDelete }: { item: FridgeItem; onDelete: (id: string) 
   )
 }
 
+// ─── Visual fridge: item tile with quantity controls below ────────────────────
+
+function FridgeItemTile({ item, onAdjust, onDelete }: {
+  item: FridgeItem
+  onAdjust: (id: string, delta: number) => void
+  onDelete: (id: string) => void
+}) {
+  const emoji = CATEGORY_EMOJI[item.category] ?? '🥡'
+  const dot   = expiryDot(item.expiry_date)
+  const name  = item.name.length > 9 ? item.name.slice(0, 8) + '…' : item.name
+
+  return (
+    <div className="group relative flex flex-col items-center" style={{ flexShrink: 0, width: '64px' }}>
+      {/* Package card */}
+      <div style={{
+        width: '54px', height: '52px', borderRadius: '10px',
+        background: 'rgba(255,255,255,0.88)',
+        backdropFilter: 'blur(6px)',
+        border: '1px solid rgba(255,255,255,0.96)',
+        boxShadow: '0 3px 10px rgba(0,0,0,0.13), 0 1px 2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.9)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: '2px', position: 'relative', cursor: 'default',
+      }}>
+        <span style={{ fontSize: '22px', lineHeight: 1 }}>{emoji}</span>
+        <span style={{ fontSize: '8px', fontWeight: 700, color: '#222', textAlign: 'center', lineHeight: 1.2, padding: '0 3px', maxWidth: '50px', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>
+          {name}
+        </span>
+        {dot && (
+          <div style={{ position: 'absolute', top: '4px', right: '4px', width: '6px', height: '6px', borderRadius: '50%', background: dot, border: '1.5px solid rgba(255,255,255,0.9)' }} />
+        )}
+        <button
+          onClick={() => onDelete(item.id)}
+          className="absolute -top-1.5 -right-1.5 opacity-0 group-hover:opacity-100 transition-opacity w-4 h-4 rounded-full flex items-center justify-center"
+          style={{ background: '#555', color: '#fff', fontSize: '9px', border: '1.5px solid rgba(255,255,255,0.9)', boxShadow: '0 1px 3px rgba(0,0,0,0.2)', cursor: 'pointer' }}
+        >✕</button>
+      </div>
+
+      {/* Quantity controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '5px' }}>
+        <button
+          onClick={() => onAdjust(item.id, -1)}
+          style={{
+            width: '20px', height: '20px', borderRadius: '50%',
+            background: 'rgba(255,255,255,0.65)', backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(255,255,255,0.5)', cursor: 'pointer',
+            fontSize: '14px', color: item.quantity <= 1 ? 'rgba(100,100,100,0.3)' : 'rgba(50,50,50,0.7)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            lineHeight: 1, flexShrink: 0, paddingBottom: '1px',
+          }}
+        >−</button>
+        <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(30,58,42,0.85)', textAlign: 'center', minWidth: '16px', whiteSpace: 'nowrap' }}>
+          {item.quantity}
+          {item.unit !== 'st' && (
+            <span style={{ fontSize: '7px', marginLeft: '1px' }}>{item.unit}</span>
+          )}
+        </span>
+        <button
+          onClick={() => onAdjust(item.id, 1)}
+          style={{
+            width: '20px', height: '20px', borderRadius: '50%',
+            background: 'rgba(28,58,42,0.65)', backdropFilter: 'blur(4px)',
+            border: '1px solid rgba(28,58,42,0.3)', cursor: 'pointer',
+            fontSize: '14px', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            lineHeight: 1, flexShrink: 0, paddingBottom: '1px',
+          }}
+        >+</button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Visual fridge: glass shelf section ──────────────────────────────────────
+
+function VisualShelf({ label, items, onAdjust, onDelete, labelColor }: {
+  label: string
+  items: FridgeItem[]
+  onAdjust: (id: string, delta: number) => void
+  onDelete: (id: string) => void
+  labelColor: string
+}) {
+  return (
+    <div>
+      <div style={{ padding: '10px 14px 6px' }}>
+        <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: labelColor, marginBottom: '8px' }}>
+          {label}
+        </p>
+        <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap', minHeight: '82px', alignItems: 'flex-end', paddingBottom: '4px' }}>
+          {items.length === 0 ? (
+            <div style={{ flex: 1, minHeight: '56px', borderRadius: '8px', border: '1px dashed rgba(150,185,210,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ fontSize: '11px', color: 'rgba(130,165,185,0.45)' }}>Tom</p>
+            </div>
+          ) : (
+            items.map(i => <FridgeItemTile key={i.id} item={i} onAdjust={onAdjust} onDelete={onDelete} />)
+          )}
+        </div>
+      </div>
+
+      {/* Glass shelf bar + side supports */}
+      <div style={{ margin: '0 10px', position: 'relative' }}>
+        <div style={{
+          height: '5px',
+          background: 'linear-gradient(180deg, rgba(218,234,246,0.96) 0%, rgba(185,212,232,0.8) 100%)',
+          borderRadius: '1px 1px 3px 3px',
+          border: '1px solid rgba(200,222,240,0.55)',
+          boxShadow: '0 2px 5px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.8)',
+        }} />
+        <div style={{ position: 'absolute', top: 0, left: '-2px', width: '9px', height: '14px', background: 'rgba(162,198,220,0.5)', borderRadius: '0 0 3px 3px', border: '1px solid rgba(185,215,232,0.35)' }} />
+        <div style={{ position: 'absolute', top: 0, right: '-2px', width: '9px', height: '14px', background: 'rgba(162,198,220,0.5)', borderRadius: '0 0 3px 3px', border: '1px solid rgba(185,215,232,0.35)' }} />
+      </div>
+      <div style={{ height: '8px' }} />
+    </div>
+  )
+}
+
+// ─── Visual fridge: crisper/produce drawer ────────────────────────────────────
+
+function CrisperDrawer({ label, items, onAdjust, onDelete, labelColor }: {
+  label: string
+  items: FridgeItem[]
+  onAdjust: (id: string, delta: number) => void
+  onDelete: (id: string) => void
+  labelColor: string
+}) {
+  return (
+    <div style={{ margin: '0 10px 10px' }}>
+      {/* Drawer handle bar */}
+      <div style={{
+        height: '22px',
+        background: 'linear-gradient(180deg, rgba(190,218,235,0.65) 0%, rgba(158,198,220,0.45) 100%)',
+        borderRadius: '6px 6px 0 0',
+        border: '1px solid rgba(175,210,228,0.5)',
+        borderBottom: 'none',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.55)',
+      }}>
+        <div style={{ flex: 1, height: '3px', borderRadius: '2px', background: 'rgba(118,162,192,0.4)', marginLeft: '14px' }} />
+        <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: labelColor, flexShrink: 0 }}>
+          {label}
+        </p>
+        <div style={{ flex: 1, height: '3px', borderRadius: '2px', background: 'rgba(118,162,192,0.4)', marginRight: '14px' }} />
+      </div>
+
+      {/* Drawer body */}
+      <div style={{
+        background: 'rgba(185,218,236,0.25)',
+        border: '1.5px solid rgba(160,200,220,0.38)',
+        borderTop: 'none',
+        borderRadius: '0 0 8px 8px',
+        padding: '10px 12px 12px',
+        boxShadow: 'inset 0 2px 6px rgba(0,50,100,0.06)',
+        minHeight: '96px',
+      }}>
+        <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap', alignItems: 'flex-end', minHeight: '78px' }}>
+          {items.length === 0 ? (
+            <div style={{ flex: 1, minHeight: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <p style={{ fontSize: '11px', color: 'rgba(100,145,175,0.45)' }}>Tom</p>
+            </div>
+          ) : (
+            items.map(i => <FridgeItemTile key={i.id} item={i} onAdjust={onAdjust} onDelete={onDelete} />)
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Visual fridge interior ───────────────────────────────────────────────────
+
+function VisualFridgeView({ items, onAdjust, onDelete }: {
+  items: FridgeItem[]
+  onAdjust: (id: string, delta: number) => void
+  onDelete: (id: string) => void
+}) {
+  const dairy   = items.filter(i => i.category === 'dairy')
+  const meat    = items.filter(i => i.category === 'meat')
+  const other   = items.filter(i => i.category === 'other')
+  const produce = items.filter(i => ['vegetable', 'fruit'].includes(i.category))
+  const lc = 'rgba(75,115,140,0.72)'
+
+  return (
+    <div style={{ paddingTop: '2px', paddingBottom: '4px' }}>
+      <VisualShelf   label="Mejeri & Ägg"      items={dairy}   onAdjust={onAdjust} onDelete={onDelete} labelColor={lc} />
+      <VisualShelf   label="Kött & Fisk"        items={meat}    onAdjust={onAdjust} onDelete={onDelete} labelColor={lc} />
+      <VisualShelf   label="Övrigt"             items={other}   onAdjust={onAdjust} onDelete={onDelete} labelColor={lc} />
+      <CrisperDrawer label="Grönsaker & Frukt"  items={produce} onAdjust={onAdjust} onDelete={onDelete} labelColor={lc} />
+    </div>
+  )
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 type Tab = 'fridge' | 'pantry' | 'freezer'
 
 export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab }) {
-  const [tab, setTab] = useState<Tab>(initialTab)
-  const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([])
-  const [pantryItems, setPantryItems] = useState<FridgeItem[]>([])
+  const [tab, setTab]           = useState<Tab>(initialTab)
+  const [viewMode, setViewMode] = useState<'list' | 'visual'>('list')
+  const [fridgeItems, setFridgeItems]   = useState<FridgeItem[]>([])
+  const [pantryItems, setPantryItems]   = useState<FridgeItem[]>([])
   const [freezerItems, setFreezerItems] = useState<FridgeItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]   = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const fetchItems = useCallback(async () => {
@@ -112,9 +345,37 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
   async function deleteItem(id: string) {
     const supabase = createClient()
     await supabase.from('fridge_items').delete().eq('id', id)
-    setFridgeItems(prev => prev.filter(i => i.id !== id))
-    setPantryItems(prev => prev.filter(i => i.id !== id))
-    setFreezerItems(prev => prev.filter(i => i.id !== id))
+    const remove = (arr: FridgeItem[]) => arr.filter(i => i.id !== id)
+    setFridgeItems(remove)
+    setPantryItems(remove)
+    setFreezerItems(remove)
+  }
+
+  async function adjustQuantity(id: string, delta: number) {
+    // Find current quantity before any state mutation
+    const all = [...fridgeItems, ...pantryItems, ...freezerItems]
+    const item = all.find(i => i.id === id)
+    if (!item) return
+
+    const newQty = Math.max(0, item.quantity + delta)
+
+    // Optimistic update
+    const update = (arr: FridgeItem[]) => {
+      if (!arr.some(i => i.id === id)) return arr
+      if (newQty === 0) return arr.filter(i => i.id !== id)
+      return arr.map(i => i.id === id ? { ...i, quantity: newQty } : i)
+    }
+    setFridgeItems(update)
+    setPantryItems(update)
+    setFreezerItems(update)
+
+    // Persist
+    const supabase = createClient()
+    if (newQty === 0) {
+      await supabase.from('fridge_items').delete().eq('id', id)
+    } else {
+      await supabase.from('fridge_items').update({ quantity: newQty }).eq('id', id)
+    }
   }
 
   async function addItem(item: Omit<FridgeItem, 'id' | 'user_id' | 'created_at'>) {
@@ -134,7 +395,7 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
     setDialogOpen(false)
   }
 
-  const items = tab === 'fridge' ? fridgeItems : tab === 'pantry' ? pantryItems : freezerItems
+  const items   = tab === 'fridge' ? fridgeItems : tab === 'pantry' ? pantryItems : freezerItems
   const shelves = tab === 'fridge' ? FRIDGE_SHELVES : tab === 'pantry' ? PANTRY_SHELVES : FREEZER_SHELVES
 
   const expiringSoon = fridgeItems.filter(i => {
@@ -142,39 +403,65 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
     return differenceInDays(new Date(i.expiry_date), new Date()) <= 2
   })
 
-  const isFridge = tab === 'fridge'
+  const isFridge  = tab === 'fridge'
   const isFreezer = tab === 'freezer'
+  const showVisual = viewMode === 'visual' && isFridge
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#F5F3EE' }}>
+
       {/* Header */}
       <div className="px-4 pt-14 pb-4">
         <div className="flex items-center justify-between mb-4">
           <p style={{ fontSize: '13px', color: '#6B6B6B', fontWeight: 500 }}>
             {loading ? '…' : `${items.length} varor`}
           </p>
+
+          {/* View toggle — fridge tab only */}
+          {isFridge && (
+            <button
+              onClick={() => setViewMode(v => v === 'list' ? 'visual' : 'list')}
+              className="pressable"
+              style={{
+                width: '34px', height: '34px', borderRadius: '10px',
+                background: showVisual ? '#1C3A2A' : 'var(--surface)',
+                border: '1.5px solid rgba(0,0,0,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: showVisual ? '#fff' : '#6B6B6B',
+                boxShadow: 'var(--shadow-xs)', transition: 'all 0.15s',
+              }}
+              title={showVisual ? 'Listvy' : 'Visuell vy'}
+            >
+              {showVisual ? (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <line x1="9" y1="6" x2="20" y2="6"/>
+                  <line x1="9" y1="12" x2="20" y2="12"/>
+                  <line x1="9" y1="18" x2="20" y2="18"/>
+                  <circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/>
+                  <circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/>
+                  <circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/>
+                </svg>
+              ) : (
+                <RefrigeratorIcon size={15} strokeWidth={2} />
+              )}
+            </button>
+          )}
         </div>
 
         {/* Tab toggle */}
-        <div
-          className="flex p-1"
-          style={{ background: '#E8E5DE', borderRadius: 'var(--radius-md)' }}
-        >
+        <div className="flex p-1" style={{ background: '#E8E5DE', borderRadius: 'var(--radius-md)' }}>
           {TABS.map(t => (
             <button
               key={t.id}
-              onClick={() => setTab(t.id)}
+              onClick={() => { setTab(t.id); if (t.id !== 'fridge') setViewMode('list') }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5"
               style={{
-                borderRadius: '10px',
-                fontSize: '12px',
-                fontWeight: 600,
+                borderRadius: '10px', fontSize: '12px', fontWeight: 600,
                 transition: 'all 0.15s',
                 background: tab === t.id ? '#fff' : 'transparent',
                 color: tab === t.id ? '#1C3A2A' : '#6B6B6B',
                 boxShadow: tab === t.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                border: 'none',
-                cursor: 'pointer',
+                border: 'none', cursor: 'pointer',
               }}
             >
               <t.Icon size={14} strokeWidth={2.2} />
@@ -184,13 +471,7 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
         </div>
       </div>
 
-      {/* Snabbsaldo — always visible */}
-      <SnabbsaldoSection
-        items={[...fridgeItems, ...pantryItems, ...freezerItems]}
-        onRefresh={fetchItems}
-      />
-
-      {/* Expiry warning — only on fridge tab */}
+      {/* Expiry warning */}
       {(isFridge || isFreezer) && expiringSoon.length > 0 && (
         <div className="mx-4 mb-3 px-4 py-3 flex items-center gap-2"
           style={{ background: '#fff8e6', borderRadius: 'var(--radius-md)', border: '1px solid rgba(212,133,10,0.2)' }}>
@@ -201,9 +482,9 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
         </div>
       )}
 
-      {/* Container */}
+      {/* Fridge / pantry / freezer container */}
       <div
-        className="flex-1 mx-3 mb-3 overflow-hidden relative"
+        className={`flex-1 mx-3 mb-3 relative ${showVisual ? 'overflow-y-auto no-scrollbar' : 'overflow-hidden'}`}
         style={isFreezer ? {
           background: 'linear-gradient(180deg, #dceef8 0%, #c8e0f4 40%, #b8d4ee 100%)',
           boxShadow: 'inset 0 2px 10px rgba(255,255,255,0.8), inset 0 -2px 6px rgba(0,60,120,0.1), 0 2px 12px rgba(0,0,0,0.1)',
@@ -225,12 +506,15 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
         }}
       >
         {/* Top light strip */}
-        <div style={{ height: '8px', background: isFreezer
-          ? 'linear-gradient(90deg, #8ab8d8, #d8f0ff, #c0e4f8, #d8f0ff, #8ab8d8)'
-          : isFridge
-            ? 'linear-gradient(90deg, #b8cdd8, #e8f4f8, #ddeef5, #e8f4f8, #b8cdd8)'
-            : 'linear-gradient(90deg, #c8a882, #e8d4b8, #d4bc96, #e8d4b8, #c8a882)',
-          opacity: 0.85 }} />
+        <div style={{
+          height: '8px',
+          background: isFreezer
+            ? 'linear-gradient(90deg, #8ab8d8, #d8f0ff, #c0e4f8, #d8f0ff, #8ab8d8)'
+            : isFridge
+              ? 'linear-gradient(90deg, #b8cdd8, #e8f4f8, #ddeef5, #e8f4f8, #b8cdd8)'
+              : 'linear-gradient(90deg, #c8a882, #e8d4b8, #d4bc96, #e8d4b8, #c8a882)',
+          opacity: 0.85,
+        }} />
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 gap-3">
@@ -249,6 +533,8 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
             </p>
             <p style={{ fontSize: '12px', color: '#b0b0b0' }}>Lägg till varor nedan</p>
           </div>
+        ) : showVisual ? (
+          <VisualFridgeView items={items} onAdjust={adjustQuantity} onDelete={deleteItem} />
         ) : (
           <div>
             {shelves.map((shelf, si) => {
@@ -284,7 +570,7 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
                     <div className="stagger" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                       {shelfItems.map(item => (
                         <div key={item.id} className="fade-up">
-                          <ItemTag item={item} onDelete={deleteItem} />
+                          <ItemTag item={item} onAdjust={adjustQuantity} onDelete={deleteItem} />
                         </div>
                       ))}
                     </div>
@@ -297,6 +583,7 @@ export default function FridgePage({ initialTab = 'fridge' }: { initialTab?: Tab
             })}
           </div>
         )}
+
         <div style={{ height: '6px', opacity: 0.4, background: isFreezer ? 'rgba(0,80,160,0.15)' : isFridge ? 'rgba(0,50,80,0.1)' : 'rgba(100,60,20,0.1)' }} />
       </div>
 
